@@ -48,7 +48,7 @@ class PouetParty extends BM_Class
         }
         if ($year) {
             return sprintf(
-                "<a href='party.php?which=%d&amp;when=%d'>%s</a> %d",
+                "<a href='party.php?which=%d&amp;when=%d'>%s %d</a>",
                 $this->id,
                 $year,
                 _html($this->name),
