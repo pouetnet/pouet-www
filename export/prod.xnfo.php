@@ -1,202 +1,88 @@
-<?
-header("Content-type: text/xml");
-include('../include/auth.php');
-require("../include/libbb.php");
+<?php
+require_once("../bootstrap.inc.php");
 
-function xmlentities ( $string )
+header("Content-type: application/xml; charset=utf-8");
+//header("Content-type: text/plain; charset=utf-8");
+
+$xml = new SimpleXMLElement("<"."?xml version='1.0' encoding='UTF-8'?"."><xnfo/>");
+
+$prod = PouetProd::Spawn( @$_GET["which"] );
+
+if (!$prod)
+  die($xml->AsXML());
+
+$a = array(&$prod);
+PouetCollectPlatforms( $a );
+
+$xml->addAttribute("standard","1.1");
+$xml->addAttribute("version","1");
+$xml->addAttribute("author","webmaster@pouet.net");
+$xml->addAttribute("mode","partial");
+
+$xml->addChild("demo");
+$xml->demo->addAttribute("pouet_id",_html($prod->id));
+$xml->demo->addChild("name",_html($prod->name));
+
+foreach($prod->types as $v)
+  $xml->demo->addChild("category",ucfirst(_html($v)))->addAttribute("type",_html($v));
+
+$s = new BM_Query();
+$s->AddField("prodotherparty.party_compo");
+$s->AddField("prodotherparty.party_place");
+$s->AddField("prodotherparty.party_year");
+$s->AddTable("prodotherparty");
+$s->attach(array("prodotherparty"=>"party"),array("parties as party"=>"id"));
+$s->AddWhere(sprintf_esc("prod=%d",$prod->id));
+$rows = $s->perform();
+foreach($rows as $row)
 {
-   return str_replace ( array ( '&', '"', "'", '<', '>' ), array ( '&amp;' , '&quot;', '&apos;' , '&lt;' , '&gt;' ), $string );
+  $prod->placings[] = new PouetPlacing( array("party"=>$row->party,"compo"=>$row->party_compo,"ranking"=>$row->party_place,"year"=>$row->party_year) );
 }
 
-$nl = "\n";
-$t = "\t";
-unset($output);
-$output = '<?xml version="1.0" encoding="UTF-8"?>'.$nl;
-$output.= '<xnfo standard="1.1" version="1" author="webmaster@pouet.net" mode="partial">'.$nl;
-
-
-// opening DB
-$dbl = mysql_connect($db['host'], $db['user'], $db['password']);
-if(!$dbl) {
-  die('SQL error... sorry ! ^^; I\'m on it !');
-}
-mysql_select_db($db['database'],$dbl);
-
-// getting data
-$query ='SELECT * FROM prods ';
-if(!$which) {
-  $query.='ORDER BY RAND()';
-} else {
-  $query.='WHERE id='.$which;
-}
-$query.=' LIMIT 1';
-$result = mysql_query($query);
-$prod = mysql_fetch_array($result);
-
-$output.= $t.'<demo pouet_id="'.$prod['id'].'">'.$nl;
-$output.= $t.$t.'<name>'.utf8_encode(xmlentities($prod['name'])).'</name>'.$nl;
-
-// category
-// list of XNFO hardcoded categories
-$xnfo_categories = Array (
-  '32b'         => Array('intro;32bytes',   'Intro 32 Bytes'),
-  '64b'         => Array('intro;64bytes',   'Intro 64 Bytes'),
-  '128b'        => Array('intro;128bytes',  'Intro 128 Bytes'),
-  '256b'        => Array('intro;256bytes',  'Intro 256 Bytes'),
-  '1k'          => Array('intro;1k',        'Intro 1 Kb'),
-  '4k'          => Array('intro;4k',        'Intro 4 Kb'),
-  '8k'          => Array('intro;8k',        'Intro 8 Kb'),
-  '32k'         => Array('intro;40k',       'Intro 32 Kb'),
-  '40k'         => Array('intro;40k',       'Intro 40 Kb'),
-  '64k'         => Array('intro;64k',       'Intro 64 Kb'),
-  '80k'         => Array('intro;80k',       'Intro 80 Kb'),
-  '96k'         => Array('intro;96k',       'Intro 96 Kb'),
-  '100k'        => Array('intro;100k',      'Intro 100 Kb'),
-  '128k'        => Array('intro;128k',      'Intro 128 Kb'),
-  '256k'        => Array('intro;256k',      'Intro 256 Kb'),
-  'artpack'     => Array('artpack',         'ArtPack'),
-  'bbstro'      => Array('bbstro',          'BBStro'),
-  'cracktro'    => Array('cracktro',        'Cracktro'),
-  'demo'        => Array('demo',            'Demo'),
-  'demopack'    => Array('demopack',        'DemoPack'),
-  'demotool'    => Array('demotool',        'DemoTool'),
-  'dentro'      => Array('dentro',          'Dentro'),
-  'diskmag'     => Array('diskmag',         'Diskmag'),
-  'fastdemo'    => Array('fastdemo',        'Fastdemo'),
-  'game'        => Array('game',            'Game'),
-  'intro'       => Array('intro',           'Intro'),
-  'invitation'  => Array('invitation',      'Invitation'),
-  'liveact'     => Array('liveact',         'Live Act'),
-  'musicdisk'   => Array('musicdisk',       'Musicdisk'),
-  'report'      => Array('report',          'Party Report'),
-  'slideshow'   => Array('slideshow',       'Slideshow'),
-  'votedisk'    => Array('votedisk',        'Vote Disk'),
-  'wild'        => Array('wild',            'Wild')
-  );
-
-$output.= $t.$t.'<category type="'.$xnfo_categories[$prod['type']][0].'">';
-$output.= xmlentities(utf8_encode($xnfo_categories[$prod['type']][1]));
-$output.= '</category>'.$nl;
-
-// party info
-if($prod['party'])
+global $COMPOTYPES;
+foreach($prod->placings as $p)
 {
-  $output.= $t.$t.'<release>'.$nl;
-  $query = 'SELECT name,web FROM parties WHERE id='.$prod['party'];
-  $result = mysql_query($query);
-  $party = mysql_fetch_assoc($result);
-  if($party['web'])
-    $output.= $t.$t.$t.'<party url="'.$party['web'].'">'.xmlentities(utf8_encode($party['name'])).'</party>'.$nl;
-  else
-    $output.= $t.$t.$t.'<party>'.xmlentities(utf8_encode($party['name'])).'</party>'.$nl;
-  if($prod['date'])
-    $output.= $t.$t.$t.'<date>'.substr($prod['date'],0,10).'</date>'.$nl;
-  if($prod['party_place'])
-    $output.= $t.$t.$t.'<rank>'.$prod['party_place'].'</rank>'.$nl;
-  if($prod['partycompo'])
-    $output.= $t.$t.$t.'<compo>'.$prod['partycompo'].'</compo>'.$nl;
-  $output.= $t.$t.'</release>'.$nl;
+  $release = $xml->demo->addChild("release");
+  $release->addChild("party",_html($p->party->name))->addAttribute("url",_html($p->party->web));
+  $release->addChild("date",$p->year);
+  $release->addChild("rank",$p->ranking);
+  $release->addChild("compo",$COMPOTYPES[$p->compo]);
 }
-if($prod['date'])
-  $output.= $t.$t.'<releaseDate>'.substr($prod['date'],0,10).'</releaseDate>'.$nl;
+/*
+<release><party url="http://www.ambience.nl">Ambience</party><date>2000-03-15</date><rank>9</rank><compo>pc demo</compo></release>
+*/
 
-// groups info
-if($prod['group1'] || $prod['group2'] || $prod['group3'])
+$xml->demo->addChild("releaseDate",substr($prod->releaseDate,0,7));
+
+if (count($prod->groups))
 {
-  $output.= $t.$t.'<authors>'.$nl;
-  if($prod['group1'])
-  {
-    $query = 'SELECT name FROM groups WHERE id='.$prod['group1'];
-    $result = mysql_query($query);
-    $group1 = mysql_result($result,0);
-    $output.= $t.$t.$t.'<group pouet_id="'.$prod['group1'].'">'.xmlentities(utf8_encode($group1)).'</group>'.$nl;
-  }
-  if($prod['group2'])
-  {
-    $query = 'SELECT name FROM groups WHERE id='.$prod['group2'];
-    $result = mysql_query($query);
-    $group2 = mysql_result($result,0);
-    $output.= $t.$t.$t.'<group pouet_id="'.$prod['group2'].'">'.xmlentities(utf8_encode($group2)).'</group>'.$nl;
-  }
-  if($prod['group3'])
-  {
-    $query = 'SELECT name FROM groups WHERE id='.$prod['group3'];
-    $result = mysql_query($query);
-    $group2 = mysql_result($result,0);
-    $output.= $t.$t.$t.'<group pouet_id="'.$prod['group3'].'">'.xmlentities(utf8_encode($group2)).'</group>'.$nl;
-  }
-
-  $output.= $t.$t.'</authors>'.$nl;
+  $xml->demo->addChild("authors");
+  foreach($prod->groups as $v)
+    $xml->demo->authors->addChild("group",_html($v->name))->addAttribute("pouet_id",$v->id);
 }
 
-$query="select platforms.name, platforms.icon from prods_platforms, platforms where prods_platforms.prod='".$which."' and platforms.id=prods_platforms.platform";
-    $result = mysql_query($query);
-    while($tmp = mysql_fetch_array($result)) {
-       $platforms[]=$tmp;
-    }
+$xml->demo->addChild("support");
+$xml->demo->support->addChild("configuration");
+foreach($prod->platforms as $v)
+  $xml->demo->support->configuration->addChild("platform",_html($v["name"]))->addAttribute("type",_html($v["slug"]));
 
-// platform info
-// list of XNFO hardcoded platforms
-$xnfo_platforms = Array (
-  'Windows' => Array('win32', 'Windows'),
-  'MS-Dos'  => Array('msdos', 'Ms-Dos'),
-  'MS-Dos/gus'  => Array('msdos', 'Ms-Dos'),
-  'Java'    => Array('java',  'Java'),
-  'Flash'   => Array('flash', 'Flash'),
-  'Linux'   => Array('linux', 'Linux'),
-  'MacOS X' => Array('macosx',  'Mac OS X')
-  );
-if(count($platforms))
+$xml->demo->addChild("download");
+$xml->demo->download->addChild("url",_html($prod->download))->addAttribute("type","download");
+
+$downloads = SQLLib::SelectRows(sprintf_esc("select * from downloadlinks where prod = %d",$prod->id));
+foreach($downloads as $v)
+  $xml->demo->download->addChild("url",_html($v->link))->addAttribute("type",$v->type);
+
+
+$shot = find_screenshot($prod->id);
+if ($shot)
 {
-  $tag_support_opened = false;
-  //$platforms = explode(",", $prod["platform"]);
-  foreach($platforms as $p) {
-    if(count($xnfo_platforms[$p["name"]])==2)
-    {
-      if(!$tag_support_opened)
-      {
-        $output.= $t.$t.'<support>'.$nl;
-        $tag_support_opened = true;
-      }
-      $output.= $t.$t.$t.'<configuration>'.$nl;
-      $output.= $t.$t.$t.$t.'<platform type="'.$xnfo_platforms[$p["name"]][0].'">'.xmlentities(utf8_encode($xnfo_platforms[$p["name"]][1])).'</platform>'.$nl;
-      $output.= $t.$t.$t.'</configuration>'.$nl;
-    }
-  }
-  if($tag_support_opened)
-    $output.= $t.$t.'</support>'.$nl;
+  $xml->demo->addChild("screenshot");
+  $xml->demo->screenshot->addChild("url",_html(POUET_CONTENT_URL.$shot));
 }
 
+$dom = dom_import_simplexml($xml)->ownerDocument;
+$dom->formatOutput = true;
+echo $dom->saveXML();
 
-$output.= $t.$t.'<download>'.$nl;
-$output.= $t.$t.$t.'<url type="download">'.xmlentities(utf8_encode($prod['download'])).'</url>'.$nl;
-
-$result = mysql_query(sprintf("select * from downloadlinks where prod=%d",$which));
-while($tmp = mysql_fetch_array($result)) {
-  $output.= $t.$t.$t.'<url type="'.xmlentities(utf8_encode($tmp['type'])).'">'.xmlentities(utf8_encode($tmp['link'])).'</url>'.$nl;
-}
-
-$output.= $t.$t.'</download>'.$nl;
-
-if(file_exists("../screenshots/".$prod["id"].".jpg")) {
-  $shotpath = "http://pouet.net/screenshots/".$prod["id"].".jpg";
-} elseif(file_exists("../screenshots/".$prod["id"].".gif")) {
-  $shotpath = "http://pouet.net/screenshots/".$prod["id"].".gif";
-} elseif(file_exists("../screenshots/".$prod["id"].".png")) {
-  $shotpath = "http://pouet.net/screenshots/".$prod["id"].".png";
-}
-
-$output.= $t.$t.'<screenshot>'.$nl;
-$output.= $t.$t.$t.'<url>'.xmlentities(utf8_encode($shotpath)).'</url>'.$nl;
-$output.= $t.$t.'</screenshot>'.$nl;
-
-$output.= $t.'</demo>'.$nl;
-$output.= '</xnfo>'.$nl;
-
-// closing DB
-if (isset($dbl)) {
-  mysql_close($dbl);
-}
-
-print($output);
 ?>

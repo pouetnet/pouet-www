@@ -1,9 +1,33 @@
 <IfModule mod_rewrite.c>
 
 RewriteEngine On
-RewriteCond %{HTTP_HOST} =www.pouet.net [OR]
+
+
+# redirect all subdomains to http://www.pouet.net
+
+RewriteCond %{HTTPS} ^off$ [NC]
+RewriteCond %{HTTP_HOST} =pouet.net [OR]
 RewriteCond %{HTTP_HOST} =pouet.scene.org [OR]
 RewriteCond %{HTTP_HOST} =www.pouet.scene.org
-RewriteRule ^(.*)$ http://pouet.net/$1 [R=301,QSA,L]
+RewriteRule ^(.*)$ http://www.pouet.net/$1 [R=301,QSA,NE,L]
+
+RewriteCond %{HTTPS} ^on$ [NC]
+RewriteCond %{HTTP_HOST} =pouet.net [OR]
+RewriteCond %{HTTP_HOST} =pouet.scene.org [OR]
+RewriteCond %{HTTP_HOST} =www.pouet.scene.org
+RewriteRule ^(.*)$ https://www.pouet.net/$1 [R=301,QSA,NE,L]
+
+
+# redirect all old directories to content domain
+
+RewriteRule ^avatars\/(.*)$ http://content.pouet.net/avatars/$1 [R=301,L]
+RewriteRule ^gfx\/(.*)$ http://content.pouet.net/gfx/$1 [R=301,L]
+RewriteRule ^screenshots\/(.*)$ http://content.pouet.net/screenshots/$1 [R=301,L]
+
+
+# maintenance mode, if needed
+
+# RewriteCond %{REMOTE_ADDR} !^123\.456\.789\.000
+# RewriteRule .* http://content.pouet.net/maintenance.html [R=302,L]
 
 </IfModule>

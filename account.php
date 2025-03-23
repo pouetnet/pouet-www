@@ -1,545 +1,689 @@
 <?php
-require_once('include/top.php');
-require_once('lib/recaptcha/recaptchalib.php');
+require_once("bootstrap.inc.php");
+require_once("include_generic/countries.inc.php");
+require_once("include_pouet/box-modalmessage.php");
 
-// Get IM types
-$result = mysql_query("DESC users im_type");
-$row = mysql_fetch_row($result);
-$reg = "/^enum\('(.*)'\)$/";
-$tmp = preg_replace($reg,'\1',$row[1]);
-$im_types = preg_split("/[']?,[']?/",$tmp);
+$COUNTRIES = array_merge(array(""),$COUNTRIES);
 
-$REGEXP_EMAIL = "^[a-zA-Z0-9][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$";
+$avatars = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
 
-$errormessage = array();
+$success = null;
 
-if (isIPBanned()) die("no.");
+$namesNumeric = array(
+  // numbers
+  "indextopglops" => "front page - top glops",
+  "indextopprods" => "front page - top prods (recent)",
+  "indextopkeops" => "front page - top prods (all-time)",
+  "indexoneliner" => "front page - oneliner",
+  "indexlatestadded" => "front page - latest added",
+  "indexlatestreleased" => "front page - latest released",
+  "indexojnews" => "front page - bitfellas news",
+  "indexlatestcomments" => "front page - latest comments",
+  "indexlatestparties" => "front page - latest parties",
+  "indexbbstopics" => "front page - bbs topics",
+  "indexwatchlist" => "front page - watchlist",
+  "bbsbbstopics" => "bbs page - bbs topics",
+  "prodlistprods" => "prodlist page - prods",
+  "userlistusers" => "userlist page - users",
+  "searchprods" => "search page - prods",
+  "userlogos" => "user page - logos",
+  "userprods" => "user page - prods",
+  "usergroups" => "user page - groups",
+  "userparties" => "user page - parties",
+  "userscreenshots" => "user page - screenshots",
+  "usernfos" => "user page - nfos",
+  "usercomments" => "user page - comments",
+  "userrulez" => "user page - rulez",
+  "usersucks" => "user page - sucks",
+  "commentshours" => "comments page - hours",
+  "topicposts" => "topic page - posts",
+);
+$namesSwitch = array(
+  //select
+  "logos" => "logos",
+  "topbar" => "top bar",
+  "bottombar" => "bottom bar",
+  "indexcdc" => "front page - cdc",
+  "indexsearch" => "front page - search",
+  "indexstats" => "front page - stats",
+  "indexlinks" => "front page - links",
+  "indexplatform" => "front page - show platform icons",
+  "indextype" => "front page - show type icons",
+  "indexwhoaddedprods" => "front page - who added prods",
+  "indexwhocommentedprods" => "front page - who commented prods",
+  "topichidefakeuser" => "bbs page - hide fakeuser",
+  "prodhidefakeuser" => "prod page - hide fakeuser",
+  "displayimages" => "[img][/img] tags should be displayed as...",
+  "indexbbsnoresidue" => "residue threads on the front page are...",
+);
 
-if ($_POST["email"] && $_POST["nickname"]) {
-  $nick = $_POST["nickname"];
-  $nick = strip_tags($nick);
-  $nick = trim($nick);
+class PouetBoxAccount extends PouetBox
+{
+  public $formifier;
+  public $maxCDCs;
+  public $cdcs;
+  public $ims;
+  public $user;
+  public $fieldsPouet;
+  public $fieldsOtherSites;
+  public $fieldsCDC;
+  public $imTypes;
+  public $fieldsIM;
+  public $sceneID;
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_account";
+    $this->title = "e-e-e-edit your account";
+    $this->formifier = new Formifier();
+    $this->maxCDCs = 20;
+  }
 
-  ///////////////////////////////////////////////////////
-  // USER ALREADY REGISTERED, UPDATE
-  if($_SESSION["SCENEID_ID"]) {
+  function LoadFromDB()
+  {
+    global $COUNTRIES;
+    $this->cdcs = array();
 
-    // user is registered and logged in
+    $query = new BM_Query( "users" );
+    $query->AddExtendedFields();
+//      foreach(PouetUser::getExtendedFields() as $v)
+//        $query->AddField("users.".$v);
+    $query->AddWhere(sprintf_esc("users.id = %d",get_login_id()));
+    $query->SetLimit(1);
 
-    $query ="UPDATE users SET ";
+    $s = new BM_Query();
+    $s->AddTable("users_im");
+    $s->AddWhere(sprintf_esc("users_im.userID = %d",get_login_id()));
+    $this->ims = $s->perform();
 
-//    $s = mysql_query("select * from users where nickname='".$_POST["nickname"]."'");
-//    $r = mysql_fetch_object($s);
-    //$_POST["nickname"] = $nick;
-//    if (!$r) // if nickname is taken
-    $query.="nickname='".mysql_real_escape_string($nick)."', ";
+    $s = $query->perform();
+    $this->user = reset( $s );
 
-    if (preg_match("/[^\\x20-\\x7f]/",$nick))
-      $errormessage[] = "nick has invalid characters! (sorry, non-ascii characters are suspended for the time being)";
+    $rows = SQLLib::SelectRows(sprintf_esc("select cdc from users_cdcs where user=%d",get_login_id()));
+    foreach($rows as $r)
+      $this->cdcs[] = $r->cdc;
 
-    if (strlen($nick) < 2)
-      $errormessage[] = "nick too short!";
+    $this->fieldsPouet = array(
+      "nickname"=>array(
+        "info"=>"how do you look on IRC ?",
+        "required"=>true,
+        "value"=>$this->user->nickname,
+        "maxlength"=>16,
+      ),
+      "avatar"=>array(
+        "info"=>"your faaaaaaace is like a song",
+        "required"=>true,
+        "value"=>$this->user->avatar,
+        "type"=>"avatar",
+        "infoAfter"=>"<span id='avatarCount'></span> (<a href='submit_avatar.php'>upload new</a>) <span id='randomAvatar'></span> <span id='avatarPicker'></span>",
+      )
+    );
+    $this->fieldsOtherSites = array(
+      "slengpung"=>array(
+        "info"=>"your slengpung id, if you have one",
+        "value"=>$this->user->slengpung,
+        "type"=>"number",
+      ),
+      "csdb"=>array(
+        "info"=>"your csdb id, if you have one",
+        "value"=>$this->user->csdb,
+        "type"=>"number",
+      ),
+      "zxdemo"=>array(
+        "info"=>"your zxdemo id, if you have one",
+        "value"=>$this->user->zxdemo,
+        "type"=>"number",
+      ),
+      "demozoo"=>array(
+        "info"=>"your demozoo id, if you have one",
+        "value"=>$this->user->demozoo,
+        "type"=>"number",
+      ),
+    );
 
-    $query.="udlogin='".mysql_real_escape_string($_POST["udlogin"])."', ";
-    //if(strlen($level)==0) $query.="level='user', ";
-    if((strlen($_POST["im_id"]) > 0) && (in_array($_POST["im_type"], $im_types))) {
-      $query.="im_type='".$_POST["im_type"]."', ";
-      $query.="im_id='".mysql_real_escape_string($_POST["im_id"])."', ";
-    }
-    else
+    $this->fieldsCDC = array();
+    $glop = POUET_CDC_MINGLOP;
+    for ($x=1; $x < $this->maxCDCs; $x++)
     {
-      $query.="im_type=NULL, ";
-      $query.="im_id=NULL, ";
-    }
-    if(strlen($_POST["ojuice"])!=0) {
-      $query.="ojuice=".((int)$_POST["ojuice"]).", ";
-    }
-    if(strlen($_POST["slengpung"])!=0) {
-      $query.="slengpung=".((int)$_POST["slengpung"]).", ";
-    }
-    if(strlen($_POST["csdb"])!=0) {
-      $query.="csdb=".((int)$_POST["csdb"]).", ";
-    }
-    if(strlen($_POST["zxdemo"])!=0) {
-      $query.="zxdemo=".((int)$_POST["zxdemo"]).", ";
-    }
-    if(file_exists("avatars/".$_POST["avatar"]))
-      $query.="avatar='".$_POST["avatar"]."' ";
-    else
-      $query.="avatar='zorglub.gif'";
-
-    $query.="WHERE id=".$_SESSION["SCENEID_ID"];
-    if (!count($errormessage)) {
-      $sql = "";
-      if ($_SESSION["SESSION_NICKNAME"] != $nick) {
-        $sql = sprintf("insert into oldnicks (user,nick) values (%d,'%s')",$_SESSION["SCENEID_ID"],mysql_real_escape_string($_SESSION["SESSION_NICKNAME"]));
-      }
-      $_SESSION["SESSION_NICKNAME"]=$nick;
-      $_SESSION["SESSION_AVATAR"]=$_POST["avatar"];
-      mysql_query($query);
-      unset($user);
-
-      if ($sql) mysql_query($sql);
-
-      $query = "SELECT cdc, timelock FROM users_cdcs WHERE user='".$_SESSION["SCENEID_ID"]."'";
-      $result = mysql_query($query);
-      while($tmp=mysql_fetch_array($result)){
-        $cdc[] = $tmp;
-      }
-
-      $query="delete from users_cdcs where user=".$_SESSION["SCENEID_ID"];
-      mysql_query($query);
-      $uniquecdc = array();
-      for ($i=0; $i<10; $i++) {
-        $k = "cdc".$i;
-        //echo $_POST[$k]." - ";
-        $uniquecdc[] = (int)$_POST[$k];
-      }
-      $uniquecdc = array_unique($uniquecdc);
-
-      foreach($uniquecdc as $v){
-        if ($v > 0) {
-          $flag = -1;
-          for ($i=0; $i < count($cdc); $i++) {
-            if ($cdc[$i]["cdc"] == $v) $flag = $i;
-            //echo "[".$cdc[$i]["cdc"].",".$v.",".$flag."]";
-            }
-          if ($flag == -1) $query="insert into users_cdcs set cdc='".$v."', user='".$_SESSION["SCENEID_ID"]."', timelock=CURRENT_DATE";
-           else $query="insert into users_cdcs set cdc='".$v."', user='".$_SESSION["SCENEID_ID"]."', timelock='".$cdc[$flag]["timelock"]."'";
-          //echo $query."\n";
-          mysql_query($query);
-        }
-      }
-      unset($cdc);
-
-      if (!preg_match("/".$REGEXP_EMAIL."/",$_POST["email"]))
-        $errormessage[] = "invalid email address";
-
-      $paramz = array(
-         "userID" => $_SESSION["SCENEID_ID"],
-         "firstname" => ($_POST["firstname"]),
-         "lastname" => ($_POST["lastname"]),
-         "nickname" => $nick, // question: do we need to set the sceneID nickname to the pouet one?
-         "email" => $_POST["email"],
-         "url" => $_POST["url"]
+      /*
+      $cdcText = array(
+        "your favorite",
+        "you love this when you're drunk",
+        "the one on that weird platform",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
       );
-      if ($_POST["password"] != $_POST["password2"]) {
-        $errormessage[] = "Passwords dont match!";
-      } else {
-        if ($_POST["password"] && $_POST["password2"]) {
-          $paramz["password"]  = md5($_POST["password"]);
-          $paramz["password2"] = md5($_POST["password2"]);
-        }
+      */
+
+      if ($this->user->glops >= $glop)
+      {
+        $this->fieldsCDC["cdc".$x] = array(
+          "value" => @$this->cdcs[$x-1],
+          "name" => "coup de coeur ".$x." (".$glop." glöps)",
+          //"info" => $cdcText[$x], // is this cool?
+        );
+        $glop *= 2;
       }
+      else
+      {
+        break;
+      }
+    }
+    $this->fieldsCDC["cdc".($x-1)]["infoAfter"] = sprintf("you currently have %d glöps and need %d more for the next cdc !",$this->user->glops,$glop - $this->user->glops);
 
-      if (!count($errormessage)) {
-        $returnvalue = $xml->parseSceneIdData("setUserInfoMD5", $paramz);
+    $row = SQLLib::SelectRow("DESC users_im im_type");
+    $this->imTypes = enum2array($row->Type);
 
-        if($returnvalue["returnvalue"]!=50)
+    $this->ims[] = new stdClass();
+    $this->fieldsIM = array();
+    $n = 0;
+    foreach($this->ims as $im)
+    {
+      $this->fieldsIM["im_type".$n] = array(
+        //"info"=>"the one you really use",
+        "name"=>"contact type",
+        "type"=>"select",
+        "value"=>@$im->im_type,
+        "fields"=>$this->imTypes,
+      );
+      $this->fieldsIM["im_id".$n] = array(
+        //"info"=>"buuuuuuuuuuuuuuuu .... hiho !",
+        "name"=>"contact address",
+        "value"=>@$im->im_id,
+        "maxlength"=>255,
+      );
+      $n++;
+    }
+
+    $this->sceneID = $this->user->GetSceneIDData(false);
+
+    global $namesNumeric;
+    global $namesSwitch;
+
+    if ($_POST)
+    {
+      foreach($_POST as $k=>$v)
+      {
+        if (@$this->fieldsPouet[$k]) $this->fieldsPouet[$k]["value"] = $v;
+        if (@$this->fieldsOtherSites[$k]) $this->fieldsOtherSites[$k]["value"] = $v;
+        if (@$this->fieldsCDC[$k]) $this->fieldsCDC[$k]["value"] = $v;
+      }
+    }
+  }
+
+  function ParsePostLoggedIn( $data )
+  {
+    global $currentUser;
+
+    $errors = array();
+
+    // cdc bit
+
+    $cdcUnique = array();
+    $glop = POUET_CDC_MINGLOP;
+    for ($x=1; $x < $this->maxCDCs; $x++)
+    {
+      if ($this->user->glops >= $glop && $data["cdc".$x])
+      {
+        $cdcUnique[] = $data["cdc".$x];
+      }
+      $glop *= 2;
+    }
+    $cdcUnique = array_unique($cdcUnique);
+    SQLLib::Query(sprintf_esc("delete from users_cdcs where user = %d",get_login_id()));
+    foreach($cdcUnique as $c)
+    {
+      $a = array();
+      $a["user"] = get_login_id();
+      $a["cdc"] = $c;
+      SQLLib::InsertRow("users_cdcs",$a);
+    }
+
+    // im bit
+
+    global $IM_TYPES;
+    SQLLib::Query(sprintf_esc("delete from users_im where userID = %d",get_login_id()));
+    for ($n = 0; $n < count($this->imTypes); $n++)
+    {
+      $a = array();
+      $a["userID"] = get_login_id();
+      $a["im_type"] = @$data["im_type".$n];
+      $imUser = @$data["im_id".$n];
+      if (@$IM_TYPES[$a["im_type"]])
+      {
+        if (preg_match("/".$IM_TYPES[$a["im_type"]]["capture"]."/",$imUser,$m))
         {
-          $errormessage[] = $returnvalue["message"];
+          $imUser = $m[1];
         }
         else
-          $message = "modifications complete!";
+        {
+          continue;
+        }
       }
-    }
-  }
-  else if ($_POST["password"] && $_POST["password2"] && $_POST["login"])
-  {
-    ///////////////////////////////////////////////////////
-    // USER NOT REGISTERED, INSERT
-
-    if (!preg_match("/".$REGEXP_EMAIL."/",$_POST["email"]))
-      $errormessage[] = "invalid email address";
-
-    if (strlen($nick) < 2)
-      $errormessage[] = "nick too short!";
-
-    if ($_POST["login"] == $_POST["firstname"] && ($_POST["firstname"] == $_POST["lastname"] || $_POST["firstname"] == substr($_POST["lastname"],0,-2)))
-      $errormessage[] = "yeah right.";
-
-    if (RECAPTCHA_PRIV_KEY !== "pouet") {
-      $resp = recaptcha_check_answer (RECAPTCHA_PRIV_KEY,
-                                      $_SERVER["REMOTE_ADDR"],
-                                      $_POST["recaptcha_challenge_field"],
-                                      $_POST["recaptcha_response_field"]);
-      if (!$resp->is_valid)
-        $errormessage[]="wrong funny letters, sorry!";
-    }
-
-    if (!count($errormessage)) {
-      // user is not registered
-      if ($_SERVER["REMOTE_ADDR"])
+      $a["im_id"] = $imUser;
+      if ($a["im_type"] && $a["im_id"])
       {
-        $query = "select id from users where level='banned' and lastip='".$_SERVER["REMOTE_ADDR"]."'";
-        $result = mysql_query($query);
-        $out = mysql_fetch_object($result);
-        if ($out)
-        {
-          $_SESSION = null;
-          $errormessage[]="your current ip belongs to a banned user. no account for you. if it's a shared ip, well, tough luck.";
-        }
-
-        if (strpos($_SERVER["REMOTE_ADDR"],"120.152.")===0 || strpos($_SERVER["REMOTE_ADDR"],"123.208.")===0)
-        {
-          $_SESSION = null;
-          $errormessage[]="long story.";
-        }
-        if (strstr(gethostbyaddr($_SERVER["REMOTE_ADDR"]),"my-addr.com")!==false)
-        {
-          $_SESSION = null;
-          $errormessage[]="long story.";
-        }
-        if (strstr(gethostbyaddr($_SERVER["REMOTE_ADDR"]),"go.vfserver.com")!==false)
-        {
-          $_SESSION = null;
-          $errormessage[]="long story.";
-        }
-      } else {
-        $_SESSION = null;
-        $errormessage[]="you're wearing a proxy.. no account for you.";
+        SQLLib::InsertRow("users_im",$a);
       }
-      if (!count($errormessage)) {
-        $paramz = array(
-          "login" => $_POST["login"],
-          "firstname" => ($_POST["firstname"]),
-          "lastname" => ($_POST["lastname"]),
-          "nickname" => $nick,
-          "email" => $_POST["email"],
-          //"url" => $_POST["url"],
-          "password" => md5($_POST["password"]),
-          "password2" => md5($_POST["password2"]),
-          "ip" => $_POST["REMOTE_ADDR"],
-        );
-        $returnvalue = $xml->parseSceneIdData("registerUserMD5", $paramz);
-
-        if($returnvalue["returnvalue"]!=20)
-        {
-      	  if (!empty($returnvalue["message"]))
-            $errormessage[] = $returnvalue["message"];
-      	  else if (!empty($returnvalue["returnvalue"]))
-            $errormessage[] = "SceneID error: ".$returnvalue["returnvalue"];
-      	  else
-            $errormessage[] = "Unknown SceneID error";
-        }
-        else if (!$returnvalue["user"]) {
-          $errormessage[] = "WTF ERROR!";
-        }
-      }
-
     }
 
-    if(!$errormessage)
+    // pouet bit
+
+    global $avatars;
+
+    $sql = array();
+    foreach ($this->fieldsPouet as $k=>$v)
     {
-      $query= "INSERT users SET ";
-      $query.="id=".$returnvalue["userID"].", ";
-      if(strlen($nick)==0) {
-        $query.="nickname='".$login."', ";
-      }
-      else
-        $query.="nickname='".$nick."', ";
-      if((strlen($im_id) > 0) && (in_array($im_type, $im_types))) {
-        $query.="im_type='".$im_type."', ";
-        $query.="im_id='".$im_id."', ";
-      }
-      else
-      {
-        $query.="im_type=NULL, ";
-        $query.="im_id=NULL, ";
-      }
-      $query.="level='user', ";
-      $query.="udlogin='".$udlogin."', ";
-      $query.="avatar='".$avatar."', ";
-      $query.="lastip='".$_SERVER["REMOTE_ADDR"]."', ";
-      $query.="lasthost='".gethostbyaddr($_SERVER["REMOTE_ADDR"])."', ";
-      if(strlen($_POST["ojuice"])!=0) {
-        $query.="ojuice=".((int)$_POST["ojuice"]).", ";
-      }
-      if(strlen($_POST["slengpung"])!=0) {
-        $query.="slengpung=".((int)$_POST["slengpung"]).", ";
-      }
-      if(strlen($_POST["csdb"])!=0) {
-        $query.="csdb=".((int)$_POST["csdb"]).", ";
-      }
-      if(strlen($_POST["zxdemo"])!=0) {
-        $query.="zxdemo=".((int)$_POST["zxdemo"]).", ";
-      }
-      $query.="quand=NOW()";
-      mysql_query($query);
-      $message = "registration complete! a confirmation mail will be sent to your address soon - you can't login until you confirmed your email address!";
+      if ($k == "nickname" && !trim($data[$k])) continue;
+      //if (trim($data[$k]))
+      $sql[$k] = trim($data[$k]);
     }
-  } else {
-    if (!$_POST["login"])
-      $errormessage[] = "login is missing!";
-    if (!$_POST["password"])
-      $errormessage[] = "password is missing!";
-    //$errormessage[] = "some required parameters are missing!";
+    foreach ($this->fieldsOtherSites as $k=>$v)
+    {
+      $sql[$k] = (int)trim($data[$k]);
+    }
+
+    if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/".$sql["avatar"]))
+      $sql["avatar"] = basename( $avatars[ array_rand($avatars) ] );
+
+    SQLLib::UpdateRow("users",$sql,"id=".(int)get_login_id());
+
+    if ($currentUser->nickname != $data["nickname"])
+    {
+      $a = array();
+      $a["user"] = $currentUser->id;
+      $a["nick"] = $currentUser->nickname;
+      SQLLib::InsertRow("oldnicks",$a);
+    }
+
+    // customizer bit
+
+    global $avatars;
+
+    global $success;
+    if (!$errors) $success = "modifications complete!";
+
+    return $errors;
   }
-} else if ($_POST) {
-  if (!$_POST["email"])
-    $errormessage[] = "email address is missing!";
-  if (!$_POST["nickname"])
-    $errormessage[] = "nickname is missing!";
+  use PouetForm;
+  function ParsePostMessage( $data )
+  {
+    if (!get_login_id())
+      return array("You have to be logged in!");
+
+    $errors = array();
+
+    $data["nickname"] = strip_tags($data["nickname"]);
+    $data["nickname"] = trim($data["nickname"]);
+
+    if (strlen($data["nickname"]) < 2)
+    {
+      $errors[] = "nick too short!";
+      return $errors;
+    }
+
+    if (!$errors)
+    {
+      $this->LoadFromDB();
+
+      $errors = $this->ParsePostLoggedIn( $data );
+    }
+//    $this->LoadFromDB();
+    return $errors;
+  }
+
+  function Render()
+  {
+    global $currentUser;
+    echo "\n\n";
+    echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+    echo "  <h2>".$this->title."</h2>\n";
+
+    // sceneid
+    echo "  <div class='accountsection content'>\n";
+    echo "    <div class='formifier'>\n";
+    echo "      <div class=\"row\">\n";
+    echo "        <label>your current profile:</label>\n";
+    echo "        <p>".$currentUser->PrintLinkedAvatar()." ".$currentUser->PrintLinkedName()."</p>\n";
+    echo "      </div>\n";
+    echo "      <div class=\"row\">\n";
+    echo "        <label>first name:</label>\n";
+    echo "        <p><b>"._html(@$this->sceneID["first_name"])."</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
+    echo "      </div>\n";
+    echo "      <div class=\"row\">\n";
+    echo "        <label>last name:</label>\n";
+    echo "        <p><b>"._html(@$this->sceneID["last_name"])."</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
+    echo "      </div>\n";
+    echo "      <div class=\"row\">\n";
+    echo "        <label>password:</label>\n";
+    echo "        <p><a href='https://id.scene.org/profile/'>change</a></p>\n";
+    echo "      </div>\n";
+    echo "    </div>\n";
+    echo "  </div>\n";
+
+    echo "  <h2>pou&euml;t things</h2>\n";
+    echo "  <div class='accountsection content'>\n";
+    $this->formifier->RenderForm( $this->fieldsPouet );
+    echo "  </div>\n";
+
+    if ($this->fieldsIM)
+    {
+      echo "  <h2>contact details</h2>\n";
+      echo "  <div class='accountsection content account-ims'>\n";
+      echo "  <p class='infoAfter'>note: whatever you specify here will be hidden for users who are logged out</p>\n";
+      $this->formifier->RenderForm( $this->fieldsIM );
+      echo "  </div>\n";
+    }
+
+    echo "  <h2>other sites</h2>\n";
+    echo "  <div class='accountsection content'>\n";
+    $this->formifier->RenderForm( $this->fieldsOtherSites );
+    echo "  </div>\n";
+
+    if ($this->fieldsCDC)
+    {
+      echo "  <h2>coup de coeurs</h2>\n";
+      echo "  <div class='accountsection content account-cdcs'>\n";
+      $this->formifier->RenderForm( $this->fieldsCDC );
+      echo "  </div>\n";
+    }
+    echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+    echo "</div>\n";
+  }
+};
+
+class PouetBoxAccountModificationRequests extends PouetBox
+{
+  public $requests;
+  function __construct( )
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_accountreq";
+    $this->title = "your most recent modification requests";
+  }
+  use PouetForm;
+  function LoadFromDB()
+  {
+    global $currentUser;
+
+    $s = new BM_Query();
+    $s->AddTable("modification_requests");
+    $s->AddField("modification_requests.id");
+    $s->AddField("modification_requests.requestType");
+    $s->AddField("modification_requests.itemID");
+    $s->AddField("modification_requests.itemType");
+    $s->AddField("modification_requests.requestBlob");
+    $s->AddField("modification_requests.requestDate");
+    $s->AddField("modification_requests.approved");
+    $s->AddField("modification_requests.comment");
+    //$s->Attach(array("modification_requests"=>"gloperatorID"),array("users as gloperator"=>"id"));
+    $s->Attach(array("modification_requests"=>"itemID"),array("prods as prod"=>"id"));
+    $s->Attach(array("modification_requests"=>"itemID"),array("groups as group"=>"id"));
+    $s->AddWhere(sprintf_esc("userID = %d",$currentUser->id));
+    $s->AddOrder("requestDate desc");
+    $s->SetLimit( @$_GET["limit"] ?: 10 );
+    $this->requests = $s->perform();
+  }
+  function Render()
+  {
+    global $REQUESTTYPES;
+    echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+    echo "  <tr>\n";
+    echo "    <th colspan='4'>".$this->title."</th>\n";
+    echo "  </tr>\n";
+    echo "  <tr>\n";
+    echo "    <th>date</th>\n";
+    echo "    <th>item</th>\n";
+    echo "    <th>request</th>\n";
+    echo "    <th>approved?</th>\n";
+    echo "  </tr>\n";
+    foreach($this->requests as $r)
+    {
+      echo "  <tr>\n";
+      echo "    <td>".$r->requestDate."</td>\n";
+      echo "    <td>".$r->itemType.": ";
+      switch ($r->itemType)
+      {
+        case "prod": if ($r->prod) echo $r->prod->RenderSingleRowShort(); break;
+        case "group": if ($r->group) echo $r->group->RenderLong(); break;
+      }
+      echo "</td>\n";
+      if ($REQUESTTYPES[$r->requestType])
+        echo "    <td>".$REQUESTTYPES[$r->requestType]::Describe()."</td>\n";
+      else
+        echo "    <td>unknown request type</td>";
+      echo "    <td>";
+      if ( $r->approved === NULL ) echo "<b>pending</b>";
+      else if ( $r->approved == 0 ) echo "<b>no</b> :: "._html($r->comment);
+      else if ( $r->approved == 1 ) echo "<b>yes</b>";
+      echo "</td>\n";
+      echo "  </tr>\n";
+    }
+    echo "</table>\n";
+  }
 }
-?>
 
-<br/>
-<form action="<?=$_SERVER['PHP_SELF']?>" method="post" name="accountform">
-<table bgcolor="#000000" cellspacing="1" cellpadding="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2">
-    <tr>
-     <td bgcolor="#224488" nowrap>
-<?
-if($_SESSION["SESSION"] && $_SESSION["SCENEID"]) {
-  $query = "SELECT * FROM users WHERE id='".$_SESSION["SCENEID_ID"]."'";
-  $result = mysql_query($query);
-  $user=mysql_fetch_assoc($result);
+class PouetBoxAccountProdAwardSuggestions extends PouetBox
+{
+  public $votes;
+  function __construct( )
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_accountawardsug";
+    $this->title = "your current award recommendations";
+  }
+  use PouetForm;
+  function LoadFromDB()
+  {
+    global $AWARDSSUGGESTIONS_EVENTS;
+    global $AWARDSSUGGESTIONS_CATEGORIES;
 
-  $userparams = array("userID" => $_SESSION["SCENEID_ID"]);
+    $cats = array();
+    $date = date("Y-m-d");
 
-  $returnvalue = $xml->parseSceneIdData("getUserInfo", $userparams);
-  if($returnvalue["returnvalue"]==10)
-    $user = array_merge($user, $returnvalue["user"]);
+    foreach($AWARDSSUGGESTIONS_CATEGORIES as $category)
+    {
+      $event = $AWARDSSUGGESTIONS_EVENTS[$category->eventID];
+      if ($event->votingStartDate <= $date && $date <= $event->votingEndDate)
+      {
+        $cats[] = (int)$category->id;
+      }
+    }
 
-?>
-      <b>e-e-e-edit your account</b><br>
-<? } else { ?>
-      <b>create your account</b><br>
-<? } ?>
-     </td>
-    </tr>
+    global $currentUser;
 
-<? if (count($errormessage) || $message) { ?>
-    <tr>
-     <td bgcolor="#446688" style="font-weight: bold; padding: 10px; text-align:center;" class="bg1">
-      <? if(count($errormessage)) { ?>
-       there are some errors:<br>
-       <br>
-       <?php
+    if ($cats)
+    {
+      $s = new BM_Query();
+      $s->AddTable("awardssuggestions_votes");
+      $s->AddField("awardssuggestions_votes.categoryID");
+      $s->AddWhere(sprintf("userID = %d and categoryID in (%s)",$currentUser->id,implode(",",$cats)));
+      $s->Attach(array("awardssuggestions_votes"=>"prodID"),array("prods as prod"=>"id"));
+      $this->votes = $s->perform();
+    }
+  }
+  function Render()
+  {
+    global $AWARDSSUGGESTIONS_EVENTS;
+    global $AWARDSSUGGESTIONS_CATEGORIES;
+    if (!$this->votes)
+    {
+      return;
+    }
+    echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+    echo "  <tr>\n";
+    echo "    <th colspan='4'>".$this->title."</th>\n";
+    echo "  </tr>\n";
+    echo "  <tr>\n";
+    echo "    <th>category</th>\n";
+    echo "    <th>prod</th>\n";
+    echo "  </tr>\n";
+    foreach($this->votes as $v)
+    {
+      $category = $AWARDSSUGGESTIONS_CATEGORIES[$v->categoryID];
+      $event = $AWARDSSUGGESTIONS_EVENTS[$category->eventID];
 
-       foreach ($errormessage as $err)
-         echo "- $err<br>\n";
+      echo "  <tr>\n";
+      echo "    <td>"._html($event->name)." - "._html($category->name)."</td>\n";
+      echo "    <td>".$v->prod->RenderSingleRowShort(). "</td>\n";
+      echo "  </tr>\n";
+    }
+    echo "</table>\n";
+  }
+};
 
-       ?>
-       <br>
-       <div align="center">
-        please, correct them.<br>
-        <a href="javascript:history.go(-1)">click here</a><br>
-       </div>
-      <? } else { ?>
-       <?=$message?>
-       <a href="/">have a nice stay!</a>
-      <? } ?>
-     </td>
-    </tr>
-<? }
-if (!count($errormessage)) {
-?>
+///////////////////////////////////////////////////////////////////////////////
 
-    <tr>
-     <td bgcolor="#446688">
-      <table id='account'>
-       <tr>
-        <td align="right">login:<br></td>
-<?if($_SESSION["SESSION"] && $_SESSION["SCENEID"]) {?>
-        <td><b><?=htmlspecialchars($user["login"])?></b><br></td>
-        <td><i>which word can you type very fast ?</i><br></td>
-<?} else {?>
-        <td><input type="text" name="login" maxlength="16" value='<?=htmlspecialchars($user["login"])?>'><br></td>
-        <td><i>which word can you type very fast ?</i> [<font color="#FF8888"><b>req</b></font>]<br></td>
-<?}?>
-       </tr>
-       <tr>
-        <td align="right">password:<br></td>
-        <td><input type="password" name="password"><br></td>
-        <td><i>the most complicated one ?</i> [<font color="#FF8888"><b>req</b></font>]<br></td>
-       </tr>
-       <tr>
-        <td align="right">password again:<br></td>
-        <td><input type="password" name="password2"><br></td>
-        <td><i>don't try to be original there</i> [<font color="#FF8888"><b>req</b></font>]<br></td>
-       </tr>
-       <tr>
-        <td align="right">firstname:<br></td>
-        <td><input type="text" name="firstname" value='<?=htmlspecialchars(utf8_decode($user["firstname"]))?>'><br></td>
-        <td><i>which name your mother gave you ?</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">lastname:<br></td>
-        <td><input type="text" name="lastname" value='<?=htmlspecialchars(utf8_decode($user["lastname"]))?>'><br></td>
-        <td><i>and your father ?</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">email:<br></td>
-        <td><input type="text" name="email" value='<?=htmlspecialchars($user["email"])?>'><br></td>
-        <td><i>to be subscribed to 16 spammed newsletters a week</i> [<font color="#FF8888"><b>req</b></font>]<br></td>
-       </tr>
-<?
-if($_SESSION["SESSION"] && $_SESSION["SCENEID"]) {
-?>
-       <tr>
-        <td align="right">website:<br></td>
-        <td><input type="text" name="url" value='<?=htmlspecialchars($user["url"]?$user["url"]:"http://")?>'><br></td>
-        <td><i>want some hits ?</i><br></td>
-       </tr>
-<?
+if (!get_login_id())
+{
+  require_once("include_pouet/header.php");
+  require("include_pouet/menu.inc.php");
+
+  $message = new PouetBoxModalMessage(false,true);
+  $message->classes[] = "errorbox";
+  $message->title = "An error has occured:";
+  $message->message = "You need to be logged in for this!";
+  $message->Render();
 }
+else
+{
+
+  $form = new PouetFormProcessor();
+
+  //if (!get_login_id())
+  //  $form->successMessage = "registration complete! a confirmation mail will be sent to your address soon - you can't login until you confirmed your email address!";
+
+  $form->SetSuccessURL( "user.php?who=".$currentUser->id, true );
+
+  $account = new PouetBoxAccount();
+  $form->Add( "account", $account );
+  $form->Add( "accountReq", new PouetBoxAccountModificationRequests() );
+  $form->Add( "accountAwardSug", new PouetBoxAccountProdAwardSuggestions() );
+
+  $form->Process();
+
+  $TITLE = "account!";
+
+  require_once("include_pouet/header.php");
+  require("include_pouet/menu.inc.php");
+
+  echo "<div id='content'>\n";
+
+  $form->Display();
+
+  echo "</div>\n";
+
 ?>
-       <tr>
-        <td align="right">nickname:<br></td>
-        <td><input type="text" name="nickname" maxlength="16" value='<?=htmlspecialchars($user["nickname"])?>'><br></td>
-        <td><i>how do you look on IRC ?</i> [<font color="#FF8888"><b>req</b></font>]<br></td>
-       </tr>
-       <tr>
-        <td align="right">instant messenger type:<br></td>
-        <td>
-          <select name="im_type">
-          <option></option>
-          <?
-          for($i=0;$i<count($im_types);$i++) {
-            if($user['im_type']==$im_types[$i]) {
-              $is_selected = " selected";
-            } else {
-              $is_selected = "";
+<script>
+<!--
+document.observe("dom:loaded",function(){
+  if (!$("avatarlist"))
+    return;
+
+  var updateAvatarCount = function()
+  {
+    var avatar = $("avatar").options[ $("avatar").selectedIndex ].value;
+    new Ajax.Request("ajax_avatar.php",{
+      "parameters" : {"avatar":avatar},
+      "onException": function(r, e) { throw e; },
+      "onSuccess": function(transport)
+        {
+          if (transport.responseJSON && transport.responseJSON.avatarCount)
+          {
+            var c = parseInt(transport.responseJSON.avatarCount,10);
+            if (c == 0)
+            {
+              $("avatarCount").update("(this avatar is unique !)");
             }
-            print("<option value=\"".$im_types[$i]."\"".$is_selected.">".$im_types[$i]."</option>\n");
+            else if (c == 1)
+            {
+              $("avatarCount").update("(only one other person uses this avatar !)");
+            }
+            else
+            {
+              $("avatarCount").update("(this avatar is used by "+c+" other people !)");
+            }
           }
-          ?>
-          </select><br />
-        </td>
-        <td><i>the one you really use</i><br></td>
-      </tr>
-       <tr>
-        <td align="right">instant messenger id:<br></td>
-        <td>
-          <input type="text" name="im_id" value='<?=htmlspecialchars($user["im_id"])?>'><br>
-        </td>
-        <td><i>buuuuuuuuuuuuuuuu .... hiho !</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">UD login:<br></td>
-        <td><input type="text" name="udlogin" value='<?=htmlspecialchars($user["udlogin"])?>'><br></td>
-        <td><i>your login on UD - <a href="ud.php">explained here</a></i><br></td>
-       </tr>
-       <tr>
-        <td align="right">avatar: [<font color="#FF8888"><b>req</b></font>]&nbsp;</td>
-        <td colspan="2">
-         <table><tr>
-         <td>
-<?
-  function mycmp($a,$b) { return strcasecmp($a,$b); }
-  $entry = glob("./avatars/*.gif");
-  usort($entry,"mycmp");
-  if (!$user["avatar"]) {
-    $r = $entry[array_rand($entry)];
-    $user["avatar"] = str_replace("./avatars/","",$r);
+        },
+    });
   }
+
+  var updateAvatar = function()
+  {
+    $("avatarimg").src = "<?=POUET_CONTENT_URL?>avatars/" + $("avatar").options[ $("avatar").selectedIndex ].value;
+    updateAvatarCount();
+  }
+
+  var img = new Element("img",{"id":"avatarimg","width":16,"height":16});
+  $("avatarlist").insertBefore(img,$("avatar"));
+  updateAvatar();
+  $("avatarlist").observe("change",updateAvatar);
+  $("avatarlist").observe("keyup",updateAvatar);
+
+  $("randomAvatar").update("(<a href='#'>pick random</a>)")
+  $("randomAvatar").down("a").observe("click",function(ev){
+    ev.stop();
+    $("avatar").selectedIndex = Math.floor( Math.random() * $("avatar").options.length );
+    updateAvatar();
+  });
+
+  var div = new Element("div",{"id":"avatarPickerPalette"})
+  $("avatarPicker").parentNode.insert(div);
+
+  div.insert( new Element("a",{"href":"#"}).observe("click",function(e){
+    regeneratePalette();
+  }).update("show more") );
+  div.insert( new Element("a",{"href":"#","id":"avatarPickerClose"}).observe("click",function(e){
+    $("avatarPickerPalette").hide();
+  }).update("close") );
+  div.insert( new Element("div",{"id":"paletteAvatars"}) );
+  var regeneratePalette = function()
+  {
+    $("paletteAvatars").update();
+    for (var i=0; i<100; i++)
+    {
+      var src = $("avatar").options[ Math.floor( Math.random() * $("avatar").options.length ) ].value;
+      var img = new Element("img",{"src":"<?=POUET_CONTENT_URL?>avatars/" + src,"data-src":src,"title":src});
+      $("paletteAvatars").insert( img );
+      img.observe("click",function(ev){
+        $("avatar").value = ev.element().getAttribute("data-src");
+        updateAvatar();
+        $("avatarPickerPalette").hide();
+      });
+    }
+  }
+  regeneratePalette();
+  $("avatarPicker").update("(<a href='#'>show picker</a>)")
+  $("avatarPickerPalette").hide();
+  $("avatarPicker").down("a").observe("click",function(ev){
+    ev.stop();
+    $("avatarPickerPalette").show();
+  });
+
+  for (var i=1; i<<?=$account->maxCDCs?>; i++)
+  {
+    if (!$("cdc"+i)) continue;
+    new Autocompleter($("cdc"+i), {
+      "dataUrl":"./ajax_prods.php",
+      "width":320,
+      "processRow": function(item) {
+        var s = item.name.escapeHTML();
+        if (item.groupName) s += " <small class='group'>" + item.groupName.escapeHTML() + "</small>";
+        return s;
+      }
+    });
+  }
+});
+//-->
+</script>
+<?php
+}
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
 ?>
-         <img src="avatars/<?=$user["avatar"]?>" name="avatr">
-  </td>
-  <td>
-  <select name="avatar" onChange="document.avatr.src='avatars/'+this.options[this.selectedIndex].value">
-  <?
-  foreach($entry as $e) {
-    $e = str_replace("./avatars/","",$e);
-    print("<option value=\"".$e."\"".($user["avatar"]==$e?" selected":"").">".$e."</option>\n");
-  }
-  ?>
-  </select>
-  <script language="JavaScript" type="text/javascript">
-  <!--
-  function randomizeAvatar() {
-    var a = document.getElementsByName('avatar')[0];
-    if (!a) return;
-    a.selectedIndex = Math.floor( Math.random() * a.options.length );
-    document.avatr.src='avatars/'+a.options[a.selectedIndex].value
-  }
-  //-->
-  </script>
-  (<a href="javascript:popupAvatarSelector('accountform','avatar');">select</a>)
-  (<a href="javascript:randomizeAvatar();">random</a>)
-  </td>
-  </td>
-  </tr></table>
-        </td>
-       </tr>
-       <tr>
-        <td><br></td>
-        <td colspan="2">you can also upload your <i>personal</i> avatar <a href="avatar.php">here</a> ;)<br><br></td>
-       </tr>
-
-       <?
-        $query = "SELECT cdc, (CURRENT_DATE - timelock) as time, prods.name FROM users_cdcs LEFT JOIN prods ON prods.id = users_cdcs.cdc WHERE user='".$_SESSION["SCENEID_ID"]."'";
-        $result = mysql_query($query);
-        while($tmp=mysql_fetch_array($result)){
-          $cdc[] = $tmp;
-        }
-
-        $minglop=32;
-        $lockdays=-1;
-        for ($ik=1; $ik < 10; $ik++) {
-          $minglop=$minglop*2;
-          if($user["glops"]>=$minglop) {
-          ?>
-       <tr>
-        <td align="right">coup de coeur <? print($ik); ?><br></td>
-
-        <td><? if ($cdc[$ik-1]["time"]=='' || $cdc[$ik-1]["time"]>$lockdays){ ?><input type="text" name="cdc<? print($ik); ?>" value="<? print($cdc[$ik-1]["cdc"]); ?>"><br></td><td><i>prod id (<?=$cdc[$ik-1]["name"]?>)</i><br></td>
-        <? }else{ ?><input type="text" name="cdc<? print($ik); ?>" value="<? print($cdc[$ik-1]["cdc"]); ?>" disabled><br></td><td><i>locked for the next <? print($lockdays-$cdc[$ik-1]["time"]); ?> days</i><br></td></td><input type="hidden" name="cdc<? print($ik); ?>" value="<? print($cdc[$ik-1]["cdc"]); ?>">
-        <? } ?>
-
-
-       </tr>
-       <?
-          }
-       }
-       ?>
-       <tr>
-        <td align="right">ojuice:<br></td>
-        <td><input type="text" name="ojuice" value="<? print($user["ojuice"]); ?>"><br></td>
-        <td><i>your <a href="http://ojuice.net" target=_blank>ojuice</a> id, if you had one (we miss you OJ ;( *snif*)</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">slengpung:<br></td>
-        <td><input type="text" name="slengpung" value="<? print($user["slengpung"]); ?>"><br></td>
-        <td><i>your <a href="http://www.slengpung.com" target=_blank>slengpung</a> id, if you have one</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">csdb:<br></td>
-        <td><input type="text" name="csdb" value="<? print($user["csdb"]); ?>"><br></td>
-        <td><i>your <a href="http://noname.c64.org/csdb/" target=_blank>csdb</a> id, if you have one</i><br></td>
-       </tr>
-       <tr>
-        <td align="right">zxdemo:<br></td>
-        <td><input type="text" name="zxdemo" value="<? print($user["zxdemo"]); ?>"><br></td>
-        <td><i>your <a href="http://zxdemo.org/" target=_blank>zxdemo</a> id, if you have one</i><br></td>
-       </tr>
-<?if(!($_SESSION["SESSION"] && $_SESSION["SCENEID"])) {?>
-       <tr>
-        <td align="right">captcha thing:<br></td>
-        <td>
-<?
-echo recaptcha_get_html(RECAPTCHA_PUB_KEY);
-?>
-        </td>
-        <td>real sceners are proficient in the skill of reading letters</td>
-       </tr>
-<?}?>
-      </table>
-     </td>
-    </tr>
-    <tr>
-     <td bgcolor="#6688AA" align="right">
-      <input type="image" src="gfx/submit.gif" style="border: 0px"><br>
-     </td>
-    </tr>
-<? } ?>
-   </table>
-  </td>
- </tr>
-</table>
-</form>
-<br/>
-<? require("include/bottom.php"); ?>

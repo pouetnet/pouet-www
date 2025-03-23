@@ -1,114 +1,99 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
+require_once("include_pouet/box-bbs-post.php");
 
-$linebypage=25;
+$POSTS_PER_PAGE = 25;
 
-$query="SELECT count(*) FROM oneliner";
-$result=mysql_query($query);
-$nbmsg=mysql_result($result,0);
+class PouetBoxOnelinerView extends PouetBox
+{
+  public $postcount;
+  public $paginator;
+  public $oneliner;
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_onelinerview";
+    $this->title = "the so complete pou&euml;t.net oneliner";
+  }
 
-$allpages = (int)ceil($nbmsg/(float)$linebypage);
-if(!$page)
-	$page=$allpages;
+  function LoadFromDB() {
+    global $POSTS_PER_PAGE;
 
-debuglog($nbmsg."/".$linebypage."=".($nbmsg/(float)$linebypage));
+    $s = new SQLSelect();
+    $s->AddField("count(*) as c");
+    $s->AddTable("oneliner");
+    if (@$_GET["who"])
+      $s->AddWhere(sprintf_esc("oneliner.who = %d",$_GET["who"]));
+    $this->postcount = SQLLib::SelectRow($s->GetQuery())->c;
 
-$query="SELECT oneliner.who,oneliner.message,users.avatar,users.nickname FROM oneliner LEFT JOIN users ON oneliner.who=users.id ORDER BY oneliner.quand ASC LIMIT ".(($page-1)*$linebypage).",".$linebypage;
-debuglog($query);
-$result=mysql_query($query);
-while($tmp=mysql_fetch_array($result)) {
-	$onelines[]=$tmp;
-}
+    $s = new BM_Query();
+    $s->AddTable("oneliner");
+    $s->AddField("oneliner.message");
+    $s->AddField("oneliner.addedDate");
+    $s->attach(array("oneliner"=>"who"),array("users as user"=>"id"));
+    if (@$_GET["who"])
+      $s->AddWhere(sprintf_esc("oneliner.who = %d",$_GET["who"]));
+    //$s->SetLimit( $POSTS_PER_PAGE, (int)(($this->page - 1)*$POSTS_PER_PAGE) );
+
+    $this->paginator = new PouetPaginator();
+    $this->paginator->SetData( (@$_GET["who"] ? "oneliner.php?who=".(int)$_GET["who"] : "oneliner.php"), $this->postcount, $POSTS_PER_PAGE, @$_GET["page"] );
+    $this->paginator->SetLimitOnQuery( $s );
+
+    $this->oneliner = $s->perform();
+  }
+
+  function RenderBody()
+  {
+    global $POSTS_PER_PAGE;
+
+    echo "<ul class='boxlist'>";
+    $lastDate = "";
+    foreach ($this->oneliner as $c)
+    {
+      $day = substr($c->addedDate,0,10);
+      if ($day != $lastDate)
+      {
+        echo "<li class='day'>".$day."</li>\n";
+        $lastDate = $day;
+      }
+      $p = $c->message;
+      $p = _html($p);
+      //$p = bbencode($p,true);
+      $p = preg_replace("/([a-z]+:\/\/\S+)/","<a href='$1' rel='external'>$1</a>",$p);
+      $p = nl2br($p);
+      $p = better_wordwrap($p,80," ");
+      echo "<li>";
+      echo "<time datetime='".$c->addedDate."' title='".$c->addedDate."'>".date("H:i",strtotime($c->addedDate))."</time> ";
+      echo $c->user->PrintLinkedAvatar()." ".$p;
+      echo "</li>\n";
+    }
+    echo "</ul>";
+
+    $this->paginator->RenderNavbar();
+   ?>
+    <script>
+    document.observe("dom:loaded",function(){ StubLinksToDomainName($("pouetbox_onelinerview")); });
+    </script>
+    <?php
+  }
+  function RenderFooter()
+  {
+    echo "</div>\n";
+  }
+};
+
+$p = new PouetBoxOnelinerView();
+$p->Load();
+
+$TITLE = "oneliner";
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+echo $p->Render();
+echo "</div>\n";
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
 ?>
-<br />
-<table bgcolor="#000000" cellspacing="1" cellpadding="0" border="0" width="75%">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2" border="0" width="100%">
-    <tr>
-     <td bgcolor="#224488" colspan="2">
-      <table border="0" cellspacing="0" cellpadding="0"><tr><td>
-       <img src="gfx/titles/talk.gif" width="16" height="16" border="0" title="talk"><br />
-      </td><td>&nbsp;</td><td>
-       <b>the so complete pouët.net oneliner</b><br />
-      </td></tr></table>
-     </td>
-    </tr>
-    <? for($i=0;$i<count($onelines);$i++): ?>
-    <tr class="cite-<?=$onelines[$i]["who"]?>">
-    <?
-     if($i%2) {
-       print("<td bgcolor=\"#557799\">");
-     } else {
-       print("<td bgcolor=\"#446688\">");
-     }
-    ?>
-      <table cellspacing="0" cellpadding="0"><tr><td>
-       <a href="user.php?who=<? (print($onelines[$i]["who"])); ?>"><img src="avatars/<? print($onelines[$i]["avatar"]); ?>" width="16" height="16" border="0" title="<? htmlspecialchars(print($onelines[$i]["nickname"])); ?>"></a><br />
-      </td>
-      <td>&nbsp;</td>
-      <td>
-       <? print(str_replace("\'", "'", htmlentities( stripslashes($onelines[$i]["message"]) ))); ?><br />
-      </td></tr></table>
-     </td>
-    </tr>
-    <? endfor; ?>
-
-    <tr bgcolor="#224488">
-     <td>
-      <table width="100%" cellspacing="0" cellpadding="0" border="0">
-       <tr>
-       <? if($page>=2): ?>
-        <td>
-         <a href="oneliner.php?page=<?=($page-1)?>">
-          <img src="gfx/flecheg.gif" border="0"><br />
-         </a>
-        </td>
-        <td>&nbsp;</td>
-        <td nowrap>
-         <a href="oneliner.php?page=<?=($page-1)?>">
-          <b>previous page</b><br />
-         </a>
-        </td>
-       <? endif; ?>
-        <form action="oneliner.php">
-        <td width="50%" align="right">
-        <select name="page">
-        <? for($i=1;$i<=$allpages;$i++): ?>
-        <? if($i==$page): ?>
-        <option value="<? print($i); ?>" selected><? print($i); ?></option>
-        <? else: ?>
-        <option value="<? print($i); ?>"><? print($i); ?></option>
-        <? endif; ?>
-        <? endfor; ?>
-        </select><br />
-        </td>
-        <td>&nbsp;</td>
-        <td width="50%">
-        <input type="image" src="gfx/submit.gif" border="0"><br />
-        </td>
-        </form>
-       <? if($page<$allpages): ?>
-        <td nowrap>
-         <a href="oneliner.php?page=<?=($page+1)?>">
-          <b>next page</b><br />
-         </a>
-        </td>
-        <td>&nbsp;</td>
-        <td>
-         <a href="oneliner.php?page=<?=($page+1)?>">
-          <img src="gfx/fleched.gif" border="0"><br />
-         </a>
-        </td>
-       <? endif; ?>
-       </tr>
-      </table>
-     </td>
-    </tr>
-
-   </table>
-  </td>
- </tr>
-</table>
-<br />
-<? require("include/bottom.php"); ?>

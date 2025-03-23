@@ -1,14 +1,12 @@
 # Pouët.net
 
-This is the old source code of Pouët.net 
-
-The one in use nowadays is available at https://github.com/pouetnet/pouet2.0
+## Team
 
 ### Former maintainers
 
-- [gargaj](http://pouet.net/user.php?who=1007) (since 2007)
-- [psenough](http://pouet.net/user.php?who=177) (2004-2007)
 - [analogue](http://pouet.net/user.php?who=1) (2000-2004)
+- [psenough](http://pouet.net/user.php?who=177) (2004-2007)
+- [gargaj](http://pouet.net/user.php?who=1007) (2007-2024)
 
 ### Contributors
 
@@ -24,7 +22,7 @@ The one in use nowadays is available at https://github.com/pouetnet/pouet2.0
 - [rez](http://pouet.net/user.php?who=10)
 - [melwyn](http://pouet.net/user.php?who=38)
 
-## License
+### License
 
 Copyright (C) 2000-2013 Laurent Raufaste and contributors
 

@@ -1,104 +1,54 @@
-<?
-header("Content-type: text/xml");
-include('../include/auth.php');
+<?php
+require_once("../bootstrap.inc.php");
+require_once( POUET_ROOT_LOCAL . "/include_pouet_index/box-index-latestadded.php");
+require_once( POUET_ROOT_LOCAL . "/include_pouet/pouet-rss.php");
 
+$limit = @$_GET["howmany"] ? (int)$_GET["howmany"] : 10;
+$limit = min($limit,25);
+$limit = max($limit,5);
 
-function xmlentities ( $string )
+$s = new BM_Query("prods");
+$s->AddOrder("prods.addedDate DESC");
+$s->attach("addedUser",array("users as user"=>"id"));
+$s->SetLimit($limit);
+
+if (@$_GET["type"])
 {
-   return str_replace ( array ( '&', '"', "'", '<', '>' ), array ( '&amp;' , '&quot;', '&apos;' , '&lt;' , '&gt;' ), $string );
+  $s->AddWhere(sprintf_esc("FIND_IN_SET('%s',prods.type)",$_GET["type"]));
 }
-
-$nl = "\n";
-$t = "\t";
-
-if(!$howmany||$howmany<0||$howmany>100)
-	$howmany=10;
-
-unset($output);
-
-// opening DB
-$dbl = mysql_connect($db['host'], $db['user'], $db['password']);
-if(!$dbl) {
-	die('SQL error... sorry ! ^^; I\'m on it !');
-}
-mysql_select_db($db['database'],$dbl);
-
-$output = '<?xml version="1.0" encoding="UTF-8"?>'.$nl;
-$output.= '<rss version="2.0">'.$nl;
-$output.= $t.'<channel>'.$nl;
-$output.= $t.$t.'<title>pouet.net</title>'.$nl;
-$output.= $t.$t.'<link>http://pouet.net/</link>'.$nl;
-$output.= $t.$t.'<description>your online demoscene resource</description>'.$nl;
-$output.= $t.$t.'<language>en-us</language>'.$nl;
-$output.= $t.$t.'<copyright>Copyright 2000-'.date('Y').' Mandarine</copyright>'.$nl;
-$output.= $t.$t.'<managingEditor>webmaster@pouet.net</managingEditor>'.$nl;
-$output.= $t.$t.'<webMaster>webmaster@pouet.net</webMaster>'.$nl;
-// lastBuildDate
-$query = 'SELECT quand FROM prods ORDER BY quand DESC LIMIT 1';
-$result = mysql_query($query);
-$lastBuildDate = date('D, d M Y H:i:s',strtotime(mysql_result($result, 0)));
-$output.= $t.$t.'<lastBuildDate>'.$lastBuildDate.' CST</lastBuildDate>'.$nl;
-$output.= $t.$t.'<generator>pouet.net</generator>'.$nl;
-$output.= $t.$t.'<docs>http://backend.userland.com/rss</docs>'.$nl;
-$output.= $t.$t.'<ttl>60</ttl>'.$nl;
-// logo
-$output.= $t.$t.'<image>'.$nl;
-$output.= $t.$t.$t.'<url>http://pouet.net/gfx/buttons/pouet.gif</url>'.$nl;
-$output.= $t.$t.$t.'<title>pouet.net</title>'.$nl;
-$output.= $t.$t.$t.'<link>http://pouet.net/</link>'.$nl;
-$output.= $t.$t.$t.'<width>88</width>'.$nl;
-$output.= $t.$t.$t.'<height>31</height>'.$nl;
-$output.= $t.$t.$t.'<description>your online demoscene resource</description>'.$nl;
-$output.= $t.$t.'</image>'.$nl;
-
-// getting data
-unset($prods);
-$query ="SELECT prods.id, prods.name, prods.quand FROM prods ";
-if ($platform) $query.=", prods_platforms, platforms ";
-$query.="WHERE 1 ";
-if ($platform) $query.="and prods_platforms.platform=platforms.id and platforms.name='".$platform."' and prods_platforms.prod=prods.id ";
-if ($type) $query.='AND find_in_set("'.$type.'",prods.type)>0 ';
-if ($group) $query.='AND (prods.group1="'.$group.'" OR prods.group2="'.$group.'" OR prods.group3="'.$group.'") ';
-$query.='ORDER BY prods.quand DESC LIMIT '.$howmany;
-//print("->".$query."<-");
-$result = mysql_query($query);
-while($row = mysql_fetch_assoc($result))
-	$prods[] = $row;
-
-// publishing each prod as <item>
-foreach($prods as $p)
+if (@$_GET["platform"])
 {
-	$output.= $t.$t.'<item>'.$nl;
-	$output.= $t.$t.$t.'<title>'.xmlentities(utf8_encode($p['name'])).'</title>'.$nl;
-	$output.= $t.$t.$t.'<link>http://pouet.net/prod.php?which='.$p['id'].'</link>'.$nl;
-	// enclosure tag
-	unset($screenshot);
-	if(file_exists('../screenshots/'.$p['id'].'.jpg')) {
-		$screenshot = $p['id'].'.jpg';
-	} elseif(file_exists('../screenshots/'.$p['id'].'.gif')) {
-		$screenshot = $p['id'].'.gif';
-	} elseif(file_exists('../screenshots/'.$p['id'].'.png')) {
-		$screenshot = $p['id'].'.png';
-	}
-	if($screenshot)
-	{
-		$screenshot_size = filesize('../screenshots/'.$screenshot);
-		$size = getimagesize('../screenshots/'.$screenshot);
-		$screenshot_type = $size['mime'];
-		$output.= $t.$t.$t.'<enclosure url="http://pouet.net/screenshots/'.$screenshot.'" length="'.$screenshot_size.'" type="'.$screenshot_type.'" />'.$nl;
-	}
-	$output.= $t.$t.$t.'<guid isPermaLink="false">'.$p['id'].'</guid>'.$nl;
-	$output.= $t.$t.$t.'<pubDate>'.date('D, d M Y H:i:s',strtotime($p['quand'])).' CST</pubDate>'.$nl;
-	$output.= $t.$t.'</item>'.$nl;
+  $platformID = -1;
+  foreach($PLATFORMS as $k=>$v)
+    if ($v["name"] == $_GET["platform"])
+      $platformID = $k;
+  if ($platformID != -1)
+  {
+    $s->AddJoin("LEFT","prods_platforms as pp","pp.prod = prods.id");
+    $s->AddWhere(sprintf_esc("pp.platform = %d",$platformID));
+  }
 }
 
-$output.= $t.'</channel>'.$nl;
-$output.= '</rss>'.$nl;
+$data = $s->perform();
+PouetCollectPlatforms($data);
 
-// closing DB
-if (isset($dbl)) {
-	mysql_close($dbl);
+$rss = new PouetRSS();
+
+foreach($data as $item)
+{
+  $rss->AddItem(array(
+    "title"       => $item->name . ($item->groups ? " by ".$item->RenderGroupsPlain() : ""),
+    "pouet:title" => $item->name,
+    "pouet:group" => array_map(function($i){ return $i->name; },$item->groups),
+    "pouet:party" => array_map(function($i){ return trim($i->party->name." ".$i->year); },$item->placings),
+    "pouet:type" => explode(",",$item->type),
+    "pouet:platform" => array_map(function($i){ return $i["name"]; },$item->platforms),
+    "link"      => POUET_ROOT_URL . "prod.php?which=" . $item->id,
+    "pubDate"   => date("r",strtotime($item->addedDate)),
+    "enclosure" => find_screenshot($item->id),
+  ));
 }
 
-print($output);
+$rss->Render();
+
 ?>

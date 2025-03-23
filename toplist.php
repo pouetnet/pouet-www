@@ -1,130 +1,213 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
 
-if ($platform == 'any platform')
-	unset($platform);
-if ($type == 'prods')
-	unset($type);
+class PouetBoxTopList extends PouetBox
+{
+  public $types;
+  public $formifier;
+  public $fields;
+  public $prods;
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_toplist";
 
-if (!$dayspans) $dayspans=30;
-if (!$dayspane) $dayspane=0;
-if (!$prodlimit) $prodlimit=10;
+    $this->formifier = new Formifier();
 
-$prodlimit = min($prodlimit,1000);
+    $row = SQLLib::selectRow("DESC prods type");
+    $m = enum2array($row->Type);
 
-// get all the platforms
-$query="select * from platforms order by name asc";
-$result = mysql_query($query);
-while($tmp = mysql_fetch_array($result)) {
-  	 $platforms[]=$tmp;
+    $this->types = array();
+    $this->types[""] = "- none - ";
+    foreach($m as $v) $this->types[$v] = $v;
+  }
+
+  function LoadFromDB()
+  {
+    global $PLATFORMS;
+    $plat = array();
+    $plat[""] = "- none -";
+	  foreach($PLATFORMS as $k=>$v) $plat[$k] = $v["name"];
+	  uasort($plat,"strcasecmp");
+
+    $this->fields = array(
+      "type"=>array(
+        "name"=>"type",
+        "type"=>"select",
+        //"multiple"=>true,
+        "assoc"=>true,
+        "fields"=>$this->types,
+        "info"=>" ",
+        //"required"=>true,
+      ),
+      "platform"=>array(
+        "name"=>"platform",
+        "type"=>"select",
+        //"multiple"=>true,
+        "assoc"=>true,
+        "fields"=>$plat,
+        "info"=>" ",
+        //"required"=>true,
+      ),
+      "limit"=>array(
+        "name"=>"number of prods",
+        "type"=>"number",
+        "value"=>10,
+        "max"=>64,
+      ),
+      "days"=>array(
+        "name"=>"days to go back",
+        "type"=>"number",
+        "value"=>0,
+        "info"=>"0 means alltime",
+      ),
+      "dateFrom"=>array(
+        "name"=>"starting date [inclusive]",
+        "type"=>"date",
+        "value"=>date("Y-m-d",time()-30*24*60*60),
+      ),
+      "dateTo"=>array(
+        "name"=>"ending date [inclusive]",
+        "type"=>"date",
+        "value"=>date("Y-m-d"),
+      ),
+    );
+
+
+    if ($_GET)
+    {
+      foreach($_GET as $k=>$v)
+        if ($this->fields[$k])
+          $this->fields[$k]["value"] = $v;
+    }
+
+    $s = new BM_Query("prods");
+    if (@$_GET["days"])
+    {
+      $s->AddOrder("(prods.views/((NOW()-prods.addedDate)/100000)+prods.views)*prods.voteavg*prods.voteup DESC");
+      $s->AddWhere(sprintf_esc("prods.addedDate > DATE_SUB(NOW(),INTERVAL %d DAY)",$_GET["days"]));
+    }
+    else if (@$_GET["dateFrom"] || @$_GET["dateTo"])
+    {
+      $s->AddOrder("(prods.views/((NOW()-prods.addedDate)/100000)+prods.views)*prods.voteavg*prods.voteup DESC");
+      if (@$_GET["dateFrom"])
+        $s->AddWhere(sprintf_esc("prods.addedDate >= '%s'",$_GET["dateFrom"]));
+      if (@$_GET["dateTo"])
+        $s->AddWhere(sprintf_esc("prods.addedDate <= '%s'",$_GET["dateTo"]));
+    }
+    else
+    {
+      $s->AddOrder("prods.rank");
+      $s->AddWhere("prods.rank > 0");
+    }
+    if (@$_GET["type"])
+    {
+      $s->AddWhere(sprintf_esc("FIND_IN_SET('%s',prods.type)>0",$_GET["type"]));
+    }
+    if (@$_GET["platform"])
+    {
+      $s->AddJoin("","prods_platforms",sprintf_esc("prods_platforms.prod = prods.id AND prods_platforms.platform=%d",$_GET["platform"]));
+    }
+    $limit = (int)(@$_GET["limit"] ? $_GET["limit"] : 10);
+    $limit = min($limit,64);
+    $limit = max($limit,10);
+    $s->SetLimit($limit);
+    $this->prods = $s->perform();
+    PouetCollectPlatforms($this->prods);
+    PouetCollectAwards($this->prods);
+  }
+  function RenderTitle()
+  {
+    echo "<div class='selector'>";
+    echo "<form action='toplist.php' method='get'>\n";
+    $this->formifier->RenderForm( $this->fields );
+    echo "  <input type='submit' value='Submit'/>\n";
+    echo "</form>\n";
+    echo "</div>";
+  }
+  function RenderBody()
+  {
+    echo "<ul class='boxlist boxlisttable'>\n";
+    $n = 1;
+    foreach($this->prods as $p)
+    {
+      printf("  <li>\n");
+      printf("    <span>%d.</span>\n",$n++);
+      printf("    <span>");
+      echo $p->RenderTypeIcons();
+      echo $p->RenderPlatformIcons();
+      echo $p->RenderSingleRowShort();
+      echo " ".$p->RenderAccolades();
+      printf("    </span>");
+
+      echo "<span class='toplist rulez'>".$p->voteup."</span>\n";
+      echo "<span class='toplist isok'>".$p->votepig."</span>\n";
+      echo "<span class='toplist sucks'>".$p->votedown."</span>\n";
+
+      $pop = (int)calculate_popularity( $p->views );
+      echo "<span>".progress_bar_solo( $pop, $pop."%" )."</span>";
+
+      printf("  </li>\n");
+    }
+    echo "</ul>\n";
+?>
+<script>
+<!--
+function toggleDateFields(range)
+{
+  $("row_dateFrom").toggle(range);
+  $("row_dateTo").toggle(range);
+  $("row_days").toggle(!range);
+  $("specify-range").toggle(!range);
+  $("specify-duration").toggle(range);
 }
 
-// get all the types
-unset($tmp);
-unset($types);
-$result = mysql_query("DESC prods type");
-$row = mysql_fetch_row($result);
-$tmp = explode("'",$row[1]);
-for($i=1;$i<count($tmp);$i+=2)
-  $types[]=$tmp[$i];
+document.observe("dom:loaded",function(){
+  var query = location.search.toQueryParams();
+  var div = new Element("div",{"id":"range-selector"});
+  div.insert(new Element("a",{"href":"#","id":"specify-range"   }).update("specify range instead").observe('click',function(ev){ ev.stop(); toggleDateFields(true); }));
+  div.insert(new Element("a",{"href":"#","id":"specify-duration"}).update("specify duration instead").observe('click',function(ev){ ev.stop(); toggleDateFields(false); }));
+  $("row_dateTo").insert({after:div});
+  if (query["dateFrom"] || query["dateTo"])
+  {
+    toggleDateFields(true);
+  }
+  else
+  {
+    toggleDateFields(false);
+  }
+  $$("form").first().observe("submit",function(ev){
+    if (!$("row_days").visible())
+    {
+      $("row_days").remove();
+    }
+    else
+    {
+      $("row_dateFrom").remove();
+      $("row_dateTo").remove();
+    }
+  });
+});
+//-->
+</script>
+<?php
+  }
+};
 
-// get the top 10 prods
-  unset($tmp);
-  $query ="SELECT prods.id,prods.name,prods.group1,prods.group2,prods.group3,prods.type ";
-  $query.="FROM prods ";
-  if ($platform) $query.=", prods_platforms, platforms ";
-  $query.="WHERE quand>DATE_SUB(sysdate(),INTERVAL '$dayspans' DAY) AND quand<DATE_SUB(sysdate(),INTERVAL '$dayspane' DAY) ";
-  if ($platform)
-	$query.="and prods_platforms.platform=platforms.id and platforms.name='".$platform."' and prods_platforms.prod=prods.id ";
-  if ($type)
-	$query.="AND FIND_IN_SET('".$type."',prods.type)>0 ";
-  $query.="ORDER BY (prods.views/((sysdate()-prods.quand)/100000)+prods.views)*prods.voteavg*prods.voteup desc LIMIT $prodlimit";
-  $result = mysql_query($query);
-  while($tmp = mysql_fetch_assoc($result)) {
-    $top10[] = $tmp;
-  }
-  for($j=0;$j<count($top10);$j++) {
-    $query="SELECT name FROM groups WHERE id=".$top10[$j]["group1"];
-    $result=mysql_query($query);
-    if(mysql_num_rows($result))
-      $top10[$j]["groupname1"]=mysql_result($result,0);
-    $query="SELECT name FROM groups WHERE id=".$top10[$j]["group2"];
-    $result=mysql_query($query);
-    if(mysql_num_rows($result))
-      $top10[$j]["groupname2"]=mysql_result($result,0);
-    $query="SELECT name FROM groups WHERE id=".$top10[$j]["group3"];
-    $result=mysql_query($query);
-    if(mysql_num_rows($result))
-      $top10[$j]["groupname3"]=mysql_result($result,0);
-  }
+$TITLE = "top of the trumpets";
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+
+$box = new PouetBoxTopList();
+$box->Load();
+$box->Render();
+
+echo "</div>\n";
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
+
 ?>
-<br />
-<form action="<?=basename($_SERVER['SCRIPT_FILENAME'])?>" method="get">
-<table bgcolor="#000000" cellspacing="1" cellpadding="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2" width="100%">
-    <tr>
-     <td bgcolor="#224488">
-		<table width="100%"><tr>
-	     <td><b>prodtype</b></td>
-		 <td>
-			<select name="type">
-			<option>prods</option>
-			<? foreach ($types as $t) { ?>
-			<? if ($type == $t) : ?>
-			<option selected><?=$t?></option>
-			<? else : ?>
-			<option><?=$t?></option>
-			<? endif; ?>
-			<? } ?>
-			</select>
-		 </td>
-	     <td><b>platform</b></td>
-		 <td colspan="2">
-			<select name="platform">
-			<option>any platform</option>
-			<? foreach ($platforms as $p) { ?>
-			<? if ($platform == $p["name"]) : ?>
-			<option selected><?=$p["name"]?></option>
-			<? else : ?>
-			<option><?=$p["name"]?></option>
-			<? endif; ?>
-			<? } ?>
-			</select>
-		 </td>
-		 <td ><input type="image" src="gfx/submit.gif"></td>
-	  </tr>
-	  <tr>
-	  <td><b>prodlimit</b></td>
-	  <td><input type="text" name="prodlimit" size="4" value="<? print($prodlimit); ?>"><br /></td>
-	  <td><b>backdays</b></td>
-	  <td align="left"><input type="text" name="dayspans" size="10" value="<? print($dayspans); ?>"><br /></td>
-	  <td align="left"><input type="text" name="dayspane" size="10" value="<? print($dayspane); ?>"><br /></td>
-	  </tr>
-	  </table>
-	 </td>
-    </tr>
-    <? for($j=0;$j<count($top10);$j++): ?>
-     <tr>
-      <td bgcolor="#446688">
-       <?=$j+1?>.
-       <b><a href="prod.php?which=<?=$top10[$j]["id"]?>"><?=$top10[$j]["name"]?></a></b>
-       <? if(strlen($top10[$j]["groupname1"])>0): ?>
-        by <a href="groups.php?which=<? print($top10[$j]["group1"]); ?>"><? print(strtolower($top10[$j]["groupname1"])); ?></a>
-       <? endif; ?>
-       <? if(strlen($top10[$j]["groupname2"])>0): ?> &amp; <a href="groups.php?which=<? print($top10[$j]["group2"]); ?>"><? print(strtolower($top10[$j]["groupname2"])); ?></a>
-       <? endif; ?>
-       <? if(strlen($top10[$j]["groupname3"])>0): ?> &amp; <a href="groups.php?which=<? print($top10[$j]["group3"]); ?>"><? print(strtolower($top10[$j]["groupname3"])); ?></a>
-       <? endif; ?>
-      </td>
-     </tr>
-    <? endfor; ?>
-   </table>
-  </td>
- </tr>
-</table>
-</form>
-<br />
-
-<? require("include/bottom.php"); ?>

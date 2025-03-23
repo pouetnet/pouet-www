@@ -1,2 +1,2 @@
-# Temporary files
-/tmp/*
+cache/
+include_generic/credentials.inc.php

@@ -1,199 +1,142 @@
-<?
-$when=$_REQUEST['when'];
-$which=$_REQUEST['which'];
-$order=$_REQUEST['order'];
+<?php
+require_once("bootstrap.inc.php");
 
-require("include/top.php");
-
-function cmp_year($a, $b)
+class PouetBoxPartyList extends PouetBox
 {
-     if ($a["year"] == $b["year"])
-     {
-         return ($a["name"] < $b["name"]) ? -1 : 1;
-     }
-     return ($a["year"] > $b["year"]) ? -1 : 1;
-}
+  public $letter;
+  public $letterselect;
+  public $parties;
+  public $partyyears;
+  public $partylinks;
+  function __construct($letter)
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_partylist";
 
-function cmp_name($a, $b)
-{
-     if (strtolower($a["name"]) == strtolower($b["name"]))
-     {
-         return (strtolower($a["year"]) > strtolower($b["year"])) ? -1 : 1;
-     }
-     return (strtolower($a["name"]) < strtolower($b["name"])) ? -1 : 1;
-}
+    $letter = substr($letter,0,1);
+    if (preg_match("/^[a-z]$/",$letter))
+      $this->letter = $letter;
+    else
+      $this->letter = "#";
 
-function goodfleche($wanted,$current) {
-  if($wanted==$current) {
-    $fleche="fleche1a";
-  } else {
-    $fleche="fleche1b";
+    $a = array();
+    $a[] = "<a href='parties.php?pattern=%23'>#</a>";
+    for($x=ord("a");$x<=ord("z");$x++)
+      $a[] = sprintf("<a href='parties.php?pattern=%s'>%s</a>",chr($x),chr($x));
+
+    $this->letterselect = "[ ".implode(" |\n",$a)." ]";
   }
-  return $fleche;
-}
 
-$pattern = chr(rand(ord('a'),ord('z')));
-if (isset($_GET["pattern"]))
-  $pattern = substr($_GET["pattern"],0,1);
-
-$query = "SELECT parties.name as name,prods.party as id,prods.party_year ".
-"as year,count(0) as count,COUNT(prods.party) as cprods,parties.web, ".
-"partylinks.csdb, partylinks.slengpung, partylinks.zxdemo, ".
-"partylinks.download FROM prods JOIN parties LEFT JOIN partylinks ON ".
-"(prods.party_year=partylinks.year AND parties.id=partylinks.party) WHERE parties.id=prods.party ";
-
-if($pattern=="#") {
-  //$sqlwhere="(name LIKE '0%')||(name LIKE '1%')||(name LIKE '2%')||(name LIKE '3%')||(name LIKE '4%')||(name LIKE '5%')||(name LIKE '6%')||(name LIKE '7%')||(name LIKE '8%')||(name LIKE '9%')";
-  $query.="and (parties.name REGEXP '^[^a-zA-Z]')";
-} else {
-  $query.="and parties.name LIKE '".$pattern."%'";
-}
-$query .=" GROUP BY prods.party, prods.party_year ";
-if ($order=="year") {
-	$query .= "ORDER BY prods.party_year DESC,parties.name ASC";
-} else {
-	$query .= "ORDER BY parties.name ASC,prods.party_year DESC";
-}
-$result = mysql_query($query);
-while($row = mysql_fetch_assoc($result)) {
-	$parties[] = $row;
-}
-
-function lettermenu($pattern) {
-  print("[ ");
-  if($pattern=="#") {
-    print("<b>#</b>");
-  } else {
-    print("<a href=\"parties.php?pattern=%23\">#</a>");
+  function RenderHeader()
+  {
+    echo "\n\n";
+    echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+    echo " <div class='letterselect'>".$this->letterselect."</div>\n";
   }
-  for($i=1;$i<=26;$i++) {
-    print(" | ");
-    if($pattern==chr(96+$i)) {
-      print("<b>".chr(96+$i)."</b>");
-    } else {
-      print("<a href=\"parties.php?pattern=".chr(96+$i)."\">".chr(96+$i)."</a>");
+
+  function RenderFooter()
+  {
+    echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+    echo "</div>\n";
+  }
+
+  function Load()
+  {
+    $s = new BM_query("parties");
+    if ($this->letter=="#")
+      $s->AddWhere(sprintf("name regexp '^[^a-z]'"));
+    else
+      $s->AddWhere(sprintf("name like '%s%%'",$this->letter));
+    $s->AddOrder("name");
+    $this->parties = $s->perform();
+
+    if ($this->parties)
+    {
+      $ids = array();
+      foreach($this->parties as $group) $ids[] = $group->id;
+      $idstr = implode(",",$ids);
+
+      $rows = SQLLib::selectRows(sprintf("SELECT count(*) as c, party, party_year FROM `prods` WHERE party in (%s) GROUP by party, party_year order by party_year",$idstr));
+      $this->partyyears = array();
+      foreach($rows as $row)
+        if ($row->party)
+          $this->partyyears[$row->party][$row->party_year] = $row->c;
+
+      $rows = SQLLib::selectRows(sprintf("SELECT * FROM `partylinks` WHERE party in (%s)",$idstr));
+      $this->partylinks = array();
+      foreach($rows as $row)
+        if ($row->party)
+          $this->partylinks[$row->party][$row->year] = $row;
     }
   }
-  print(" ]<br />\n");
-}
 
+  function RenderBody()
+  {
+    echo "<table class='boxtable'>\n";
+    echo "<tr>\n";
+    echo "  <th>partyname</th>\n";
+    echo "  <th>year</th>\n";
+    echo "  <th>releases</th>\n";
+    echo "  <th>download</th>\n";
+    echo "</tr>\n";
+    foreach ($this->parties as $party)
+    {
+      $p = 0;
+      if (!@$this->partyyears[$party->id])
+        $this->partyyears[$party->id][""] = 0;
+      foreach($this->partyyears[$party->id] as $year=>$count)
+      {
+        echo "<tr>\n";
+        if ($p==0)
+          echo "  <td class='partyname'>".$party->RenderFull()."</td>\n";
+        else
+          echo "  <td></td>\n";
+        echo "  <td>\n";
+        if ($year)
+          echo "<a href='party.php?which=".$party->id."&amp;when=".$year."'>".$year."</a> ";
+        if (@$this->partylinks[$party->id][$year])
+        {
+          if($this->partylinks[$party->id][$year]->slengpung)
+            echo " [<a href='http://www.slengpung.com/?eventid=".(int)$this->partylinks[$party->id][$year]->slengpung."'>slengpung</a>]";
+          if($this->partylinks[$party->id][$year]->csdb)
+            echo " [<a href='http://csdb.dk/event/?id=".(int)$this->partylinks[$party->id][$year]->csdb."'>csdb</a>]";
+          if($this->partylinks[$party->id][$year]->zxdemo)
+            echo " [<a href='http://zxdemo.org/party.php?id=".(int)$this->partylinks[$party->id][$year]->zxdemo."'>zxdemo</a>]";
+          if($this->partylinks[$party->id][$year]->artcity)
+            echo " [<a href='http://artcity.bitfellas.org/index.php?a=search&type=tag&text=".rawurlencode($this->partylinks[$party->id][$year]->artcity)."'>artcity</a>]";
+        }
+        echo "</td>\n";
+        echo "  <td>".$count."</td>\n";
+        echo "  <td>";
 
+        if(@$this->partylinks[$party->id][$year]->download)
+          echo "[<a href='".$this->partylinks[$party->id][$year]->download."'>prods</a>] ";
+
+        if(file_exists($party->GetResultsLocalFileName($year)))
+          echo $party->RenderResultsLink( $year );
+
+        echo "</td>\n";
+        echo "</tr>\n";
+        $p++;
+      }
+    }
+    echo "</table>\n";
+  }
+};
+///////////////////////////////////////////////////////////////////////////////
+
+$pattern = @$_GET["pattern"] ? @$_GET["pattern"] : chr(rand(ord("a"),ord("z")));
+$p = new PouetBoxPartyList($pattern);
+$p->Load();
+$TITLE = "parties: ".$p->letter;
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+if($p) $p->Render();
+echo "</div>\n";
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
 ?>
-
-
-<br>
-<table bgcolor="#000000" cellspacing="1" cellpadding="0" border="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2" border="0">
-    <tr bgcolor="#224488">
-      <th colspan="4">
-       <center><? lettermenu($pattern); ?></center>
-      </th>
-    </tr>
-
-    <tr bgcolor="#224488">
-     <th>
-      <table><tr>
-       <td>
-        <a href="parties.php?order=name&amp;pattern=<?php print($pattern); ?>"><img src="gfx/<? print(goodfleche("name",$order)); ?>.gif" width="13" height="12" border="0"></a><br>
-       </td>
-       <td>
-        <a href="parties.php?order=name&amp;pattern=<?php print($pattern); ?>"><b>partyname</b></a><br>
-       </td>
-      </tr></table>
-     </th>
-     <th>
-      <table><tr>
-       <td>
-        <a href="parties.php?order=year&amp;pattern=<?php print($pattern); ?>"><img src="gfx/<? print(goodfleche("year",$order)); ?>.gif" width="13" height="12" border="0"></a><br>
-       </td>
-       <td>
-        <a href="parties.php?order=year&amp;pattern=<?php print($pattern); ?>"><b>year</b></a><br>
-       </td>
-      </tr></table>
-     </th>
-     <th>
-      <b>releases</b><br>
-     </th>
-     <th>
-      <b>download</b><br>
-     </th>
-    </tr>
-
-   <?
-    for($i=0,$j=0;$i<count($parties);$i++):
-
-       if($parties[$i]['id']!=1024):
-
-     	if($parties[$i]['id']!=$parties[$i-1]['id']):
-
-     		if (($order=="year") && ($parties[$i]['year']!=$parties[$i-1]['year']))
-     		 print("<tr bgcolor=\"#224488\"><td></td><td><b>".$parties[$i]["year"]."</b><br /></td><td></td><td></td></tr>");
-
-     	 	$j++;
-     	 	if($j%2) {
-		       print("<tr bgcolor=\"#446688\"><td>");
-		     } else {
-		       print("<tr bgcolor=\"#557799\"><td>");
-		     }
-		print("<b><a href=\"party.php?which=".$parties[$i]['id']."\">".$parties[$i]['name']."</a></b>\n");
-
-		if($parties[$i]["web"])
-		{
-		   print(" [<a href=\"".$parties[$i]['web']."\">web</a>]");
-		 } ?>
-		 <br />
-	<? else:
-     	 	if($j%2) {
-		       print("<tr bgcolor=\"#446688\"><td><br /></td>");
-		     } else {
-		       print("<tr bgcolor=\"#557799\"><td><br /></td>");
-		     }
-
-	endif; ?>
-
-	      <td>
-	      <? print("<a href=\"party.php?which=".$parties[$i]['id']."&when=".$parties[$i]['year']."\">".$parties[$i]['year']."</a>\n"); ?>
-	      <? if($parties[$i]["slengpung"]): ?>
-	       [<a href="http://www.slengpung.com/?eventid=<?=$parties[$i]["slengpung"]?>">slengpung</a>]
-	      <? endif; ?>
-	      <? if($parties[$i]["csdb"]): ?>
-	       [<a href="http://noname.c64.org/csdb/event/?id=<?=$parties[$i]["csdb"]?>">csdb</a>]
-	      <? endif; ?>
-	      <? if($parties[$i]["zxdemo"]): ?>
-	       [<a href="http://zxdemo.org/party.php?id=<?=$parties[$i]["zxdemo"]?>">zxdemo</a>]
-	      <? endif; ?>
-      		<br />
-	      </td>
-
-	      <td>
-	      <? print($parties[$i]['cprods']); ?><br />
-	      </td>
-
-	      <td>
-              <? if($parties[$i]["download"]): ?>
-      		[<a href="<?=$parties[$i]["download"]?>">prods</a>]
-              <? endif; ?>
-              <? if(file_exists("results/".$parties[$i]["id"]."_".substr($parties[$i]["year"],-2).".txt")): ?>
-           	[<a href="results.php?which=<?=$parties[$i]["id"]?>&when=<?=substr($parties[$i]["year"],-2)?>">results</a>]
-              <? endif; ?>
-	      </td>
-
-
-	     </tr>
-	<? endif; ?>
-    <? endfor; ?>
-   </table>
-  </td>
- </tr>
-    <tr bgcolor="#224488">
-      <th colspan="3">
-       <center><? lettermenu($pattern); ?></center>
-      </th>
-    </tr>
-
-</table>
-<br />
-
-<? require("include/bottom.php"); ?>

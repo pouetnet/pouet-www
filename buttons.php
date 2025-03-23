@@ -1,29 +1,61 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
 
-$query="SELECT type,img,url,alt FROM buttons WHERE dead = 0 ORDER BY type,RAND()";
-$result=mysql_query($query);
-while($tmp=mysql_fetch_array($result)) {
-  $buttons[]=$tmp;
-}
+class PouetBoxButtons extends PouetBox
+{
+  public $buttons;
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_buttons";
+  }
+
+  function LoadFromDB()
+  {
+    // Get all the buttons ordered by type of buttons, randomly within each type
+    $this->buttons = SQLLib::SelectRows("SELECT type, url, img, alt FROM buttons WHERE dead = 0 ORDER BY type ASC, RAND()");
+  }
+  function Render()
+  {
+    echo "\n\n";
+    echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+    $type = "";
+    foreach($this->buttons as $b)
+    {
+      if ($type != $b->type)
+      {
+        if($type)
+        {
+          echo "</ul>\n";
+          echo "</div>\n";
+        }
+        echo "<h2>"._html($b->type)."</h2>\n";
+        echo "<div class='content'>\n";
+        echo "<ul>\n";
+        $type = $b->type;
+      }
+      echo "  <li><a href='"._html($b->url)."'><img src='".POUET_CONTENT_URL."buttons/".$b->img."' title='"._html($b->alt)."' alt='"._html($b->alt)."'/></a></li>\n";
+    }
+    echo "</ul>\n";
+    echo "</div>\n";
+    echo "</div>\n";
+  }
+};
+
+$TITLE = "we like !";
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+
+$box = new PouetBoxButtons();
+$box->Load();
+$box->Render();
+
+echo "</div>\n";
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
+
 ?>
-<br>
-
-<table bgcolor="#000000" cellspacing="1" cellpadding="2" width="50%">
-<? for($i=0;$i<count($buttons);$i++): ?>
-<? if($buttons[$i]["type"]!=$buttons[$i-1]["type"]): ?>
-<tr>
-<th bgcolor="#224488"><?=$buttons[$i]["type"]?></th>
-</tr>
-<tr>
-<td bgcolor="#446688">
-<? endif; ?>
-<div style="margin:3px; float:left; width:88px; height:31px; overflow:hidden;"><a href="<?=$buttons[$i]["url"]?>"><img src="gfx/buttons/<?=$buttons[$i]["img"]?>" border="0" alt="<?=$buttons[$i]["alt"]?>"></a></div>
-<? if($buttons[$i]["type"]!=$buttons[$i+1]["type"]): ?>
-</td>
-</tr>
-<? endif; ?>
-<? endfor; ?>
-</table>
-<br>
-<? require("include/bottom.php"); ?>

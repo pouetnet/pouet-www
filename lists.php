@@ -1,817 +1,623 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
 
-function lettermenu($pattern) {
-  print("[ ");
-  if($pattern=="#") {
-    print("<b>#</b>");
-  } else {
-    print("<a href=\"lists.php?pattern=%23\">#</a>");
+class PouetBoxListsList extends PouetBox  /* pf lol */
+{
+  public $letter;
+  public $letterselect;
+  public $lists;
+  function __construct($letter)
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_listslist";
+
+    $letter = substr($letter,0,1);
+    if (preg_match("/^[a-z]$/",$letter))
+      $this->letter = $letter;
+    else
+      $this->letter = "#";
+
+    $a = array();
+    $a[] = "<a href='lists.php?pattern=%23'>#</a>";
+    for($x=ord("a");$x<=ord("z");$x++)
+      $a[] = sprintf("<a href='lists.php?pattern=%s'>%s</a>",chr($x),chr($x));
+
+    $this->letterselect = "[ ".implode(" |\n",$a)." ]";
   }
-  for($i=1;$i<=26;$i++) {
-    print(" | ");
-    if($pattern==chr(96+$i)) {
-      print("<b>".chr(96+$i)."</b>");
-    } else {
-      print("<a href=\"lists.php?pattern=".chr(96+$i)."\">".chr(96+$i)."</a>");
+
+  function RenderHeader()
+  {
+    echo "\n\n";
+    echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+    echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+  }
+
+  function RenderFooter()
+  {
+    echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+    echo "</div>\n";
+  }
+
+  function Load()
+  {
+    $s = new BM_query();
+    $s->AddTable("lists");
+    $s->AddField("lists.id");
+    $s->AddField("lists.name");
+    $s->AddField("lists.desc");
+    $s->Attach(array("lists"=>"owner"),array("users as owner"=>"id"));
+    if ($this->letter=="#")
+      $s->AddWhere(sprintf("name regexp '^[^a-z]'"));
+    else
+      $s->AddWhere(sprintf("name like '%s%%'",$this->letter));
+    $s->AddOrder("name");
+    $this->lists = $s->perform();
+  }
+
+  function RenderBody()
+  {
+    global $thread_categories;
+    echo "<table class='boxtable'>\n";
+    echo "<tr>\n";
+    echo "  <th>name</th>\n";
+    echo "  <th>description</th>\n";
+    echo "  <th>owner</th>\n";
+    echo "</tr>\n";
+    foreach ($this->lists as $l) {
+      echo "<tr>\n";
+      echo "  <td class='listname'><a href='lists.php?which=".(int)$l->id."'>"._html($l->name)."</a></td>\n";
+      echo "  <td>"._html(shortify($l->desc))."</td>\n";
+      echo "  <td>".$l->owner->PrintLinkedAvatar()." ".$l->owner->PrintLinkedName()."</td>\n";
+      echo "</tr>\n";
+    }
+    echo "</table>\n";
+  }
+};
+
+///////////////////////////////////////////////////////////
+
+class PouetBoxListsMain extends PouetBox
+{
+  public $id;
+  public $list;
+  public $prods;
+  public $groups;
+  public $parties;
+  public $users;
+  public $maintainers;
+  public $canEdit;
+  public $canDelete;
+  function __construct($id)
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_listsmain";
+    $this->id = (int)$id;
+
+    $this->canEdit = false;
+    $this->canDelete = false;
+  }
+
+  function LoadFromDB()
+  {
+    $s = new BM_query();
+    $s->AddTable("lists");
+    $s->AddField("lists.id");
+    $s->AddField("lists.name");
+    $s->AddField("lists.desc");
+    $s->AddField("lists.addedDate");
+    $s->Attach(array("lists"=>"addedUser"),array("users as addedUser"=>"id"));
+    $s->Attach(array("lists"=>"owner"),array("users as owner"=>"id"));
+    $s->AddWhere(sprintf_esc("lists.id=%d",$this->id));
+    list($this->list) = $s->perform();
+
+    if (!$this->list)
+    {
+      return;
+    }
+
+    $s = new BM_query();
+    $s->AddTable("list_items");
+    $s->Attach(array("list_items"=>"itemid"),array("prods as prod"=>"id"));
+    $s->AddWhere(sprintf_esc("list_items.list=%d",$this->id));
+    $s->AddWhere("list_items.type='prod'");
+    $this->prods = $s->perform();
+
+    $a = array();
+    foreach($this->prods as $p) $a[] = &$p->prod;
+    PouetCollectPlatforms($a);
+
+    $s = new BM_query();
+    $s->AddTable("list_items");
+    $s->Attach(array("list_items"=>"itemid"),array("groups as group"=>"id"));
+    $s->AddWhere(sprintf_esc("list_items.list=%d",$this->id));
+    $s->AddWhere("list_items.type='group'");
+    $this->groups = $s->perform();
+
+    $s = new BM_query();
+    $s->AddTable("list_items");
+    $s->Attach(array("list_items"=>"itemid"),array("parties as party"=>"id"));
+    $s->AddWhere(sprintf_esc("list_items.list=%d",$this->id));
+    $s->AddWhere("list_items.type='party'");
+    $this->parties = $s->perform();
+
+    $s = new BM_query();
+    $s->AddTable("list_items");
+    $s->Attach(array("list_items"=>"itemid"),array("users as user"=>"id"));
+    $s->AddWhere(sprintf_esc("list_items.list=%d",$this->id));
+    $s->AddWhere("list_items.type='user'");
+    $this->users = $s->perform();
+
+    $s = new BM_query();
+    $s->AddTable("list_maintainers");
+    $s->Attach(array("list_maintainers"=>"userID"),array("users as user"=>"id"));
+    $s->AddWhere(sprintf_esc("list_maintainers.listID = %d",$this->id));
+    $this->maintainers = $s->perform();
+
+    global $currentUser;
+    if ($currentUser)
+    {
+      if ($currentUser->id == $this->list->owner->id
+        || $currentUser->id == $this->list->addedUser->id
+        || $currentUser->IsModerator())
+      {
+        $this->canEdit = true;
+        $this->canDelete = true;
+      }
+      foreach($this->maintainers as $user)
+      {
+        if ($currentUser->id == $user->user->id)
+        {
+          $this->canEdit = true;
+        }
+      }
     }
   }
-  print(" ]<br />\n");
-}
 
-function goodfleche($wanted,$current) {
-  if($wanted==$current) {
-    $fleche="fleche1a";
-  } else {
-    $fleche="fleche1b";
+  function Render()
+  {
+    global $currentUser;
+    echo "<div id='".$this->uniqueID."' class='pouettbl'>\n";
+    echo "<div id='listsname'>\n";
+    echo $this->list->name;
+    echo "</div>\n";
+
+    echo " <div class='content' id='description'>".nl2br(_html($this->list->desc))."</div>\n";
+
+    echo "<h2>maintainers</h2>";
+    echo "<ul class='boxlist'>\n";
+    echo " <li>".$this->list->owner->PrintLinkedAvatar()." ".$this->list->owner->PrintLinkedName()." <b>(owner)</b></li>\n";
+    foreach($this->maintainers as $user)
+    {
+      echo " <li>".$user->user->PrintLinkedAvatar()." ".$user->user->PrintLinkedName()."</li>\n";
+    }
+    echo "</ul>\n";
+
+    if ($this->groups)
+    {
+      echo "<h2>groups</h2>";
+      echo "<ul class='boxlist boxlisttable'>\n";
+      foreach($this->groups as $d)
+      {
+        echo "<li>\n";
+        echo "<span>\n";
+        echo $d->group->RenderFull();
+        echo "</span>\n";
+        if ($this->CanEdit())
+        {
+          printf("  <span class='list-delete'><input type='submit' name='listDeleteGroup[%d]' value='delete'/></span>",$d->group->id);
+        }
+        echo "</li>\n";
+      }
+      echo "</ul>\n";
+    }
+
+    if ($this->prods)
+    {
+      echo "<h2>prods</h2>";
+      echo "<ul class='boxlist boxlisttable'>\n";
+      foreach($this->prods as $d)
+      {
+        echo "<li>\n";
+        echo "<span>\n";
+        echo $d->prod->RenderTypeIcons();
+        echo $d->prod->RenderPlatformIcons();
+        echo $d->prod->RenderSingleRowShort();
+        echo "</span>\n";
+        echo "<span>\n";
+        if ($d->prod->placings)
+          echo $d->prod->placings[0]->PrintResult();
+        echo "</span>\n";
+        echo "<span>\n";
+        echo $d->prod->RenderReleaseDate();
+        echo "</span>\n";
+        if ($this->CanEdit())
+        {
+          printf("  <span class='list-delete'><input type='submit' name='listDeleteProd[%d]' value='delete'/></span>",$d->prod->id);
+        }
+        echo "</li>\n";
+      }
+      echo "</ul>\n";
+    }
+
+    if ($this->parties)
+    {
+      echo "<h2>parties</h2>";
+      echo "<ul class='boxlist boxlisttable'>\n";
+      foreach($this->parties as $d)
+      {
+        echo "<li>\n";
+        echo "<span>\n";
+        echo $d->party->RenderFull();
+        echo "</span>\n";
+        if ($this->CanEdit())
+        {
+          printf("  <span class='list-delete'><input type='submit' name='listDeleteParty[%d]' value='delete'/></span>",$d->party->id);
+        }
+        echo "</li>\n";
+      }
+      echo "</ul>\n";
+    }
+
+    if ($this->users)
+    {
+      echo "<h2>users</h2>";
+      echo "<ul class='boxlist boxlisttable'>\n";
+      foreach($this->users as $d)
+      {
+        echo "<li>\n";
+        echo "<span>\n";
+        echo $d->user->PrintLinkedAvatar()." ";
+        echo $d->user->PrintLinkedName();
+        echo "</span>\n";
+        echo "<span>\n";
+        echo $d->user->glops." glöps";
+        echo "</span>\n";
+        if ($this->CanEdit())
+        {
+          printf("  <span class='list-delete'><input type='submit' name='listDeleteUser[%d]' value='delete'/></span>",$d->user->id);
+        }
+        echo "</li>\n";
+      }
+      echo "</ul>\n";
+    }
+    echo " <div class='foot'>added on the ".$this->list->addedDate." by ".$this->list->addedUser->PrintLinkedName()." ".$this->list->addedUser->PrintLinkedAvatar()."</div>\n";
+    echo "</div>\n";
   }
-  return $fleche;
-}
-
-function reorder_prodtype($a, $b)
-{
-	if (($a["type"] == "prod") && ($b["type"] == "prod")) {
-     if ($a["prodtype"] == $b["prodtype"])
-     {
-         return 0;
-     }
-     return ($a["prodtype"] < $b["prodtype"]) ? -1 : 1;
-     }
-	else {
-	     if ($a["type"] == $b["type"])
-	     {
-	         if (strtolower($a["groupname"]) == strtolower($b["groupname"]))
-		     {
-		         if (strtolower($a["nickname"]) == strtolower($b["nickname"]))
-			     {
-			         if (strtolower($a["partyname"]) == strtolower($b["partyname"]))
-				     {
-				         return 0;
-				     }
-				     return (strtolower($a["partyname"]) < strtolower($b["partyname"])) ? -1 : 1;
-			     }
-			     return (strtolower($a["nickname"]) < strtolower($b["nickname"])) ? -1 : 1;
-		     }
-		     return (strtolower($a["groupname"]) < strtolower($b["groupname"])) ? -1 : 1;
-	     }
-	     return ($a["type"] < $b["type"]) ? -1 : 1;
-	}
-}
-
-/*function reorder_date($a, $b)
-{
-     if ($a["date"] == $b["date"])
-     {
-         return 0;
-     }
-     return ($a["date"] > $b["date"]) ? -1 : 1;
-}
-
-function reorder_id($a, $b)
-{
-     if ($a["id"] == $b["id"])
-     {
-         return 0;
-     }
-     return ($a["id"] > $b["id"]) ? -1 : 1;
-}*/
-
-function reorder_id_and_date($a, $b)
-{
-	if (($a["type"] == "prod") && ($b["type"] == "prod")) {
-	     if ($a["date"] == $b["date"])
-	     {
-	     	return ($a["id"] > $b["id"]) ? -1 : 1;
-	     }
-	     return ($a["date"] > $b["date"]) ? -1 : 1;
-	}
-	else {
-	     if ($a["type"] == $b["type"])
-	     {
-	         if (strtolower($a["groupname"]) == strtolower($b["groupname"]))
-		     {
-		         if (strtolower($a["nickname"]) == strtolower($b["nickname"]))
-			     {
-			         if (strtolower($a["partyname"]) == strtolower($b["partyname"]))
-				     {
-				         return 0;
-				     }
-				     return (strtolower($a["partyname"]) < strtolower($b["partyname"])) ? -1 : 1;
-			     }
-			     return (strtolower($a["nickname"]) < strtolower($b["nickname"])) ? -1 : 1;
-		     }
-		     return (strtolower($a["groupname"]) < strtolower($b["groupname"])) ? -1 : 1;
-	     }
-	     return ($a["type"] < $b["type"]) ? -1 : 1;
-	}
-}
-
-
-function reorder_partycompo($a, $b)
-{
-	if (($a["type"] == "prod") && ($b["type"] == "prod")) {
-     if ($a["partycompo"] == $b["partycompo"])
-     {
-         return 0;
-     }
-     return ($a["partycompo"] < $b["partycompo"]) ? -1 : 1;
-     }
-	else {
-	     if ($a["type"] == $b["type"])
-	     {
-	         if (strtolower($a["groupname"]) == strtolower($b["groupname"]))
-		     {
-		         if (strtolower($a["nickname"]) == strtolower($b["nickname"]))
-			     {
-			         if (strtolower($a["partyname"]) == strtolower($b["partyname"]))
-				     {
-				         return 0;
-				     }
-				     return (strtolower($a["partyname"]) < strtolower($b["partyname"])) ? -1 : 1;
-			     }
-			     return (strtolower($a["nickname"]) < strtolower($b["nickname"])) ? -1 : 1;
-		     }
-		     return (strtolower($a["groupname"]) < strtolower($b["groupname"])) ? -1 : 1;
-	     }
-	     return ($a["type"] < $b["type"]) ? -1 : 1;
-	}
-}
-
-function reorder_name($a, $b)
-{
-	if (($a["type"] == "prod") && ($b["type"] == "prod")) {
-     if (strtolower($a["name"]) == strtolower($b["name"]))
-     {
-         return 0;
-     }
-     return (strtolower($a["name"]) < strtolower($b["name"])) ? -1 : 1;
-     }
-	else {
-	     if ($a["type"] == $b["type"])
-	     {
-	         if (strtolower($a["groupname"]) == strtolower($b["groupname"]))
-		     {
-		         if (strtolower($a["nickname"]) == strtolower($b["nickname"]))
-			     {
-			         if (strtolower($a["partyname"]) == strtolower($b["partyname"]))
-				     {
-				         return 0;
-				     }
-				     return (strtolower($a["partyname"]) < strtolower($b["partyname"])) ? -1 : 1;
-			     }
-			     return (strtolower($a["nickname"]) < strtolower($b["nickname"])) ? -1 : 1;
-		     }
-		     return (strtolower($a["groupname"]) < strtolower($b["groupname"])) ? -1 : 1;
-	     }
-	     return ($a["type"] < $b["type"]) ? -1 : 1;
-	}
-}
-
-function reorder_platform($a, $b)
-{
-	if (($a["type"] == "prod") && ($b["type"] == "prod")) {
-     if ($a["platform"] == $b["platform"])
-     {
-         return 0;
-     }
-     return ($a["platform"] < $b["platform"]) ? -1 : 1;
-     }
-	else {
-	     if ($a["type"] == $b["type"])
-	     {
-	         if (strtolower($a["groupname"]) == strtolower($b["groupname"]))
-		     {
-		         if (strtolower($a["nickname"]) == strtolower($b["nickname"]))
-			     {
-			         if (strtolower($a["partyname"]) == strtolower($b["partyname"]))
-				     {
-				         return 0;
-				     }
-				     return (strtolower($a["partyname"]) < strtolower($b["partyname"])) ? -1 : 1;
-			     }
-			     return (strtolower($a["nickname"]) < strtolower($b["nickname"])) ? -1 : 1;
-		     }
-		     return (strtolower($a["groupname"]) < strtolower($b["groupname"])) ? -1 : 1;
-	     }
-	     return ($a["type"] < $b["type"]) ? -1 : 1;
-	}
-}
-
-/*function reorder_views($a, $b)
-{
-     if ($a["views"] == $b["views"])
-     {
-         return 0;
-     }
-     return ($a["views"] > $b["views"]) ? -1 : 1;
-}
-
-function reorder_thumbup($a, $b)
-{
-     if ($a["voteup"] == $b["voteup"])
-     {
-         return 0;
-     }
-     return ($a["voteup"] > $b["voteup"]) ? -1 : 1;
-}
-
-function reorder_thumbpig($a, $b)
-{
-     if ($a["votepig"] == $b["votepig"])
-     {
-         return 0;
-     }
-     return ($a["votepig"] > $b["votepig"]) ? -1 : 1;
-}
-
-
-function reorder_thumbdown($a, $b)
-{
-     if ($a["votedown"] == $b["votedown"])
-     {
-         return 0;
-     }
-     return ($a["votedown"] > $b["votedown"]) ? -1 : 1;
-}
-
-function reorder_avg($a, $b)
-{
-     if ($a["voteavg"] == $b["voteavg"])
-     {
-         return 0;
-     }
-     return ($a["voteavg"] > $b["voteavg"]) ? -1 : 1;
-}*/
-
-
-if(!$pattern&&!$which) {
-  $pattern=chr(mt_rand(96,122));
-  if($pattern==chr(96)) {
-    $pattern="#";
+  function CanEdit()
+  {
+    return $this->canEdit;
   }
-}
-
-if($which) {
-  	$query="SELECT lists.id,lists.name,lists.desc,lists.upkeeper,lists.added,users.nickname,users.avatar FROM lists LEFT JOIN users on users.id=lists.upkeeper WHERE lists.id=".$which;
-} elseif($pattern) {
-  if($pattern=="#") {
-    $sqlwhere="(name LIKE '0%')||(name LIKE '1%')||(name LIKE '2%')||(name LIKE '3%')||(name LIKE '4%')||(name LIKE '5%')||(name LIKE '6%')||(name LIKE '7%')||(name LIKE '8%')||(name LIKE '9%')";
-  } else {
-    $sqlwhere="name LIKE '".$pattern."%'";
+  function CanDelete()
+  {
+    return $this->canDelete;
   }
-  $query="SELECT lists.id,lists.name,lists.desc,lists.upkeeper,lists.added,users.nickname,users.avatar FROM lists LEFT JOIN users on users.id=lists.upkeeper WHERE (".$sqlwhere.") ORDER BY name";
-}
-$result = mysql_query($query);
-while($tmp = mysql_fetch_array($result)) {
-  $lists[]=$tmp;
-}
-if($which) {
+  use PouetForm;
+  function Validate($post)
+  {
+    return $this->CanEdit() ? array() : array("lol no !");
+  }
+  function Commit($post)
+  {
+    if ($post["listDeleteParty"])
+    {
+      $ids = array_map(function($i){ return (int)$i; },array_keys($post["listDeleteParty"]));
+      SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='party' AND itemid IN (".implode(",",$ids).")",$this->list->id));
+    }
+    if ($post["listDeleteProd"])
+    {
+      $ids = array_map(function($i){ return (int)$i; },array_keys($post["listDeleteProd"]));
+      SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='prod' AND itemid IN (".implode(",",$ids).")",$this->list->id));
+    }
+    if ($post["listDeleteGroup"])
+    {
+      $ids = array_map(function($i){ return (int)$i; },array_keys($post["listDeleteGroup"]));
+      SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='group' AND itemid IN (".implode(",",$ids).")",$this->list->id));
+    }
+    if ($post["listDeleteUser"])
+    {
+      $ids = array_map(function($i){ return (int)$i; },array_keys($post["listDeleteUser"]));
+      SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='user' AND itemid IN (".implode(",",$ids).")",$this->list->id));
+    }
+    return array();
+  }
+};
+///////////////////////////////////////////////////////////////////////////////
 
-  	$query="SELECT * from listitems WHERE list=$which ORDER BY listitems.type";
-	$result = mysql_query($query);
-	//print("->".$query);
-	while($tmp = mysql_fetch_array($result)) {
-		//print("\n->".$tmp["type"]);
-		if($tmp["type"]=="prod") {
-			//print("kaja");
-			  	$prodquery="SELECT prods.id,prods.name,prods.views,prods.type,prods.date,prods.party,prods.party_year,prods.party_place,prods.partycompo,prods.group1,prods.group2,prods.group3,parties1.name as partyname FROM prods LEFT JOIN parties as parties1 ON parties1.id=prods.party WHERE prods.id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["id"]=$tmp2["id"];
-				$tmp["name"]=$tmp2["name"];
-				$tmp["views"]=$tmp2["views"];
-				$tmp["prodtype"]=$tmp2["type"];
-				$tmp["date"]=$tmp2["date"];
-				$tmp["party"]=$tmp2["party"];
-				$tmp["party_year"]=$tmp2["party_year"];
-				$tmp["party_place"]=$tmp2["party_place"];
-				$tmp["partycompo"]=$tmp2["partycompo"];
-				$tmp["group1"]=$tmp2["group1"];
-				$tmp["group2"]=$tmp2["group2"];
-				$tmp["group3"]=$tmp2["group3"];
-				$tmp["partyname"]=$tmp2["partyname"];
-				if ($tmp["group1"]):
-					$gquery="select name,acronym from groups where id='".$tmp["group1"]."'";
-					$gresult=mysql_query($gquery);
-					while($gtmp = mysql_fetch_array($gresult)) {
-					  $tmp["groupname1"]=$gtmp["name"];
-					  $tmp["groupacron1"]=$gtmp["acronym"];
-					 }
-				endif;
-				if ($tmp["group2"]):
-					$gquery="select name,acronym from groups where id='".$tmp["group2"]."'";
-					$gresult=mysql_query($gquery);
-					while($gtmp = mysql_fetch_array($gresult)) {
-					  $tmp["groupname2"]=$gtmp["name"];
-					  $tmp["groupacron2"]=$gtmp["acronym"];
-					 }
-				endif;
-				if ($tmp["group3"]):
-					$gquery="select name,acronym from groups where id='".$tmp["group3"]."'";
-					$gresult=mysql_query($gquery);
-					while($gtmp = mysql_fetch_array($gresult)) {
-					  $tmp["groupname3"]=$gtmp["name"];
-					  $tmp["groupacron3"]=$gtmp["acronym"];
-					 }
-				endif;
+class PouetBoxListsAdd extends PouetBox
+{
+  public $box;
+  public $list;
+  public $formifier;
+  public $fields;
+  function __construct($box)
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_listsadd";
+    $this->box = $box;
+    $this->list = $box->list;
+    $this->formifier = new Formifier();
+    $this->fields = array(
+      "prodID"=>array(
+        "name"=>"add prod",
+      ),
+      "groupID"=>array(
+        "name"=>"add group",
+      ),
+      "partyID"=>array(
+        "name"=>"add party",
+      ),
+      "userID"=>array(
+        "name"=>"add user",
+      ),
+    );
+    $this->title = "add item to list";
+  }
+  use PouetForm;
+  function Validate($post)
+  {
+    global $currentUser;
 
-				if (strlen($tmp["groupname1"].$tmp["groupname2"].$tmp["groupname3"])>27):
-					if (strlen($tmp["groupname1"])>10 && $tmp["groupacron1"]) $tmp["groupname1"]=$tmp["groupacron1"];
-					if (strlen($tmp["groupname2"])>10 && $tmp["groupacron2"]) $tmp["groupname2"]=$tmp["groupacron2"];
-					if (strlen($tmp["groupname3"])>10 && $tmp["groupacron3"]) $tmp["groupname3"]=$tmp["groupacron3"];
-				endif;
+    if (!$currentUser)
+      return array("you have to be logged in!");
 
-				//get platforms
-				$pltquery="select platforms.name from prods_platforms, platforms where prods_platforms.prod='".$tmp["id"]."' and platforms.id=prods_platforms.platform";
-				$pltresult=mysql_query($pltquery);
-				$check=0;
-				$tmp["platform"]="";
-				while($pltmp = mysql_fetch_array($pltresult)) {
-				  if ($check>0) $tmp["platform"].=",";
-				  $check++;
-				  $tmp["platform"].=$pltmp["name"];
-				}
+    if (!$this->box->CanEdit())
+      return array("not allowed lol !");
 
-				//get array of sceneorgrecommendations for this group
-				$result2=mysql_query("SELECT * from sceneorgrecommended where prodid=".$tmp["itemid"]." ORDER BY type");
-				while($tmp2=mysql_fetch_array($result2)) {
-		  			$sceneorgrecommends[]=$tmp2;
-				}
-		} elseif($tmp["type"]=="party") {
-			  	$prodquery="SELECT name,web from parties where id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["partyname"]=$tmp2["name"];
-				$tmp["partyweb"]=$tmp2["web"];
-/*		} elseif($tmp["type"]=="partylinks") {
-			  	$prodquery="SELECT name from parties where id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["partylinkname"]=$tmp2["name"];
-				$prodquery="SELECT * from partylinks where id='".$tmp["itemid"]."' and year='".$tmp["itempartyyear"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["partyname"]=$tmp2["name"];
-*/		} elseif($tmp["type"]=="user") {
-			  	$prodquery="SELECT nickname,avatar from users where id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["nickname"]=$tmp2["nickname"];
-				$tmp["avatar"]=$tmp2["avatar"];
-		} elseif($tmp["type"]=="group") {
-			  	$prodquery="SELECT name,acronym,web,csdb,zxdemo from groups where id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["groupname"]=$tmp2["name"];
-				$tmp["groupacronym"]=$tmp2["acronym"];
-				$tmp["groupweb"]=$tmp2["web"];
-				$tmp["groupcsdb"]=$tmp2["csdb"];
-				$tmp["groupzxdemo"]=$tmp2["zxdemo"];
-	/*	} elseif($tmp["type"]=="lists") {
-			  	$prodquery="SELECT lists.name,lists.desc,lists.upkeeper,users.nickname,users.avatar from lists LEFT JOIN users ON users.id=lists.upkeeper where id='".$tmp["itemid"]."' LIMIT 1";
-				$prodresult = mysql_query($prodquery);
-				$tmp2 = mysql_fetch_array($prodresult);
-				$tmp["listname"]=$tmp2["name"];
-				$tmp["desc"]=$tmp2["desc"];
-				$tmp["upkeeper"]=$tmp2["upkeeper"];
-				$tmp["upkeepernickname"]=$tmp2["nickname"];
-				$tmp["upkeeperavatar"]=$tmp2["avatar"];
-	*/	}
-  	 $listitems[]=$tmp;
-	}
+    return array();
+  }
 
-	switch($prodorder) {
-	  case "type": usort($listitems, "reorder_id_and_date");
-	  	       usort($listitems, "reorder_prodtype"); break;
-	  case "name": usort($listitems, "reorder_name"); break;
-	  case "release": usort($listitems, "reorder_id_and_date"); break;
-	  case "platform": usort($listitems, "reorder_id_and_date");
-	  		   usort($listitems, "reorder_platform"); break;
-/*	  case "views": usort($listitems, "reorder_views"); break;
-	  case "thumbup": usort($listitems, "reorder_thumbup"); break;
-	  case "thumbpig": usort($listitems, "reorder_thumbpig"); break;
-	  case "thumbdown": usort($listitems, "reorder_thumbdown"); break;
-	  case "avg": usort($listitems, "reorder_avg"); break;*/
-	  default: case "release": usort($listitems, "reorder_id_and_date"); break;
-	           $prodorder="release";
-	           break;
-	}
+  function Commit($post)
+  {
+    $items = array("prod","group","party","user");
+    $added = false;
+    foreach($items as $v)
+    {
+      if ($post[$v."ID"])
+      {
+        $a = array();
+        $a["list"] = $this->list->id;
+        $a["type"] = $v;
+        $a["itemid"] = $post[$v."ID"];
+        try
+        {
+          SQLLib::InsertRow("list_items",$a);
+        }
+        catch(SQLLibException $e)
+        {
+          if ($e->getCode() == 1062)
+          {
+            return array("that's already added! :o");
+          }
+          else throw $e;
+        }
+        $added = true;
+      }
+    }
+    return $added ? array() : array("you didn't add anything ! :(");
+  }
 
-}
-
+  function RenderContent()
+  {
+    $this->formifier->RenderForm( $this->fields );
 ?>
-<br />
-<table><tr><td valign="top">
-<table bgcolor="#000000" cellspacing="1" cellpadding="0" border="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2" border="0">
-   <? if($which): ?>
-    <? $sortlink="lists.php?which=".$which."&prodorder="; ?>
-    <tr bgcolor="#224488">
-     <th colspan="9">
-     <center>
-     <?
-     	$i=0;
-	//print("<b><a href=\"lists.php?which=".$lists[$i]["id"]."\">".$lists[$i]["name"]."</a></b> - ".$lists[$i]["desc"]);
-	print("<b><a href=\"lists.php?which=".$lists[$i]["id"]."\">".$lists[$i]["name"]."</a></b>");
-	if($SESSION_LEVEL=='administrator' || $SESSION_LEVEL=='moderator' || $SESSION_LEVEL=='gloperator')
-	  print(" <b>[<a href=\"editlist.php?which=".$which."\">editlist</a>]</b>\n");
+<script>
+<!--
+document.observe("dom:loaded",function(){
+  new Autocompleter($("prodID"), {"dataUrl":"./ajax_prods.php",
+    "width":320,
+    "processRow": function(item) {
+      var s = item.name.escapeHTML();
+      if (item.groupName) s += " <small class='group'>" + item.groupName.escapeHTML() + "</small>";
+      return s;
+    }
+  });
+  new Autocompleter($("partyID"), {"dataUrl":"./ajax_parties.php"});
+  new Autocompleter($("groupID"), {"dataUrl":"./ajax_groups.php","processRow": function(item) {
+    return item.name.escapeHTML() + (item.disambiguation ? " <span class='group-disambig'>" + item.disambiguation.escapeHTML() + "</span>" : "");
+  }});
+  new Autocompleter($("userID"),  {"dataUrl":"./ajax_users.php","processRow": function(item) {
+    return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'/> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
+  }});
+});
+//-->
+</script>
+<?php
+  }
+  function RenderFooter()
+  {
+    echo "<div class='foot'>\n";
+    echo " <input type='submit' value='Submit' id='submit'>";
+    echo "</div>\n";
+    echo "</div>";
+  }
+}
 
-	$query = "SELECT upkeeper FROM lists where id='".$lists[$i]["id"]."'";
-  	$result=mysql_query($query);
-  	$listupkeeper=mysql_result($result,0);
-	if($_SESSION["SCENEID_ID"]==$listupkeeper || $SESSION_LEVEL=='administrator' || $SESSION_LEVEL=='moderator' || $SESSION_LEVEL=='gloperator') {
-		print(" <b>[<a href=\"submitlistitem.php?which=".$which."\">add item</a>]</b>\n");
-		print(" <b>[<a href=\"removelistitem.php?which=".$which."\">del item</a>]</b>\n");
-	}
+///////////////////////////////////////////////////////////////////////////////
 
-     ?></center>
-     </th>
-     </tr>
-    <? if(count($lists)==0): ?>
-    <tr bgcolor="#557799">
-     <th colspan="3">
-      <br />
-       congratulations!! you just found a non existant list!!!!11<br />
-      <br />
-     </td>
-    </tr>
-   <? endif; ?>
-   <? else: ?>
-    <tr bgcolor="#224488">
-      <th colspan="3">
-       <center><? lettermenu($pattern); ?></center>
-      </th>
-    </tr>
-    <tr bgcolor="#224488">
-     <th>
-      <table>
-       <tr>
-        <td>
-         <img src="gfx/fleche1a.gif" width="13" height="12" border="0"><br />
-        </td>
-        <td>
-         <b>name</b>
-        </td>
-       </tr>
-      </table>
-      </th>
-      <th>
-      <table>
-       <tr>
-        <td>
-         <img src="gfx/fleche1a.gif" width="13" height="12" border="0"><br />
-        </td>
-        <td>
-         <b>desc</b>
-        </td>
-       </tr>
-      </table>
-     </th>
-     <th>
-      <table>
-       <tr>
-        <td>
-         <img src="gfx/fleche1a.gif" width="13" height="12" border="0"><br />
-        </td>
-        <td>
-         <b>upkeeper</b>
-        </td>
-       </tr>
-      </table>
-     </th>
-    </tr>
-    <? if(count($lists)==0): ?>
-    <tr bgcolor="#557799">
-     <th colspan="3">
-      <br />
-      no list name beginning with a <b><? print($pattern); ?></b> yet =(<br />
-      <br />
-     </td>
-    </tr>
-    <? endif; ?>
-   <? endif; ?>
+class PouetBoxListsAddMaintainer extends PouetBox
+{
+  public $box;
+  public $list;
+  public $formifier;
+  public $fields;
+  function __construct($box)
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_listsaddmaintainer";
+    $this->box = $box;
+    $this->list = $box->list;
+    $this->formifier = new Formifier();
+    $this->fields = array(
+      "maintainerID"=>array(
+        "name"=>"add maintainer",
+      ),
+    );
+    $this->title = "add maintainer to list";
+  }
+  use PouetForm;
+  function Validate($post)
+  {
+    global $currentUser;
 
-   <? if (!$which){
+    if (!$currentUser)
+      return array("you have to be logged in!");
 
-   	for($i=0;$i<count($lists);$i++)
-   	{
-     		if($i%2) {
-       			print("<tr bgcolor=\"#446688\">\n");
-     		} else {
-       			print("<tr bgcolor=\"#557799\">\n");
-     		}
-     		print("<td valign=\"top\"><b><a href=\"lists.php?which=".$lists[$i]["id"]."\">".$lists[$i]["name"]);
-     		print("</a></b>");
-     		if($SESSION_LEVEL=='administrator' || $SESSION_LEVEL=='moderator' || $SESSION_LEVEL=='gloperator') print(" <b>[<a href=\"editlist.php?which=".$lists[$i]["id"]."\">editlist</a>]</b>\n");
-     		print("</td>\n");
-     		print("<td>".$lists[$i]["desc"]."</td>\n");
-     		print("<td><a href=\"user.php?who=".$lists[$i]["upkeeper"]."\">".$lists[$i]["nickname"]."</a></td>\n</tr>\n");
-     	}
+    if (!$this->box->CanDelete())
+      return array("not allowed lol !");
 
-     } else {
-     	//print("->kok9".count($listitems));
-		for($i=0;$i<count($listitems);$i++):
-		 //print("><pokachu".$i."->".$listitems[$i]["type"]);
-	  	 if ($listitems[$i]["type"]!=$listitems[$i-1]["type"]):
-	  	    if ($listitems[$i]["type"]=="prod")
-	  	    { //print("kakak000");
+    if (!$post["maintainerID"])
+      return array("something is missing ?!");
 
-	  	    	?>
-	  	      <tr bgcolor="#224488">
-     		      <th><table><tr>
-		       <td>
-		        <a href="<? print($sortlink); ?>type"><img src="gfx/<? print(goodfleche("prodtype",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td>
-		       <td>
-		        <a href="<? print($sortlink); ?>type"><b>type</b></a><br />
-		       </td>
-		       <td>
-		        <a href="<? print($sortlink); ?>name"><img src="gfx/<? print(goodfleche("name",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td>
-		       <td width="100%">
-		        <a href="<? print($sortlink); ?>name"><b>prodname</b></a><br />
-		       </td>
-		       <td align="right">
-		        <a href="<? print($sortlink); ?>platform"><img src="gfx/<? print(goodfleche("platform",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td align="right">
-		       <td>
-		        <a href="<? print($sortlink); ?>platform"><b>platform</b></a>
-		       </td>
-		       </tr></table>
-		     </th>
-		     <th>
-		      <table><tr>
-		       <td>
-		        <a href="<? print($sortlink); ?>party"><img src="gfx/<? print(goodfleche("party",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td>
-		       <td>
-		        <a href="<? print($sortlink); ?>party"><b>release party</b></a>
-		       </td>
-		      </tr></table>
-		     </th>
-		     <th>
-		      <table><tr>
-		       <td>
-		        <a href="<? print($sortlink); ?>release"><img src="gfx/<? print(goodfleche("release",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td>
-		       <td>
-		        <a href="<? print($sortlink); ?>release"><b>release date</b></a>
-		       </td>
-		      </tr></table>
-		     </th>
-<? /*		     <th>
-		        <a href="<? print($sortlink); ?>thumbup"><img src="gfx/rulez.gif" alt="rulez" border="0"></a>
-		     </th>
-		     <th>
-		        <a href="<? print($sortlink); ?>thumbpig"><img src="gfx/isok.gif" alt="piggie" border="0"></a>
-		     </th>
-		     <th>
-		        <a href="<? print($sortlink); ?>thumbdown"><img src="gfx/sucks.gif" alt="sucks" border="0"></a>
-		     </th>
-		     <th>
-		      <table><tr>
-		       <td>
-		        <a href="<? print($sortlink); ?>avg"><img src="gfx/<? print(goodfleche("avg",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-		       </td>
-		       <td>
-		        <a href="<? print($sortlink); ?>avg"><b>avg</b></a>
-		       </td>
-		      </tr></table>
-		     </th> */ ?>
-		     </tr>
-	  	    	<?
-	  		} else {
-		   	 print("<tr bgcolor=\"#224488\"><th colspan=\"9\">".$listitems[$i]["type"]."<br /></th></tr>");
-		   	}
-		 endif;
+    return array();
+  }
 
-		 if($i%2) {
-       			print("<tr bgcolor=\"#446688\">\n");
-     		 } else {
-       			print("<tr bgcolor=\"#557799\">\n");
-     		 }
-			//print("pokaman");
-		 if ($listitems[$i]["type"]=="prod"):
+  function Commit($post)
+  {
+    $a = array();
+    $a["listID"] = $this->list->id;
+    $a["userID"] = (int)$post["maintainerID"];
+    SQLLib::InsertRow("list_maintainers",$a);
+    return array();
+  }
 
-			$typess = explode(",", $listitems[$i]["prodtype"]);
-			print("<td nowrap><table cellspacing=\"0\" cellpadding=\"0\"><tr><td nowrap><a href=\"prod.php?which=".$listitems[$i]["id"]."\">");
-			for($k=0;$k<count($typess);$k++) {
-			print("<img src=\"gfx/types/".$types[$typess[$k]]."\" width=\"16\" height=\"16\" border=\"0\" title=\"".$typess[$k]."\">");
-			}
-			print("<br /></a></td><td><img src=\"gfx/z.gif\" width=\"2\" height=\"1\" border=\"0\"><br /></td><td nowrap><a href=\"prod.php?which=".$listitems[$i]["id"]."\">".strtolower(stripslashes($listitems[$i]["name"]))."</a>");
-			if ($listitems[$i]["group1"]) { print(" by <a href=\"groups.php?which=".$listitems[$i]["group1"]."\">".$listitems[$i]["groupname1"]."</a>"); }
-			if ($listitems[$i]["group2"]) { print(" &amp; <a href=\"groups.php?which=".$listitems[$i]["group2"]."\">".$listitems[$i]["groupname2"]."</a>"); }
-			if ($listitems[$i]["group3"]) { print(" &amp; <a href=\"groups.php?which=".$listitems[$i]["group3"]."\">".$listitems[$i]["groupname3"]."</a>"); }
-			print("<br /></td><td>&nbsp;</td>");
+  function RenderContent()
+  {
+    $this->formifier->RenderForm( $this->fields );
+?>
+<script>
+<!--
+document.observe("dom:loaded",function(){
+  new Autocompleter($("maintainerID"),  {"dataUrl":"./ajax_users.php",
+    "processRow": function(item) {
+      return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'/> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
+    }
+  });
+});
+//-->
+</script>
+<?php
+  }
+  function RenderFooter()
+  {
+    echo "<div class='foot'>\n";
+    echo " <input type='submit' value='Submit' id='submit'>";
+    echo "</div>\n";
+    echo "</div>";
+  }
+}
 
-			if(count($sceneorgrecommends)):
-	        	print("<td nowrap>");
-			for($k=0;$k<count($sceneorgrecommends);$k++) {
-				if ($sceneorgrecommends[$k]["prodid"]==$listitems[$i]["id"]) print("<img src=\"gfx/sceneorg/".$sceneorgrecommends[$k]["type"].".gif\" width=\"16\" height=\"16\" border=\"0\" title=\"".$sceneorgrecommends[$k]["category"]."\" alt=\"".$sceneorgrecommends[$k]["category"]."\">");
-			}
-			print("<br /></td>");
-			endif;
+///////////////////////////////////////////////////////////////////////////////
 
-			if($listitems[$i]["cdc"]):
-			 print("<td nowrap>");
-			 for($ii=0;$ii<$prods[$j]["cdc"];$ii++): print("<img src=\"gfx/titles/coupdecoeur.gif\" width=\"16\" height=\"16\" border=\"0\" title=\"cdc\" alt=\"cdc\">");
-			 endfor;
-			 print("<br /></td>");
-			endif;
+class PouetBoxListsDelete extends PouetBox
+{
+  public $list;
+  public $checkString;
+  function __construct( $list )
+  {
+    parent::__construct();
 
-			print("<td width=\"100%\">&nbsp;</td>");
+    $this->uniqueID = "pouetbox_listsdelete";
 
-	       		$platforms = explode(",", $listitems[$i]["platform"]);
-	       		for($kkk=0; $kkk<count($platforms); $kkk++){
-	       		 print("<td align=\"right\"><a href=\"prodlist.php?platform=".$platforms[$kkk]."\"><img src=\"gfx/os/".$os[$platforms[$kkk]]."\" width=\"16\" height=\"16\" border=\"0\" title=\"".$platforms[$kkk]."\"></a><br /></td>");
-	       		}
+    $this->classes[] = "errorbox";
 
-	       		print("</tr></table></td>\n");
+    $this->list = $list;
 
-			if(($listitems[$i]["partyname"])&&!($listitems[$i]["party"]==1024))
-			{
-				$placeadj="";
-				if ($listitems[$i]["partycompo"]=="") $compophrase="";
-				 else $compophrase=" ".$listitems[$i]["partycompo"];
-				if (($listitems[$i]["partycompo"]=="none")||($listitems[$i]["partycompo"]=="invit")) $listitems[$i]["party_place"]=98;
+    global $verificationStrings;
+    $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-				if($listitems[$i]["party_place"])
-				{
-		           		switch($listitems[$i]["party_place"]) {
-		             		case 1:
-		             		case 21:
-		             		case 31:
-		             		case 41:
-		             		case 51:
-		             		case 61:
-		             		case 71:
-		             		case 81:
-		             		case 91:  $placeadj="st";
-		             			print("<td>".$listitems[$i]["party_place"].$placeadj." at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-		             			break;
-		             		case 2:
-		             		case 22:
-		             		case 32:
-		             		case 42:
-		             		case 52:
-		             		case 62:
-		             		case 72:
-		             		case 82:
-		             		case 92:  $placeadj="nd";
-		             			print("<td>".$listitems[$i]["party_place"].$placeadj." at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-		             			break;
-		             		case 3:
-		             		case 23:
-		             		case 33:
-		             		case 43:
-		             		case 53:
-		             		case 63:
-		             		case 73:
-		             		case 83:
-		             		case 93:  $placeadj="rd";
-		             			print("<td>".$listitems[$i]["party_place"].$placeadj." at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-		             			break;
-		                	case 97: print("<td>disqualified at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-						break;
-		             		case 98: print("<td>for <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a><br /></td>\n");
-		             			break;
-		             		case 99: print("<td>not shown at <a href=\"party.php?which=".$prods[$j]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-		             			break;
-		             		default: $placeadj="th";
-		             			print("<td>".$listitems[$i]["party_place"].$placeadj." at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-		             			break;
-		           		}
-		         	} else
-		         	{
-		         		 $placeadj = "??";
-		         		 print("<td>".$listitems[$i]["party_place"].$placeadj." at <a href=\"party.php?which=".$listitems[$i]["party"]."&when=".sprintf("%02d",$listitems[$i]["party_year"])."\">".$listitems[$i]["partyname"]." ".sprintf("%02d",$listitems[$i]["party_year"])."</a>".$compophrase."<br /></td>\n");
-				}
-		        } else {
-		       	  if ($listitems[$i]["party"]==1024) print("<td>no party<br /></td>\n");
-		       	   else print("<td>??<br /></td>\n");
-		        }
+    $this->title = "delete this list: "._html( $this->list->name );
+  }
+  use PouetForm;
+  function Validate($data)
+  {
+    if ($data["check"] != $data["checkOrig"])
+      return array("wrong verification string !");
+    return array();
+  }
+  function Commit($data)
+  {
+    SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d",$this->list->id));
+    SQLLib::Query(sprintf_esc("DELETE FROM list_maintainers WHERE listID=%d",$this->list->id));
+    SQLLib::Query(sprintf_esc("DELETE FROM lists WHERE id=%d",$this->list->id));
+    return array();
+  }
+  function RenderBody()
+  {
+    echo "<div class='content'/>";
+    echo "  <p>To make sure you want to delete <b>this</b> list, type \"".$this->checkString."\" here:</p>";
+    echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'/>";
+    echo "  <input id='check' name='check' autocomplete='no'/>";
+    echo "</div>";
+    echo "<div class='foot'/>";
+    echo "  <input type='submit' value='Submit' />";
+    echo "</div>";
+    ?>
+<script>
+document.observe("dom:loaded",function(){
+  $("pouetbox_listsdelete").up("form").observe("submit",function(e){
+    if ($F("check") != "<?=_js($this->checkString)?>")
+    {
+      alert("Enter the verification string!");
+      e.stop();
+      return;
+    }
+    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE \"<?=_js($this->list->name)?>\"?!"))
+      e.stop();
+  });
+});
+</script>
+    <?php
+  }
+}
 
-			if(($listitems[$i]["date"]!="0000-00-00")&&(strlen($listitems[$i]["date"])>0))
-		       	{
-		          $rdate=explode("-",$listitems[$i]["date"]);
-		          switch($rdate[1]) {
-		            case "01": $rmonth="January"; break;
-		            case "02": $rmonth="February"; break;
-		            case "03": $rmonth="March"; break;
-		            case "04": $rmonth="April"; break;
-		            case "05": $rmonth="May"; break;
-		            case "06": $rmonth="June"; break;
-		            case "07": $rmonth="July"; break;
-		            case "08": $rmonth="August"; break;
-		            case "09": $rmonth="September"; break;
-		            case "10": $rmonth="October"; break;
-		            case "11": $rmonth="November"; break;
-		            case "12": $rmonth="December"; break;
-		            default: $rmonth=""; break;
-		           }
-		           print("<td>".$rmonth." ".$rdate[0]."<br /></td>\n");
-			} else {
-				print("<td>&nbsp;<br /></td>\n");
-			}
+$listID = (int)@$_GET["which"];
 
-	/*		if ($listitems[$i]["voteup"])
-			{ print("<td>\n".$listitems[$i]["voteup"]."</td>\n");
-			}
-			else
-			{print("<td>\n0</td>\n");
-			}
-			if ($listitems[$i]["votepig"])
-			{ print("<td>\n".$listitems[$i]["votepig"]."</td>\n");
-			}
-			else
-			{print("<td>\n0</td>\n");
-			}
-			if ($listitems[$i]["votedown"])
-			{ print("<td>\n".$listitems[$i]["votedown"]."</td>\n");
-			}
-			else
-			{print("<td>\n0</td>\n");
-			}
+$form = null;
+$p = null;
+if (!$listID)
+{
+  $pattern = @$_GET["pattern"] ? @$_GET["pattern"] : chr(rand(ord("a"),ord("z")));
+  $p = new PouetBoxListsList($pattern);
+  $p->Load();
+  $TITLE = "lists: ".$p->letter;
+}
+else
+{
+  $form = new PouetFormProcessor();
+  $main = new PouetBoxListsMain($listID);
+  $form->Add( "listmain", $main );
+  $main->Load();
+  if ($main->list)
+  {
+    $TITLE = $main->list->name;
 
-			if($listitems[$i]["voteavg"]>0)
-				$thumbgfx="gfx/rulez.gif";
-			elseif($listitems[$i]["voteavg"]==0)
-				$thumbgfx="gfx/isok.gif";
-			else
-				$thumbgfx="gfx/sucks.gif";
-			printf("<td>\n<table cellspacing=\"0\" cellpadding=\"0\"><tr><td>&nbsp;</td><td>%.2f</td><td>&nbsp;</td><td><img src=\"".$thumbgfx."\" width=\"16\" height=\"16\" border=\"0\" alt=\"average rating\" align=\"left\"></td></tr></table></td>\n",$listitems[$i]["voteavg"]);
+    if ($main->CanEdit())
+    {
+      $form->SetSuccessURL( "lists.php?which=".(int)$listID, true );
+      $form->Add( "list_add", new PouetBoxListsAdd($main) );
+      if ($main->CanDelete())
+      {
+        $form->Add( "list_addmaintainer", new PouetBoxListsAddMaintainer($main) );
+        $form->Add( "list_delete", new PouetBoxListsDelete($main->list) );
+      }
 
-			//popularity bar
-			print("<td>\n");
-			$pourcent = floor($listitems[$i]["views"]*100/$max_views);
-			DoBar($pourcent);
-			print("</td>\n");	*/
+      $form->Process();
+    }
+  }
+  else
+  {
+    $form = null;
+  }
+}
 
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
 
-		 /* ?>
-			<td><a href="prod.php?which=<? print($listitems[$i]["id"]); ?>"><? print($listitems[$i]["name"]); ?></a>
-			<? if($listitems[$i]["group1"]) { print(" by"); } ?>
-			<a href="groups.php?which=<?=$listitems[$i]["group1"]?>"><?=$listitems[$i]["groupname1"]?></a>
-			<? if ($listitems[$i]["groupname2"]) {print(" &amp; ");} ?><a href="groups.php?which=<?=$listitems[$i]["group2"]?>"><?=$listitems[$i]["groupname2"]?></a>
-			<? if ($listitems[$i]["groupname3"]) {print(" &amp; ");} ?><a href="groups.php?which=<?=$listitems[$i]["group3"]?>"><?=$listitems[$i]["groupname3"]?></a>
-			<br /></td> */
-		 elseif ($listitems[$i]["type"]=="user"):  ?>
-		  <td colspan="9">
-		   <table cellspacing="0" cellpadding="0">
-		    <tr>
-		     <td><a href="user.php?who=<?=$listitems[$i]["itemid"]?>"><img src="avatars/<?=$listitems[$i]["avatar"]?>" width="16" height="16" border="0" title="<?=$listitems[$i]["nickname"]?>"></a><br /></td>
-	             <td><img src="gfx/z.gif" width="3" height="1"><br /></td>
-	             <td><a href="user.php?who=<? print($listitems[$i]["itemid"]); ?>"><? print($listitems[$i]["nickname"]); ?></a><br /></td>
-	            </tr>
-	           </table>
-	          </td>
-		<? elseif ($listitems[$i]["type"]=="party"):  ?>
-		<td colspan="9"><a href="party.php?which=<? print($listitems[$i]["itemid"]); ?>"><? print($listitems[$i]["partyname"]); ?></a>
-		 <? if($listitems[$i]["partyweb"]) print(" [<a href=\"".$listitems[$i]["partyweb"]."\">web</a>]\n"); ?><br /></td>
-		<? elseif ($listitems[$i]["type"]=="group"):  ?>
-		<td colspan="9"><a href="groups.php?which=<? print($listitems[$i]["itemid"]); ?>"><? print($listitems[$i]["groupname"]);
-		 if($listitems[$i]["groupacronym"]) print(" [".$listitems[$i]["groupacronym"]."]"); ?></a>
-		 <? if($listitems[$i]["groupweb"]) print(" [<a href=\"".$listitems[$i]["groupweb"]."\">web</a>]\n");
-		 if($listitems[$i]["groupcsdb"]) print(" [<a href=\"http://noname.c64.org/csdb/group/?id=".$listitems[$i]["groupcsdb"]."\">csdb</a>]\n");
-		 if($listitems[$i]["groupzxdemo"]) print(" [<a href=\"http://zxdemo.org/author.php?id=".$listitems[$i]["groupzxdemo"]."\">zxdemo</a>]\n"); ?>
-		 <br /></td>
-		<? else: print("<td>".$listitems[$i]["itemid"]."<br /></td>"); ?>
-		<? endif; ?>
+echo "<div id='content'>\n";
+if($p) $p->Render();
+if($form) $form->Display();
+echo "</div>\n";
 
-
-     	 </td>
-     	</tr>
-     	<?
-     	endfor;
-     }
-     print("<tr bgcolor=\"#224488\">");
-     if($which):
-       if(count($lists)!=0): ?>
-       <td colspan="3" align="right">
-        <table cellspacing="0" cellpadding="0">
-         <tr>
-          <td>added on the <? print(substr($lists[0]["added"],0,10)); ?> for <a href="user.php?who=<? print($lists[0]["upkeeper"]); ?>"><? print($lists[0]["nickname"]); ?></a></td>
-          <td>&nbsp;<br /></td>
-          <td><a href="user.php?who=<? print($lists[0]["upkeeper"]); ?>"><img src="avatars/<? print($lists[0]["avatar"]); ?>" width="16" height="16" border="0"></a></td>
-         </tr>
-        </table>
-       </td>
-      <? endif; ?>
-     <? else: ?>
-      <th colspan="3">
-       <center><? lettermenu($pattern); ?></center>
-      </th>
-     <? endif; ?>
-    </tr>
-   </table>
-  </td>
- </tr>
-</table>
-</td>
-</tr></table>
-<br />
-
-<? require("include/bottom.php"); ?>
-
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
+?>

@@ -1,30 +1,60 @@
 <?php
-require_once('lib/lastrss/lastRSS.php');
-require_once('include/constants.php');
+if(php_sapi_name() != "cli")
+  die("commandline only!");
 
-header("Content-type: text/plain");
+// change to pouet root
+chdir( dirname( __FILE__ ) );
 
-printf("START %s - ",date("Y-m-d H:i:s"));
+require_once("bootstrap.inc.php");
+require_once("admin.functions.php");
 
-// create lastRSS object
-$rss = new lastRSS;
+echo "[".date("Y-m-d H:i:s")."] Cron running: ".$argv[1]."\n";
 
-// setup transparent cache
-$rss->cache_dir = TMP_FOLDER;
-$rss->cache_time = 5*60; // in seconds
-$rss->CDATA = 'strip';
-$rss->date_format = 'Y-m-d';
+function cron_CheckLinks( $ids = null )
+{
+  $s = new SQLSelect();
+  $s->AddField("prods.id");
+  $s->AddField("prods.download");
+  $s->AddTable("prods");
+  $s->AddJoin("left","prods_linkcheck","prods_linkcheck.prodID = prods.id");
+  $s->AddOrder("prods_linkcheck.testDate");
+  if ($ids)
+  {
+    $s->AddWhere(sprintf("prods.id in (%s)",implode(",",array_map(function($i){ return (int)$i; },$ids))));
+  }
+  else
+  {
+    $s->AddWhere("prods_linkcheck.testDate is NULL or datediff(now(),prods_linkcheck.testDate) > 20");
+    $s->SetLimit( 20 );
+    $s->AddOrder("RAND()");
+  }
+  $prods = SQLLib::SelectRows( $s->GetQuery() );
+  $out = array();
+  foreach($prods as $prod)
+  {
+    $out[] = pouetAdmin_recheckLinkProd($prod);
+    usleep(500000);
+  }
+  return implode(", ",$out);
+}
 
-$rss->get('http://bitfellas.org/e107_plugins/rss_menu/rss.php?1.2');
+switch($argv[1])
+{
+  case "recacheTopDemos":
+    $content = pouetAdmin_recacheTopDemos();
+    preg_match_all("/<h3>(.*)<\/h3>/",$content,$m);
+    foreach($m[1] as $v)
+      echo " > Recache: ".$v."\n";
+    break;
+  case "linkCheck":
+    $content = cron_CheckLinks( array_slice($argv,2) );
+    echo " > linkCheck: ".$content."\n";
+    break;
+  case "createDataDump":
+    $content = pouetAdmin_createDataDump();
+    echo " > dataDump: ".$content."\n";
+    break;
+}
 
-$rss->itemtags[] = "demopartynet:title";
-$rss->itemtags[] = "demopartynet:date";
-$rss->itemtags[] = "demopartynet:startDate";
-$rss->itemtags[] = "demopartynet:endDate";
-
-$r = $rss->get('http://feeds.feedburner.com/demoparty/parties');
-
-// var_dump($rss);
-// var_dump($r);
-
-printf("END %s\n",date("Y-m-d H:i:s"));
+echo "[".date("Y-m-d H:i:s")."] Cron finished.\n\n";
+?>

@@ -1,400 +1,221 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
+require_once("include_pouet/box-bbs-open.php");
+require_once("include_pouet/box-login.php");
 
-function goodfleche($wanted,$current) {
-  if($wanted==$current) {
-    $fleche="fleche1a";
-  } else {
-    $fleche="fleche1b";
+class PouetBoxBBSTopicList extends PouetBox
+{
+  public $id;
+  public $group;
+  public $categories;
+  public $page;
+  public $count;
+  public $topics;
+
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_bbslist";
+
+    $row = SQLLib::selectRow("DESC bbs_topics category");
+    $this->categories = enum2array($row->Type);
   }
-  return $fleche;
-}
 
-function htmlcleanonerow($inhtml){
-  $inhtml= str_replace( "<", "&" . "lt;", $inhtml);
-  $inhtml= str_replace( ">", "&" . "gt;", $inhtml);
-  $inhtml= str_replace( "\"", "&" . "quot;", $inhtml);
-  $inhtml= str_replace( "\n", " ", $inhtml);
-  return $inhtml;
-}
+  function LoadFromDB()
+  {
+    $s = new SQLSelect();
 
-$topics_per_page=$user["bbsbbstopics"];
+    $perPage = get_setting("bbsbbstopics");
+    $this->page = (int)max( 1, (int)@$_GET["page"] );
 
-if(($page<=0)||(!$page)) {
-  $page=1;
-}
+    $s = new BM_query();
+    $s->AddField("bbs_topics.id as id");
+    $s->AddField("bbs_topics.lastpost as lastpost");
+    $s->AddField("bbs_topics.firstpost as firstpost");
+    $s->AddField("bbs_topics.topic as topic");
+    $s->AddField("bbs_topics.count as count");
+    $s->AddField("bbs_topics.category as category");
+    $s->AddField("bbs_topics.closed as closed");
+    $s->AddTable("bbs_topics");
+    $s->attach(array("bbs_topics"=>"userfirstpost"),array("users as firstuser"=>"id"));
+    $s->attach(array("bbs_topics"=>"userlastpost"),array("users as lastuser"=>"id"));
 
-$query="SELECT count(0) FROM bbs_topics";
-if ($_GET["categoryfilter"])
-  $query.= sprintf(" where bbs_topics.category = %d",$_GET["categoryfilter"]);
-$result=mysql_query($query);
-$nb_topics=mysql_result($result,0);
 
-$query="SELECT bbs_topics.id, bbs_topics.topic, bbs_topics.firstpost, bbs_topics.lastpost, bbs_topics.userfirstpost, bbs_topics.userlastpost, bbs_topics.count, bbs_topics.category, users1.nickname as nickname_1, users1.avatar as avatar_1, users2.nickname as nickname_2, users2.avatar as avatar_2 FROM bbs_topics LEFT JOIN users as users2 on users2.id=bbs_topics.userfirstpost LEFT JOIN users as users1 on users1.id=bbs_topics.userlastpost";
-if ($_GET["categoryfilter"])
-  $query.= sprintf(" where bbs_topics.category = %d",$_GET["categoryfilter"]);
-switch($order) {
-  case "userfirstpost": $query.=" ORDER BY nickname_2, avatar_2, bbs_topics.lastpost DESC"; break;
-  case "firstpost": $query.=" ORDER BY firstpost DESC"; break;
-  case "userlastpost": $query.=" ORDER BY nickname_1, avatar_1, bbs_topics.lastpost DESC"; break;
-  case "lastpost": $query.=" ORDER BY bbs_topics.lastpost DESC"; break;
-  case "count": $query.=" ORDER BY bbs_topics.count DESC"; break;
-  case "topic": $query.=" ORDER BY bbs_topics.topic"; break;
-  case "category": $query.=" ORDER BY bbs_topics.category"; break;
-  default: $query.=" ORDER BY bbs_topics.lastpost DESC"; break;
-}
+    $dir = "DESC";
+    if (@$_GET["reverse"])
+      $dir = "ASC";
 
-$query.=" LIMIT ".(($page-1)*$topics_per_page).",".$topics_per_page;
-$result=mysql_query($query);
-while($tmp=mysql_fetch_assoc($result)) {
-  $topics[]=$tmp;
-}
+    switch(@$_GET["order"])
+    {
+      case "firstpost": $s->AddOrder("bbs_topics.firstpost ".$dir); break;
+      case "userfirstpost": $s->AddOrder("bbs_topics_firstuser.nickname ".$dir); break;
+      case "userlastpost": $s->AddOrder("bbs_topics_lastuser.nickname ".$dir); break;
+      case "topic": $s->AddOrder("bbs_topics.topic ".$dir); break;
+      case "category": $s->AddOrder("bbs_topics.category ".$dir); break;
+      case "count": $s->AddOrder("bbs_topics.count ".$dir); break;
+      case "lastpost":
+      default: $s->AddOrder("bbs_topics.lastpost ".$dir); break;
+    }
+    $s->AddOrder("bbs_topics.lastpost ".$dir);
+    $s->SetLimit( $perPage, (int)(($this->page - 1) * $perPage) );
 
-$sortlink ="bbs.php?";
-if ($_GET["categoryfilter"])
-  $sortlink ="categoryfilter=".$_GET["categoryfilter"]."&amp;";
-$sortlink.="order=";
+    if (@$_GET["category"])
+      $s->AddWhere(sprintf_esc("category='%s'",$_GET["category"]));
+    //echo $s->GetQuery();
 
-$pagelink = "bbs.php?order=".$order;
-if ($_GET["categoryfilter"])
-  $pagelink .= "&categoryfilter=".$_GET["categoryfilter"]."";
+    $this->topics = $s->performWithCalcRows( $this->count );
+    //PouetCollectPlatforms($this->prods);
 
-$row = 6;
-if (canSeeBBSCategories()) {
-  $row = 7;
-}
+    //$this->maxtopics = SQLLib::SelectRow("SELECT MAX(views) as m FROM prods")->m;
+  }
 
+  function Render()
+  {
+    echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
+    $headers = array(
+      "firstpost"=>"started",
+      "userfirstpost"=>"by",
+      "category"=>"category",
+      "topic"=>"bbs topic",
+      "count"=>"replies",
+      "lastpost"=>"last post",
+      "userlastpost"=>"by",
+    );
+    echo "<caption>the oldskool pouÃ«t.net bbs</caption>\n";
+    echo "<tr class='sortable'>\n";
+    foreach($headers as $key=>$text)
+    {
+      $out = sprintf("<th id='th_%s'><a href='%s' class='%s%s' id='%s'>%s</a></th>\n",
+        $key,adjust_query_header(array("order"=>$key)),@$_GET["order"]==$key?"selected":"",(@$_GET["order"]==$key && @$_GET["reverse"])?" reverse":"","prodlistsort_".$key,$text);
+      if ($key == "type" || $key == "name") $out = str_replace("</th>","",$out);
+      if ($key == "platform" || $key == "name") $out = str_replace("<th>"," ",$out);
+      echo $out;
+    }
+    echo "</tr>\n";
+
+    foreach ($this->topics as $p)
+    {
+      printf("<tr class='%s'>\n",$p->closed?"closed":"");
+
+      echo " <td>";
+      echo $p->firstpost;
+      echo "</td>\n";
+
+      echo " <td>";
+      echo $p->firstuser->PrintLinkedAvatar()." ";
+      echo $p->firstuser->PrintLinkedName();
+      echo "</td>\n";
+
+      echo " <td>"._html($p->category)."</td>\n";
+
+      echo " <td class='topic'>";
+      echo "<a href='topic.php?which=".(int)$p->id."'>"._html($p->topic)."</a>";
+      echo "</td>\n";
+
+      echo " <td>".$p->count."</td>\n";
+
+      echo " <td title='"._html(dateDiffReadable(time(),$p->lastpost))." ago'>";
+      echo $p->lastpost;
+      echo "</td>\n";
+
+      echo " <td>";
+      echo $p->lastuser->PrintLinkedAvatar()." ";
+      echo $p->lastuser->PrintLinkedName();
+      echo "</td>\n";
+
+      echo "</tr>\n";
+    }
+
+    $perPage = get_setting("bbsbbstopics");
+
+    echo "<tr>\n";
+    echo "<td class='nav' colspan=".(count($headers)).">\n";
+
+    $this->page = ((int)@$_GET["page"] ? $_GET["page"] : 1);
+    if ($this->page > 1)
+      echo "  <div class='prevpage'><a href='".adjust_query(array("page"=>($this->page - 1)))."'>previous page</a></div>\n";
+    if ($this->page < ($this->count / $perPage))
+      echo "  <div class='nextpage'><a href='".adjust_query(array("page"=>($this->page + 1)))."'>next page</a></div>\n";
+
+    echo "  <select name='page'>\n";
+    for ($x=1; $x<=($this->count / $perPage) + 1; $x++)
+      printf("    <option value='%d'%s>%d</option>\n",$x,$x==$this->page?" selected='selected'":"",$x);
+    echo "  </select>\n";
+    echo "  <input type='submit' value='Submit'/>\n";
+    echo "</td>\n";
+    echo "</tr>\n";
+    echo "</table>\n";
 ?>
-<br />
-<table bgcolor="#000000" cellspacing="1" cellpadding="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2">
-    <tr>
-     <td bgcolor="#224488" colspan="<?=$row?>" align="center">
-       <b>the oldskool pouët.net bbs</b><br />
-         </td>
-    </tr>
-    <tr>
-    <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>firstpost"><img src="gfx/<? print(goodfleche("firstpost",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>firstpost"><b>started</b></a>
-       </td>
-      </tr></table>
-     </th>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>userfirstpost"><img src="gfx/<? print(goodfleche("userfirstpost",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>userfirstpost"><b>by</b></a>
-       </td>
-      </tr></table>
-     </th>
-<?
-if (canSeeBBSCategories()) {
-?>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>category"><img src="gfx/<? print(goodfleche("category",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>category"><b>category</b></a>
-       </td>
-      </tr></table>
-     </th>
-<?
-}
-?>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>topic"><img src="gfx/<? print(goodfleche("topic",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>topic"><b>bbs topic</b></a>
-       </td>
-      </tr></table>
-     </th>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>count"><img src="gfx/<? print(goodfleche("count",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>count"><b>replies</b></a>
-       </td>
-      </tr></table>
-     </th>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>lastpost"><img src="gfx/<? print(goodfleche("lastpost",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>lastpost"><b>last post</b></a>
-       </td>
-      </tr></table>
-     </th>
-     <th bgcolor="#224488">
-      <table><tr>
-       <td>
-        <a href="<? print($sortlink); ?>userlastpost"><img src="gfx/<? print(goodfleche("userlastpost",$order)); ?>.gif" width="13" height="12" border="0"></a><br />
-       </td>
-       <td>
-        <a href="<? print($sortlink); ?>userlastpost"><b>by</b></a>
-       </td>
-      </tr></table>
-     </th>
-    </tr>
-    <? for($i=0;$i<count($topics);$i++): ?>
-    <? $tdcolor=($i%2)?"#557799":"#446688"; ?>
-    <tr class="cite-<?=$topics[$i]["userfirstpost"]?>">
-     <td bgcolor="<?=$tdcolor?>">
-      <?=substr($topics[$i]["firstpost"],0,10)?><br />
-     </td>
-     <td bgcolor="<?=$tdcolor?>">
-      <table cellspacing="0" cellpadding="0">
-       <tr>
-        <td>
-         <a href="user.php?who=<?=$topics[$i]["userfirstpost"]?>">
-          <img src="avatars/<?=$topics[$i]["avatar_2"]?>" width="16" height="16" border="0" title="<?=$topics[$i]["nickname_2"]?>"><br />
-         </a>
-        </td>
-        <td>
-         <img src="gfx/z.gif" width="3" height="1"><br />
-        </td>
-        <td>
-         <a href="user.php?who=<?=$topics[$i]["userfirstpost"]?>">
-          <?=$topics[$i]["nickname_2"]?><br />
-         </a>
-        </td>
-       </tr>
-      </table>
-     </td>
-     <?
-if (canSeeBBSCategories()) {
-?>
-     <td bgcolor="<?=$tdcolor?>">
-      <?=$thread_categories[$topics[$i]["category"]]?>
-<?
-if (canEditBBSCategories()) {
-?>
-      [<a href="edit_topic_category.php?which=<?=$topics[$i]["id"]?>">edit</a>]
-<?
-}
-?>
-     </td>
-<?
-}
-?>
-
-     <td bgcolor="<?=$tdcolor?>">
-      <a href="topic.php?which=<?=$topics[$i]["id"]?>"><b>
-<? if (strlen($topics[$i]["topic"])>70) print(htmlcleanonerow(substr($topics[$i]["topic"],0,70)."...")); else print(htmlcleanonerow($topics[$i]["topic"])); ?></b></a><br />
-     </td>
-     <td bgcolor="<?=$tdcolor?>" align="right">
-      <?=$topics[$i]["count"]?><br />
-     </td>
-     <td bgcolor="<?=$tdcolor?>">
-      <?=$topics[$i]["lastpost"]?><br />
-     </td>
-     <td bgcolor="<?=$tdcolor?>">
-      <table cellspacing="0" cellpadding="0">
-       <tr>
-        <td>
-         <a href="user.php?who=<?=$topics[$i]["userlastpost"]?>">
-          <img src="avatars/<?=$topics[$i]["avatar_1"]?>" width="16" height="16" border="0" title="<?=$topics[$i]["nickname_1"]?>"><br />
-         </a>
-        </td>
-        <td>
-         <img src="gfx/z.gif" width="3" height="1"><br />
-        </td>
-        <td>
-         <a href="user.php?who=<?=$topics[$i]["userlastpost"]?>">
-          <?=$topics[$i]["nickname_1"]?><br />
-         </a>
-        </td>
-       </tr>
-      </table>
-     </td>
-
-    </tr>
-    <? endfor; ?>
-
-    </tr>
-	<tr bgcolor="#224488">
- 	 <td colspan="<?=$row?>">
-      <table width="100%" cellspacing="0" cellpadding="0" border="0">
-       <tr>
-       <? if($page>=2): ?>
-        <td>
-         <a href="<?=($pagelink)?>&page=<?=($page-1)?>">
-          <img src="gfx/flecheg.gif" border="0"><br />
-         </a>
-        </td>
-        <td>&nbsp;</td>
-        <td nowrap>
-         <a href="<?=($pagelink)?>&page=<?=($page-1)?>">
-          <b>previous page</b><br />
-         </a>
-        </td>
-       <? endif; ?>
-        <form action="bbs.php">
-        <td width="50%" align="right">
-        <input type="hidden" name="order" value="<? print($order); ?>">
-<?if($_GET["categoryfilter"]){?>        <input type="hidden" name="categoryfilter" value="<? print($_GET["categoryfilter"]); ?>"><?}?>
-        <select name="page">
-        <? for($i=1;($i-1)<=($nb_topics/$topics_per_page);$i++): ?>
-        <? if($i==$page): ?>
-        <option value="<? print($i); ?>" selected><? print($i); ?></option>
-        <? else: ?>
-        <option value="<? print($i); ?>"><? print($i); ?></option>
-        <? endif; ?>
-        <? endfor; ?>
-        </select><br />
-        </td>
-        <td>&nbsp;</td>
-        <td width="50%">
-        <input type="image" src="gfx/submit.gif" border="0"><br />
-        </td>
-        </form>
-       <? if(($page*$topics_per_page)<=$nb_topics): ?>
-        <td nowrap>
-         <a href="<?=($pagelink)?>&page=<?=($page+1)?>">
-          <b>next page</b><br />
-         </a>
-        </td>
-        <td>&nbsp;</td>
-        <td>
-         <a href="<?=($pagelink)?>&page=<?=($page+1)?>">
-          <img src="gfx/fleched.gif" border="0"><br />
-         </a>
-        </td>
-       <? endif; ?>
-       </tr>
-      </table>
-	 </td>
-	</tr>
-   </table>
-  </td>
- </tr>
-</table>
-<br />
-
-<table bgcolor="#000000" cellspacing="1" cellpadding="0" width="50%">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2">
-    <tr>
-     <th bgcolor="#224488" colspan="4">
-      Disclaimer<br />
-     </th>
-    </tr>
-    <tr>
-     <td bgcolor="#446688" colspan="4" align="left">
-      The oldskool pouët BBS is not the demoscene, please visit a <a href="http://www.demoparty.net/">demoparty</a>. This is merely a forum for sceners, with obviously too much free time, to release their frustrations and request salted communitary feedback, as opposed to polluting the prod comments section.<br />
-      <br />
-      New users: please take your vaccines before entering, don't expect instant praise, and try not to feel easily insulted.<br />
-      Old users: please don't feed the trolls. Reoccuring annoying behavior will result in a heavily subjective ban. Just try not to piss off 90% of our active users with childish and/or idiotic behaviour and you should be safe.<br />
-      <br />
-      <a href="http://i.imgur.com/QBxVc.jpg">You have been warned.</a><br />
-      <br />
-      Also, <b>copycat threads are the equivalent of putting glow and ribbons in your demo.</b><br />
-     </td>
-    </tr>
-   </table>
-  </td>
- </tr>
-</table>
-<br />
-
-<? if($_SESSION["SCENEID_ID"]): ?>
-<form action="add.php" method="post">
-<input type="hidden" name="type" value="topic">
-<table bgcolor="#000000" cellspacing="1" cellpadding="0">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2">
-    <tr>
-     <th bgcolor="#224488" colspan="4">
-      post a new topic<br />
-     </th>
-    </tr>
-    <tr>
-     <td bgcolor="#446688" colspan="4" align="center">
-      <table>
-       <tr>
-        <td>
-         topic:<br />
-         <input type="text" name="topic" size="80" value="<?=$topic?>"><br />
-<?
-if (canSeeBBSCategories()) {
-?>
-         category:<br />
-        <select name='category'>
-        <?
-        foreach ($thread_categories as $k=>$v)
-          printf("<option value='%d'%s>%s</option>\n",$k,0==$k?' selected="selected"':"",htmlspecialchars($v));
-        ?>
-        </select>
-        <br />
-<?
-}
-?>
-         message:<br />
-         <textarea cols="80" rows="10" name="message"><?=$message?></textarea><br />
-         <div align="right"><a href="faq.php#BB Code"><b>BB Code</b></a> is allowed here</div>
-        </td>
-       </tr>
-      </table>
-     </td>
-    </tr>
-    <tr>
-     <td bgcolor="#224488" colspan="4" align="right">
-<script language="JavaScript" type="text/javascript">
+<script>
 <!--
-  document.write('<input type="image" src="gfx/previewdxm.gif" onclick=\'return preview(this.form,"topic")\' border="0">');
+var threadCategories = $A([<?php
+foreach($this->categories as $v) echo "'"._js($v)."',";
+?>]);
+document.observe("dom:loaded",function(){
+  var sel = new Element("select",{"id":"categoryFilter"});
+  $("th_category").insert(sel);
+
+  var q = location.href.toQueryParams();
+
+  sel.add( new Option("-- filter to","") );
+  threadCategories.each(function(item){
+    sel.add( new Option(item,item) );
+    if (item == q["category"])
+      sel.selectedIndex = sel.options.length - 1;
+  });
+  sel.observe("change",function(){
+    if (sel.selectedIndex == 0)
+      location.href = "bbs.php";
+    else
+      location.href = "bbs.php?category=" + sel.options[ sel.selectedIndex ].value;
+  });
+});
 //-->
 </script>
-      <input type="image" src="gfx/submit.gif" border="0"><br />
-     </th>
-    </tr>
-   </table>
-  </td>
- </tr>
-</table>
-</form>
-<? else: ?>
-<form action="login.php" method="post">
-<table bgcolor="#000000" cellspacing="1" cellpadding="0">
- <tr>
-  <td>
-<table bgcolor="#000000" cellspacing="1" cellpadding="2">
- <tr><th>post a new topic</th></tr>
- <tr bgcolor="#446688">
-  <td nowrap align="center">
-   You need to be logged in to post a new topic :: <a href="account.php">register here</a><br />
-   <input type="text" name="login" value="SceneID" size="15" maxlength="16" onfocus="this.value=''">
-   <input type="password" name="password" value="password" size="15" onfocus="javascript:if(this.value=='password') this.value='';"><br />
-  </td>
- </tr>
- <tr>
-  <td bgcolor="#6688AA" align="right">
-   <input type="image" src="gfx/submit.gif">
-  </td>
- </tr>
-</table>
-  </td>
- </tr>
-</table>
-</form>
-<? endif; ?>
-<br />
-<? require("include/bottom.php"); ?>
+<?php
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+$list = new PouetBoxBBSTopicList();
+$list->Load();
+
+$openNew = null;
+if ($currentUser)
+{
+  if ($currentUser->CanOpenNewBBSTopic())
+  {
+    $openNew = new PouetBoxBBSOpen();
+    $openNew->Load();
+  }
+}
+else
+{
+  $openNew = new PouetBoxLogin();
+}
+
+$TITLE = "BBS";
+if ($list->page > 1)
+  $TITLE .= " :: page ".(int)$list->page;
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+echo "<form action='bbs.php' method='get'>\n";
+
+foreach($_GET as $k=>$v)
+  if ($k != "type" && $k != "platform" && $k != "page")
+    echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'/>\n";
+
+if($list) $list->Render();
+echo "</form>\n";
+
+if($openNew) $openNew->Render();
+
+echo "</div>\n";
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
+?>

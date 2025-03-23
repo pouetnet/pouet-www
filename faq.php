@@ -1,55 +1,96 @@
-<?
-require("include/top.php");
+<?php
+require_once("bootstrap.inc.php");
 
-$query="SELECT id,question,answer,category FROM faq ORDER BY category ASC";
-$result=mysql_query($query);
-while($tmp=mysql_fetch_array($result)) {
-  $faq[]=$tmp;
-}
+class PouetBoxFAQ extends PouetBox
+{
+  public $entries;
+  function __construct()
+  {
+    parent::__construct();
+    $this->uniqueID = "pouetbox_faq";
+    $this->title = "the always incomplete pouÃ«t.net faq";
+  }
+
+  function LoadFromDB()
+  {
+    $this->entries = SQLLib::SelectRows("select * from faq where deprecated = 0 order by category, id");
+  }
+
+  function RenderBody()
+  {
+    echo "<div class='content' id='faq_toc'>\n";
+    $lastType = "";
+    foreach($this->entries as $e)
+    {
+      if ($lastType != $e->category)
+      {
+        if ($lastType)
+          echo "</ul>\n";
+        echo "<h3>"._html($e->category)."</h3>\n";
+        $lastType = $e->category;
+        echo "<ul>\n";
+      }
+      echo "<li><a href='#faq"._html($e->id)."'>".$e->question."</a></li>\n";
+    }
+    echo "</ul>\n";
+    echo "</div>\n";
+
+    $lastType = "";
+    foreach($this->entries as $e)
+    {
+      if ($lastType != $e->category)
+      {
+        if ($lastType)
+          echo "</dl>\n";
+        echo "<h2>:: "._html($e->category)."</h2>\n";
+        $lastType = $e->category;
+        echo "<dl class='faq'>\n";
+      }
+      echo "<dt id='faq"._html($e->id)."'>:: "._html($e->category)." :: ".$e->question."</dt>\n";
+      echo "<dd>".$e->answer."</dd>\n";
+    }
+    echo "</dl>\n";
+  }
+};
+
+$TITLE = "faq";
+
+require_once("include_pouet/header.php");
+require("include_pouet/menu.inc.php");
+
+echo "<div id='content'>\n";
+
+$box = new PouetBoxFAQ();
+$box->Load();
+$box->Render();
+
+echo "</div>\n";
+
 ?>
-<br>
-<table bgcolor="#000000" cellspacing="1" cellpadding="0" width="75%">
- <tr>
-  <td>
-   <table bgcolor="#000000" cellspacing="1" cellpadding="2">
-    <tr>
-     <th bgcolor="#224488">the always incomplete pouët.net faq</th>
-    </tr>
-    <tr>
-     <td bgcolor="#446688">
-      <? for($i=0;$i<count($faq);$i++): ?>
-       <? if($faq[$i]["category"]!=$faq[$i-1]["category"]): ?>
-        <a href="#<? print($faq[$i]["category"]); ?>"><b><? print($faq[$i]["category"]); ?></b></a><br>
-       <? endif; ?>
-       &nbsp;--> <a href="#<? print($faq[$i]["id"]); ?>"><? print($faq[$i]["question"]); ?></a><br>
-       <? if($faq[$i]["category"]!=$faq[$i+1]["category"]): ?>
-        <br>
-       <? endif; ?>
-      <? endfor; ?>
-     </td>
-    </tr>
-    <? for($i=0;$i<count($faq);$i++): ?>
-    <? if($faq[$i]["category"]!=$faq[$i-1]["category"]): ?>
-     <tr>
-      <th bgcolor="#224488"><a name="<? print($faq[$i]["category"]); ?>"><? print($faq[$i]["category"]); ?></a></th>
-     </tr>
-    <? endif; ?>
-    <tr>
-     <td bgcolor="#446688">
-      <a name="<? print($faq[$i]["id"]); ?>"><b>:: <? print($faq[$i]["category"]); ?> :: <? print($faq[$i]["question"]); ?></b></a>
-     </td>
-    </tr>
-    <tr>
-     <td bgcolor="#557799">
-      <blockquote>
-       <? print($faq[$i]["answer"]); ?>
-      </blockquote>
-     </td>
-    </tr>
-    <? endfor; ?>
-   </table>
-  </td>
- </tr>
-</table>
-<br>
-<? require("include/bottom.php"); ?>
+<script>
+<!--
+document.observe("dom:loaded",function(){
+  $("faq_toc").hide();
+  $$(".faq > dd").invoke("hide");
+  $$(".faq > dt").each(function(item){
+    item.update( "[<a href='#" + item.id + "'>#</a>] " + item.innerHTML );
+    item.setStyle({"cursor":"pointer"});
+    item.observe("click",function(ev){
+      ev.findElement("dt").nextSiblings().first().toggle();
+      if (!ev.findElement("a"))
+        ev.stop();
+    });
+  });
+
+  var e = $$("dt#" + location.hash);
+  if (e.length) e.first().nextSiblings().first().show();
+  var v = location.hash; location.hash = v; // force firefox
+});
+//-->
+</script>
+<?php
+
+require("include_pouet/menu.inc.php");
+require_once("include_pouet/footer.php");
+
+?>

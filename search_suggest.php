@@ -1,15 +1,13 @@
-<?
-include_once("include/misc.php");
-include_once("include/auth.php");
+<?php
+require_once("bootstrap.inc.php");
 
-conn_db();
-
-$r = mysql_query("select name,type,party_year from prods where name like '".mysql_real_escape_string($_GET["what"])."%' order by views desc limit 10");
+$r = SQLLib::selectRows(sprintf_esc("select name,type,party_year from prods where name like '%%%s%%' order by views desc limit 10",_like($_GET["what"])));
 $res[0] = $_GET["what"];
-while($o = mysql_fetch_object($r))
+foreach($r as $o)
 {
   $res[1][] = $o->name;
   $res[2][] = $o->type.($o->party_year?", ".$o->party_year:"");
 }
+header("Content-type: application/json; charset=utf-8");
 echo json_encode($res);
 ?>
