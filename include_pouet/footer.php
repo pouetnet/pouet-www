@@ -10,7 +10,7 @@
   </li>
   <li>
     send comments and bug reports to <a href="mailto:webmaster@pouet.net">webmaster@pouet.net</a>
-    or <a href="https://github.com/pouetnet/pouet2.0/">github</a>
+    or <a href="https://github.com/pouetnet/www.pouet.net">github</a>
   </li>
 <?php
 $timer["html"]["end"] = microtime_float();
