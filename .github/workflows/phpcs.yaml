@@ -1,4 +1,4 @@
-on: push
+on: workflow_dispatch # Only runs when manually triggered for now
 
 jobs:
   phpcs:
