@@ -3,54 +3,52 @@ require_once("bootstrap.inc.php");
 
 class PouetBoxFAQ extends PouetBox
 {
-  public $entries;
-  function __construct()
-  {
-    parent::__construct();
-    $this->uniqueID = "pouetbox_faq";
-    $this->title = "the always incomplete pouët.net faq";
-  }
-
-  function LoadFromDB()
-  {
-    $this->entries = SQLLib::SelectRows("select * from faq where deprecated = 0 order by category, id");
-  }
-
-  function RenderBody()
-  {
-    echo "<div class='content' id='faq_toc'>\n";
-    $lastType = "";
-    foreach($this->entries as $e)
+    public $entries;
+    public function __construct()
     {
-      if ($lastType != $e->category)
-      {
-        if ($lastType)
-          echo "</ul>\n";
-        echo "<h3>"._html($e->category)."</h3>\n";
-        $lastType = $e->category;
-        echo "<ul>\n";
-      }
-      echo "<li><a href='#faq"._html($e->id)."'>".$e->question."</a></li>\n";
+        parent::__construct();
+        $this->uniqueID = "pouetbox_faq";
+        $this->title = "the always incomplete pouët.net faq";
     }
-    echo "</ul>\n";
-    echo "</div>\n";
 
-    $lastType = "";
-    foreach($this->entries as $e)
+    public function LoadFromDB()
     {
-      if ($lastType != $e->category)
-      {
-        if ($lastType)
-          echo "</dl>\n";
-        echo "<h2>:: "._html($e->category)."</h2>\n";
-        $lastType = $e->category;
-        echo "<dl class='faq'>\n";
-      }
-      echo "<dt id='faq"._html($e->id)."'>:: "._html($e->category)." :: ".$e->question."</dt>\n";
-      echo "<dd>".$e->answer."</dd>\n";
+        $this->entries = SQLLib::SelectRows("select * from faq where deprecated = 0 order by category, id");
     }
-    echo "</dl>\n";
-  }
+
+    public function RenderBody()
+    {
+        echo "<div class='content' id='faq_toc'>\n";
+        $lastType = "";
+        foreach ($this->entries as $e) {
+            if ($lastType != $e->category) {
+                if ($lastType) {
+                    echo "</ul>\n";
+                }
+                echo "<h3>"._html($e->category)."</h3>\n";
+                $lastType = $e->category;
+                echo "<ul>\n";
+            }
+            echo "<li><a href='#faq"._html($e->id)."'>".$e->question."</a></li>\n";
+        }
+        echo "</ul>\n";
+        echo "</div>\n";
+
+        $lastType = "";
+        foreach ($this->entries as $e) {
+            if ($lastType != $e->category) {
+                if ($lastType) {
+                    echo "</dl>\n";
+                }
+                echo "<h2>:: "._html($e->category)."</h2>\n";
+                $lastType = $e->category;
+                echo "<dl class='faq'>\n";
+            }
+            echo "<dt id='faq"._html($e->id)."'>:: "._html($e->category)." :: ".$e->question."</dt>\n";
+            echo "<dd>".$e->answer."</dd>\n";
+        }
+        echo "</dl>\n";
+    }
 };
 
 $TITLE = "faq";

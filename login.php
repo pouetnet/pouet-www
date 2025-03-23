@@ -1,82 +1,73 @@
 <?php
+
 require_once("bootstrap.inc.php");
 require_once("include_pouet/pouet-user.php");
 
 //$csrf = new CSRFProtect();
-if (@$_GET["error"])
-  redirect("error.php?e=".rawurlencode( $_GET["error_description"] ));
+if (@$_GET["error"]) {
+    redirect("error.php?e=".rawurlencode($_GET["error_description"]));
+}
 
-if (!@$_GET["code"])
-{
-  $_SESSION["__return"] = @$_GET["return"];
-  $sceneID->PerformAuthRedirect();
-  exit();
+if (!@$_GET["code"]) {
+    $_SESSION["__return"] = @$_GET["return"];
+    $sceneID->PerformAuthRedirect();
+    exit();
 }
 
 $rv = null;
 $err = "";
-try
-{
-  $returnURL = $_SESSION["__return"];
-  unset($_SESSION["__return"]);
+try {
+    $returnURL = $_SESSION["__return"];
+    unset($_SESSION["__return"]);
 
-  $sceneID->ProcessAuthResponse();
+    $sceneID->ProcessAuthResponse();
 
-  unset($_SESSION["user"]);
+    unset($_SESSION["user"]);
 
-  session_regenerate_id(true);
+    session_regenerate_id(true);
 
-  $SceneIDuser = $sceneID->Me();
+    $SceneIDuser = $sceneID->Me();
 
-  if (!@$SceneIDuser["success"] || !@$SceneIDuser["user"]["id"])
-  {
-    redirect("error.php?e=".rawurlencode("User not found."));
-  }
+    if (!@$SceneIDuser["success"] || !@$SceneIDuser["user"]["id"]) {
+        redirect("error.php?e=".rawurlencode("User not found."));
+    }
 
-  $user = PouetUser::Spawn( (int)$SceneIDuser["user"]["id"] );
-  $welcome = false;
-  if (!$user || !$user->id)
-  {
-    $entry = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
-    $r = $entry[array_rand($entry)];
-    $a = basename($r);
+    $user = PouetUser::Spawn((int)$SceneIDuser["user"]["id"]);
+    $welcome = false;
+    if (!$user || !$user->id) {
+        $entry = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
+        $r = $entry[array_rand($entry)];
+        $a = basename($r);
 
-    $user = new PouetUser();
-    $user->id = (int)$SceneIDuser["user"]["id"];
-    $user->nickname = substr($SceneIDuser["user"]["display_name"],0,16);
-    $user->avatar = $a;
+        $user = new PouetUser();
+        $user->id = (int)$SceneIDuser["user"]["id"];
+        $user->nickname = substr($SceneIDuser["user"]["display_name"], 0, 16);
+        $user->avatar = $a;
 
-    $user->Create();
+        $user->Create();
 
-    $user = PouetUser::Spawn( $user->id );
+        $user = PouetUser::Spawn($user->id);
 
-    $welcome = true;
-  }
+        $welcome = true;
+    }
 
-  if ( $user->IsBanned() )
-  {
-    redirect("error.php?e=".rawurlencode("We dun like yer type 'round these parts."));
-  }
+    if ($user->IsBanned()) {
+        redirect("error.php?e=".rawurlencode("We dun like yer type 'round these parts."));
+    }
 
-  $_SESSION["user"] = $user;
+    $_SESSION["user"] = $user;
 
-  $currentUserSettings = SQLLib::SelectRow(sprintf_esc("select * from usersettings where id=%d",$user->id));
-  if ($currentUserSettings)
-    $ephemeralStorage->set( "settings:".$user->id, $currentUserSettings );
+    $currentUserSettings = SQLLib::SelectRow(sprintf_esc("select * from usersettings where id=%d", $user->id));
+    if ($currentUserSettings) {
+        $ephemeralStorage->set("settings:".$user->id, $currentUserSettings);
+    }
 
-  if ($welcome)
-  {
-    redirect( "welcome.php" . $returnURL ? "?return=" . rawurlencode( basename( $returnURL ) ) : "" );
-  }
-  else
-  {
-    redirect( basename( $returnURL ? $returnURL : "index.php" ) );
-  }
+    if ($welcome) {
+        redirect("welcome.php" . $returnURL ? "?return=" . rawurlencode(basename($returnURL)) : "");
+    } else {
+        redirect(basename($returnURL ? $returnURL : "index.php"));
+    }
 
+} catch (SceneID3Exception $e) {
+    redirect("error.php?e=".rawurlencode($e->GetMessage()));
 }
-catch(SceneID3Exception $e)
-{
-  redirect("error.php?e=".rawurlencode( $e->GetMessage() ));
-}
-
-?>

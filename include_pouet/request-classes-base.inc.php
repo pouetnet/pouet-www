@@ -1,27 +1,47 @@
 <?php
+
 class PouetRequestBase
 {
-  // return the type of atomic item this request handles (can be "prod", "group" or "party")
-  static function GetItemType() { return ""; }
+    // return the type of atomic item this request handles (can be "prod", "group" or "party")
+    public static function GetItemType()
+    {
+        return "";
+    }
 
-  // return human-readable description of operation
-  static function Describe() { return ""; }
+    // return human-readable description of operation
+    public static function Describe()
+    {
+        return "";
+    }
 
-  // return error string on error, empty string / null / false / etc. on success
-  static function GetFields($data,&$fields,&$js) { return ""; }
+    // return error string on error, empty string / null / false / etc. on success
+    public static function GetFields($data, &$fields, &$js)
+    {
+        return "";
+    }
 
-  // transform form $input into sql-ish $output
-  // return error array on error, empty array on success
-  static function ValidateRequest($input,&$output) { $output = $input; return array(); }
+    // transform form $input into sql-ish $output
+    // return error array on error, empty array on success
+    public static function ValidateRequest($input, &$output)
+    {
+        $output = $input;
+        return array();
+    }
 
-  // return HTML string describing the changes
-  // - $data is the changeset
-  static function Display($itemID, $data) { return ""; }
+    // return HTML string describing the changes
+    // - $data is the changeset
+    public static function Display($itemID, $data)
+    {
+        return "";
+    }
 
-  // commit changeset
-  // - $reqData is the changeset
-  // return error array on error, empty array on success
-  static function Process($itemID,$reqData) { return array(); }
+    // commit changeset
+    // - $reqData is the changeset
+    // return error array on error, empty array on success
+    public static function Process($itemID, $reqData)
+    {
+        return array();
+    }
 };
 
 /*
@@ -41,7 +61,7 @@ class PouetRequestClassDoStuffToProds extends PouetRequestClassBase
         "info"=>"good stuff. yeah.",
         "required"=>true,
       ),
-      
+
       // Add this if all the other data is collected
       "finalStep" => array(
         "type"=>"hidden",
@@ -56,7 +76,7 @@ class PouetRequestClassDoStuffToProds extends PouetRequestClassBase
     {
       return array("stuff not good !");
     }
-    
+
     $output["stuff"] = $input["stuff"];
     return array();
   }
@@ -82,4 +102,3 @@ class PouetRequestClassDoStuffToProds extends PouetRequestClassBase
 */
 
 $REQUESTTYPES = array();
-?>

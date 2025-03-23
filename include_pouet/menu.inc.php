@@ -1,13 +1,11 @@
 <?php
 $menusetting = "bottombar";
-if (!defined("MENU_DONE_ONCE"))
-{
-  $menusetting = "topbar";
-  define("MENU_DONE_ONCE",true);
+if (!defined("MENU_DONE_ONCE")) {
+    $menusetting = "topbar";
+    define("MENU_DONE_ONCE", true);
 }
-if (get_setting($menusetting))
-{
-?>
+if (get_setting($menusetting)) {
+    ?>
 <nav id="<?=$menusetting?>">
   <ul>
 <?php if ($currentUser) { ?>
@@ -31,16 +29,12 @@ if (get_setting($menusetting))
   </ul>
 </nav>
 <?php
-if (POUET_MOBILE)
-{
-  if ($menusetting == "topbar")
-  {
-    printf("<a href='#bottombar' class='mobileNavLink'>Go to bottom</a>");
-  } 
-  else
-  {
-    printf("<a href='#topbar' class='mobileNavLink'>Go to top</a>");
-  } 
+if (POUET_MOBILE) {
+    if ($menusetting == "topbar") {
+        printf("<a href='#bottombar' class='mobileNavLink'>Go to bottom</a>");
+    } else {
+        printf("<a href='#topbar' class='mobileNavLink'>Go to top</a>");
+    }
 }
 }
 ?>
