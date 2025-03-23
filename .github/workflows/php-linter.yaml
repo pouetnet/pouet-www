@@ -1,4 +1,4 @@
-on: pull_request
+on: push
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -8,4 +8,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-      - run: find . -name "*.php" -exec php -l {} \;
+      - name: Lint PHP files
+        run: |
+          set -e  # Exit on any error
+          failed=0
+          for file in $(find . -name "*.php"); do
+            echo "Linting $file"
+            php -l "$file" || failed=1
+          done
+          exit $failed
