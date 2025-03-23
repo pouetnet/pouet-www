@@ -16,327 +16,331 @@
  */
 class LastRss
 {
-	/**
-	 * cURL options
-	 * @var array
-	 */
-	private $curlOptions = array(
-		CURLOPT_HEADER => false,
-		CURLOPT_CONNECTTIMEOUT => 2,
-		CURLOPT_TIMEOUT => 5,
+    /**
+     * cURL options
+     * @var array
+     */
+    private $curlOptions = array(
+        CURLOPT_HEADER => false,
+        CURLOPT_CONNECTTIMEOUT => 2,
+        CURLOPT_TIMEOUT => 5,
 //		CURLOPT_FOLLOWLOCATION => true,
-		CURLOPT_MAXREDIRS => 3,
-		CURLOPT_RETURNTRANSFER => 1,
-		CURLOPT_FAILONERROR => true,
-		CURLOPT_ENCODING => 'gzip,deflate',
-	);
+        CURLOPT_MAXREDIRS => 3,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_FAILONERROR => true,
+        CURLOPT_ENCODING => 'gzip,deflate',
+    );
 
-	/**
-	 * Error strings
-	 */
-	private static $parseError = 'Parse error: Invalid RSS/XML document (%s). Please check RSS by http://feedvalidator.org/.';
-	private static $downloadError = 'Download error: %s';
-	private static $fileOpenErorr = 'File error: Unable to open file %s';
+    /**
+     * Error strings
+     */
+    private static $parseError = 'Parse error: Invalid RSS/XML document (%s). Please check RSS by http://feedvalidator.org/.';
+    private static $downloadError = 'Download error: %s';
+    private static $fileOpenErorr = 'File error: Unable to open file %s';
 
-	private $cacheDir = "./cache";
-	private $cacheTime = 3600; // in seconds
-	
-	
-	/**
-	 * If true, HTML will be stripped from HTML is suspected tags
-	 * @var boolean
-	 */
-	private $stripHtml = true;
+    private $cacheDir = "./cache";
+    private $cacheTime = 3600; // in seconds
 
-	/**
-	 * Array of tags where HTML is suspected
-	 */
-	private $htmlSuspected = array('title', 'description');
 
-	private $channelTags = array('title', 'link', 'description', 'lastBuildDate');
-	private $itemTags = array('title', 'link', 'description', 'pubDate', 'guid');
+    /**
+     * If true, HTML will be stripped from HTML is suspected tags
+     * @var boolean
+     */
+    private $stripHtml = true;
 
-	/**
-	 * Maximum number of items to be returned
-	 */
-	private $itemsLimit = 0;
+    /**
+     * Array of tags where HTML is suspected
+     */
+    private $htmlSuspected = array('title', 'description');
 
-	/**
-	 * @var string Date time format for date related RSS items
-	 */
-	private $dateFormat = null;
+    private $channelTags = array('title', 'link', 'description', 'lastBuildDate');
+    private $itemTags = array('title', 'link', 'description', 'pubDate', 'guid');
 
-	/**
-	 * XML name spaces
-	 */
-	private static $xmlns = array(
-		// @todo: asi se nikde nepouziva - smazat
-		'atom' => 'http://www.w3.org/2005/Atom',
-		'content' => 'http://purl.org/rss/1.0/modules/content/',
-		'wfw' => 'http://wellformedweb.org/CommentAPI/',
-		'dc' => 'http://purl.org/dc/elements/1.1/',
-		'sy' => 'http://purl.org/rss/1.0/modules/syndication/',
-		'slash' => 'http://purl.org/rss/1.0/modules/slash/',
-	);
+    /**
+     * Maximum number of items to be returned
+     */
+    private $itemsLimit = 0;
 
-	/**
-	 * XML name spaces used in used tags
-	 */
-	private $usedXmlns = array();
+    /**
+     * @var string Date time format for date related RSS items
+     */
+    private $dateFormat = null;
 
-	public $lastError = null;
+    /**
+     * XML name spaces
+     */
+    private static $xmlns = array(
+        // @todo: asi se nikde nepouziva - smazat
+        'atom' => 'http://www.w3.org/2005/Atom',
+        'content' => 'http://purl.org/rss/1.0/modules/content/',
+        'wfw' => 'http://wellformedweb.org/CommentAPI/',
+        'dc' => 'http://purl.org/dc/elements/1.1/',
+        'sy' => 'http://purl.org/rss/1.0/modules/syndication/',
+        'slash' => 'http://purl.org/rss/1.0/modules/slash/',
+    );
 
-	/**
-	 * Constructor to initialize all options
-	 */
-	public function __construct( $options = array() )
-	{
-		foreach ($options as $name => $value) {
-			$this->$name = $value;
-		}
-	}
+    /**
+     * XML name spaces used in used tags
+     */
+    private $usedXmlns = array();
 
-	/**
-	 * Register all xml namespaces used in channel tags or item tags.
-	 */
-	private function registerNameSpaces(&$xpath)
-	{
-		foreach ($this->usedXmlns as $ns) {
-			$xpath->registerNamespace($ns, '');
-		}
-	}
+    public $lastError = null;
 
-	/**
-	 * Recalc array of all xml namespaces used in channel tags or item tags.
-	 */
-	private function calcNamespaces()
-	{
-		// Get all XML name spaces used in required tags
-		$tags = implode(',', array_merge($this->channelTags, $this->itemTags));
-		preg_match_all("'([a-zA-Z0-9]+):'si", $tags, $namespaces);
-		$this->usedXmlns = $namespaces[1];
-	}
+    /**
+     * Constructor to initialize all options
+     */
+    public function __construct($options = array())
+    {
+        foreach ($options as $name => $value) {
+            $this->$name = $value;
+        }
+    }
 
-	/**
-	 * Set required channel tags
-	 * @param array $tags (default is array('title', 'link', 'description')
-	 */
-	public function setChannelTags($tags) {
-		$this->channelTags = $tags;
-		$this->calcNamespaces();
-		return $this;
-	}
+    /**
+     * Register all xml namespaces used in channel tags or item tags.
+     */
+    private function registerNameSpaces(&$xpath)
+    {
+        foreach ($this->usedXmlns as $ns) {
+            $xpath->registerNamespace($ns, '');
+        }
+    }
 
-	/**
-	 * Set required item tags
-	 * @param array $tags Default is array('title', 'link', 'description', 'pubDate', 'guid')
-	 */
-	public function setItemTags($tags) {
-		$this->itemTags = $tags;
-		$this->calcNamespaces();
-		return $this;
-	}
+    /**
+     * Recalc array of all xml namespaces used in channel tags or item tags.
+     */
+    private function calcNamespaces()
+    {
+        // Get all XML name spaces used in required tags
+        $tags = implode(',', array_merge($this->channelTags, $this->itemTags));
+        preg_match_all("'([a-zA-Z0-9]+):'si", $tags, $namespaces);
+        $this->usedXmlns = $namespaces[1];
+    }
 
-	/**
-	 * Set date/time format for date related items (lastBuildDate, pubDate).
-	 * To disable date format conversion set date format to null (default value).
-	 * @param string $dateFormat Date/time format compatible with PHP function date().
-	 */
-	public function setDateFormat($dateFormat) {
-		$this->dateFormat = $dateFormat;
-		return $this;
-	}
+    /**
+     * Set required channel tags
+     * @param array $tags (default is array('title', 'link', 'description')
+     */
+    public function setChannelTags($tags)
+    {
+        $this->channelTags = $tags;
+        $this->calcNamespaces();
+        return $this;
+    }
 
-	/**
-	 * Fotmat the input variable into $dateFormat
-	 *
-	 * If input value is not valid date, change input value to null.
-	 * If $dateFormat is specified, do nothing.
-	 * @param string $dateString
-	 */
-	private function formatDate(&$dateString) {
-		if ($this->dateFormat) {
-			$timeStamp = strtotime($dateString);
-			$dateString = ($timeStamp) ? date($this->dateFormat, $timeStamp) : null;
-		}
-	}
+    /**
+     * Set required item tags
+     * @param array $tags Default is array('title', 'link', 'description', 'pubDate', 'guid')
+     */
+    public function setItemTags($tags)
+    {
+        $this->itemTags = $tags;
+        $this->calcNamespaces();
+        return $this;
+    }
 
-	/**
-	 * Get URL content using CURL
-	 * @param $url String
-	 * @return String Returns XML string on success, FALSE on failure.
-	 */
-	private function loadUrl($url)
-	// @todo: prejmenovat na downloadUrl()
-	{
-		if (!function_exists('curl_init')) {
-			return file_get_contents($url);
-		}
-		$ch = curl_init();
-		curl_setopt_array($ch, $this->curlOptions);
-		if (!ini_get('safe_mode') && !ini_get('open_basedir'))
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_URL, $url);
-		if (!($content = curl_exec($ch))) {
-			$this->lastError = sprintf(self::$downloadError, curl_error($ch));
-		}
-		curl_close($ch);
-		return $content;
-	}
+    /**
+     * Set date/time format for date related items (lastBuildDate, pubDate).
+     * To disable date format conversion set date format to null (default value).
+     * @param string $dateFormat Date/time format compatible with PHP function date().
+     */
+    public function setDateFormat($dateFormat)
+    {
+        $this->dateFormat = $dateFormat;
+        return $this;
+    }
 
-	/**
-	 * Parse xmlData and return parsed result
-	 *
-	 */
-	private function parse(&$xmlData)
-	{
-		if (!$xmlData)
-		{
-			return false;
-		}
-		$result = array();
-		$doc = new DomDocument();
-		// Try to load XML or return parse error
-		if (false == @$doc->loadXml($xmlData)) {
-			// Try to fix XML by Tidy and try to load one more time
-			if (function_exists("tidy_repair_string"))
-				$xmlData = tidy_repair_string($xmlData, array('output-xml' => true, 'input-xml' => true), 'utf8');
-			if (false == @$doc->loadXml($xmlData)) {
-				$this->lastError = self::$parseError;
-				return false;
-			}
-		}
-		unset($xmlData);
-		$xpath = new DOMXPath($doc);
+    /**
+     * Fotmat the input variable into $dateFormat
+     *
+     * If input value is not valid date, change input value to null.
+     * If $dateFormat is specified, do nothing.
+     * @param string $dateString
+     */
+    private function formatDate(&$dateString)
+    {
+        if ($this->dateFormat) {
+            $timeStamp = strtotime($dateString);
+            $dateString = ($timeStamp) ? date($this->dateFormat, $timeStamp) : null;
+        }
+    }
 
-		// Register xml name spaces
-		$this->registerNamespaces($xpath);
+    /**
+     * Get URL content using CURL
+     * @param $url String
+     * @return String Returns XML string on success, FALSE on failure.
+     */
+    private function loadUrl($url)
+    // @todo: prejmenovat na downloadUrl()
+    {
+        if (!function_exists('curl_init')) {
+            return file_get_contents($url);
+        }
+        $ch = curl_init();
+        curl_setopt_array($ch, $this->curlOptions);
+        if (!ini_get('safe_mode') && !ini_get('open_basedir')) {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        if (!($content = curl_exec($ch))) {
+            $this->lastError = sprintf(self::$downloadError, curl_error($ch));
+        }
+        curl_close($ch);
+        return $content;
+    }
 
-		// Parse channel tags
-		foreach($this->channelTags as &$tag) {
-			$result[$tag] = $xpath->evaluate("string(channel/$tag)");
-			if ($tag == 'lastBuildDate') {
-				$this->formatDate($result[$tag]);
-			}
-		}
+    /**
+     * Parse xmlData and return parsed result
+     *
+     */
+    private function parse(&$xmlData)
+    {
+        if (!$xmlData) {
+            return false;
+        }
+        $result = array();
+        $doc = new DomDocument();
+        // Try to load XML or return parse error
+        if (false == @$doc->loadXml($xmlData)) {
+            // Try to fix XML by Tidy and try to load one more time
+            if (function_exists("tidy_repair_string")) {
+                $xmlData = tidy_repair_string($xmlData, array('output-xml' => true, 'input-xml' => true), 'utf8');
+            }
+            if (false == @$doc->loadXml($xmlData)) {
+                $this->lastError = self::$parseError;
+                return false;
+            }
+        }
+        unset($xmlData);
+        $xpath = new DOMXPath($doc);
 
-		// Parse items
-		// @todo: Zjistit, co bude rychlejsi
-		//$items = $doc->getElementsByTagName('item');
-		$items = $xpath->evaluate('/rss/channel/item');
+        // Register xml name spaces
+        $this->registerNamespaces($xpath);
 
-		foreach($items as $item) {
-			$tmpItem = array();
+        // Parse channel tags
+        foreach ($this->channelTags as &$tag) {
+            $result[$tag] = $xpath->evaluate("string(channel/$tag)");
+            if ($tag == 'lastBuildDate') {
+                $this->formatDate($result[$tag]);
+            }
+        }
 
-			// Parse item tags
-			foreach ($this->itemTags as &$tag) {
-				switch ($tag) {
-					case 'pubDate':
-						$tmpItem[$tag] = $xpath->evaluate('string(pubDate)', $item);
-						$this->formatDate($tmpItem[$tag]);
-						break;
-					case 'category':
-						// Category is multivalue tag
-						$tmpItem[$tag] = array();
-						foreach ($xpath->query('category', $item) as $node) {
-							$tmpItem[$tag][] = trim($node->nodeValue);
-						}
-						break;
-					case 'title':
-					case 'description':
-						$tmpItem[$tag] = $xpath->evaluate("string($tag)", $item);
-						if ($this->stripHtml) {
-							$tmpItem[$tag] = strip_tags($tmpItem[$tag]);
-							$tmpItem[$tag] = html_entity_decode($tmpItem[$tag], ENT_QUOTES, 'UTF-8');
-						}
-						$tmpItem[$tag] = trim($tmpItem[$tag]);
-						break;
-					default:
-						$tmpItem[$tag] = trim($xpath->evaluate("string($tag)", $item));
-						break;
-				}
-			}
+        // Parse items
+        // @todo: Zjistit, co bude rychlejsi
+        //$items = $doc->getElementsByTagName('item');
+        $items = $xpath->evaluate('/rss/channel/item');
 
-			$result['items'][] = $tmpItem;
+        foreach ($items as $item) {
+            $tmpItem = array();
 
-			// If limit number of items is reached, stop processing remaining items
-			if (count($result['items']) == $this->itemsLimit) {
-				break;
-			}
-		}
+            // Parse item tags
+            foreach ($this->itemTags as &$tag) {
+                switch ($tag) {
+                    case 'pubDate':
+                        $tmpItem[$tag] = $xpath->evaluate('string(pubDate)', $item);
+                        $this->formatDate($tmpItem[$tag]);
+                        break;
+                    case 'category':
+                        // Category is multivalue tag
+                        $tmpItem[$tag] = array();
+                        foreach ($xpath->query('category', $item) as $node) {
+                            $tmpItem[$tag][] = trim($node->nodeValue);
+                        }
+                        break;
+                    case 'title':
+                    case 'description':
+                        $tmpItem[$tag] = $xpath->evaluate("string($tag)", $item);
+                        if ($this->stripHtml) {
+                            $tmpItem[$tag] = strip_tags($tmpItem[$tag]);
+                            $tmpItem[$tag] = html_entity_decode($tmpItem[$tag], ENT_QUOTES, 'UTF-8');
+                        }
+                        $tmpItem[$tag] = trim($tmpItem[$tag]);
+                        break;
+                    default:
+                        $tmpItem[$tag] = trim($xpath->evaluate("string($tag)", $item));
+                        break;
+                }
+            }
 
-		// Calc items count
-		$result['itemsCount'] = isset($result['items']) ? count($result['items']) : 0;
+            $result['items'][] = $tmpItem;
 
-		return $result;
-	}
+            // If limit number of items is reached, stop processing remaining items
+            if (count($result['items']) == $this->itemsLimit) {
+                break;
+            }
+        }
 
-	/**
-	 * Fetch RSS/Atom feed from remote URL
-	 * @param string $url URL
-	 * @return array
-	 */
-	public function getUrl($url)
-	{
-		$this->lastError = '';
-		// Get feed content
-		$xmlData = $this->loadUrl($url);
-		return $this->parse($xmlData);
-	}
+        // Calc items count
+        $result['itemsCount'] = isset($result['items']) ? count($result['items']) : 0;
 
-	/**
-	 * Fetch RSS/Atom feed from local file
-	 * @param string $filename Local file name
-	 * @return array
-	 */
-	public function getFile($filename)
-	{
-		$this->lastError = '';
-		$xmlData = file_get_contents($filename);
-		return $this->parse($xmlData);
-	}
+        return $result;
+    }
 
-	/**
-	 * Fetch RSS/Atom feed from remote URL, but retrieve cache if possible
-	 * @param string $url URL
-	 * @return array
-	 */
-	public function get($url)
-	{
-		$cache_file = $this->cacheDir . '/rsscache_' . preg_replace("/[^a-z0-9A-Z_]+/","_",$url);
-		$timedif = @(time() - filemtime($cache_file));
-		if ($timedif > $this->cacheTime) 
-		{
-			$xmlData = $this->loadUrl($url);
-			$result = $this->parse($xmlData);
-			if ($result && $result['itemsCount'] > 0)
-			{
-				@file_put_contents($cache_file,serialize($result));
-				$result["cached"] = false;
-			}
-		}
-		if (@!$result['itemsCount'])
-		{
-			$result = @unserialize( file_get_contents($cache_file) ) ?: array();
-			$result["cached"] = true;
-		}
-		
-		return $result;
-	}
+    /**
+     * Fetch RSS/Atom feed from remote URL
+     * @param string $url URL
+     * @return array
+     */
+    public function getUrl($url)
+    {
+        $this->lastError = '';
+        // Get feed content
+        $xmlData = $this->loadUrl($url);
+        return $this->parse($xmlData);
+    }
 
-	/**
-	 * Get last error message
-	 * @return string Error description
-	 */
-	public function getLastError() {
-		return $this->lastError;
-	}
+    /**
+     * Fetch RSS/Atom feed from local file
+     * @param string $filename Local file name
+     * @return array
+     */
+    public function getFile($filename)
+    {
+        $this->lastError = '';
+        $xmlData = file_get_contents($filename);
+        return $this->parse($xmlData);
+    }
 
-	/**
-	 * @param int $limit Maximum number of items. Default is 0 which means "no limit".
-	 */
-	public function setItemsLimit($limit = 0) {
-		$this->itemsLimit = (int) $limit;
-		return $this;
-	}
+    /**
+     * Fetch RSS/Atom feed from remote URL, but retrieve cache if possible
+     * @param string $url URL
+     * @return array
+     */
+    public function get($url)
+    {
+        $cache_file = $this->cacheDir . '/rsscache_' . preg_replace("/[^a-z0-9A-Z_]+/", "_", $url);
+        $timedif = @(time() - filemtime($cache_file));
+        if ($timedif > $this->cacheTime) {
+            $xmlData = $this->loadUrl($url);
+            $result = $this->parse($xmlData);
+            if ($result && $result['itemsCount'] > 0) {
+                @file_put_contents($cache_file, serialize($result));
+                $result["cached"] = false;
+            }
+        }
+        if (@!$result['itemsCount']) {
+            $result = @unserialize(file_get_contents($cache_file)) ?: array();
+            $result["cached"] = true;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get last error message
+     * @return string Error description
+     */
+    public function getLastError()
+    {
+        return $this->lastError;
+    }
+
+    /**
+     * @param int $limit Maximum number of items. Default is 0 which means "no limit".
+     */
+    public function setItemsLimit($limit = 0)
+    {
+        $this->itemsLimit = (int) $limit;
+        return $this;
+    }
 }

@@ -1,49 +1,50 @@
 <?php
+
 class PouetBoxIndexRandom extends PouetBox
 {
-  var $data;
-  var $prod;
-  function __construct()
-  {
-    parent::__construct();
-    $this->uniqueID = "pouetbox_random";
-    $this->title = "a random prod";
-  }
+    public $data;
+    public $prod;
+    public function __construct()
+    {
+        parent::__construct();
+        $this->uniqueID = "pouetbox_random";
+        $this->title = "a random prod";
+    }
 
-  function LoadFromCachedData($data)
-  {
-    $this->data = unserialize($data);
-  }
+    public function LoadFromCachedData($data)
+    {
+        $this->data = unserialize($data);
+    }
 
-  function GetCacheableData()
-  {
-    return serialize($this->data);
-  }
+    public function GetCacheableData()
+    {
+        return serialize($this->data);
+    }
 
-  function LoadFromDB()
-  {
-    $id = SQLLib::SelectRow("SELECT prods.id as id FROM prods ORDER BY RAND() LIMIT 1")->id;
+    public function LoadFromDB()
+    {
+        $id = SQLLib::SelectRow("SELECT prods.id as id FROM prods ORDER BY RAND() LIMIT 1")->id;
 
-    $s = new BM_Query("prods");
-    $s->AddWhere(sprintf_esc("prods.id = %d",$id));
-    $s->SetLimit(1);
-    $data = $s->perform();
-    $this->data = reset($data);
+        $s = new BM_Query("prods");
+        $s->AddWhere(sprintf_esc("prods.id = %d", $id));
+        $s->SetLimit(1);
+        $data = $s->perform();
+        $this->data = reset($data);
 
-    $a = array(&$this->data);
-    PouetCollectPlatforms($a);
-  }
+        $a = array(&$this->data);
+        PouetCollectPlatforms($a);
+    }
 
-  function RenderContent()
-  {
-    if ($this->data)
-      $this->data->RenderAsEntry();
-  }
-  function RenderFooter()
-  {
-    echo "</div>\n";
-  }
+    public function RenderContent()
+    {
+        if ($this->data) {
+            $this->data->RenderAsEntry();
+        }
+    }
+    public function RenderFooter()
+    {
+        echo "</div>\n";
+    }
 };
 
 $indexAvailableBoxes[] = "Random";
-?>

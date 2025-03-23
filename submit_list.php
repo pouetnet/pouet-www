@@ -1,130 +1,129 @@
 <?php
+
 require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
-if ($currentUser && !$currentUser->CanSubmitItems())
-{
-  redirect("index.php");
-  exit();
+if ($currentUser && !$currentUser->CanSubmitItems()) {
+    redirect("index.php");
+    exit();
 }
 
 class PouetBoxSubmitList extends PouetBox
 {
-  public $formifier;
-  public $fields;
+    use PouetForm;
+    public $formifier;
+    public $fields;
 
-  function __construct()
-  {
-    parent::__construct();
-    $this->uniqueID = "pouetbox_submitlist";
-    $this->title = "create a new list!";
-    $this->formifier = new Formifier();
-    $this->fields = array(
-      "name"=>array(
-        "name" => "list name",
-        "info" => " ",
-        "required" => true,
-      ),
-      "desc"=>array(
-        "name" => "short description",
-        "type" => "textarea",
-        "info" => "be concise."
-      ),
-    );
-  }
-  use PouetForm;
-  function Validate( $data )
-  {
-    global $partyID,$currentUser;
-
-    if (!$currentUser)
-      return array("you have to be logged in !");
-
-    if (!$currentUser->CanSubmitItems())
-      return array("not allowed lol !");
-
-    if (!trim($data["name"]))
+    public function __construct()
     {
-      return array("oh come on you're more creative than that !");
+        parent::__construct();
+        $this->uniqueID = "pouetbox_submitlist";
+        $this->title = "create a new list!";
+        $this->formifier = new Formifier();
+        $this->fields = array(
+          "name" => array(
+            "name" => "list name",
+            "info" => " ",
+            "required" => true,
+          ),
+          "desc" => array(
+            "name" => "short description",
+            "type" => "textarea",
+            "info" => "be concise."
+          ),
+        );
     }
-    return array();
-  }
-  function Commit( $data )
-  {
-    $a = array();
-    $a["name"] = trim($data["name"]);
-    $a["desc"] = $data["desc"];
-    $a["owner"] = get_login_id();
-    $a["addedUser"] = get_login_id();
-    $a["addedDate"] = date("Y-m-d H:i:s");
-    $this->listID = SQLLib::InsertRow("lists",$a);
+    public function Validate($data)
+    {
+        global $partyID,$currentUser;
 
-    @unlink("cache/pouetbox_latestlists.cache");
-    
-    return array();
-  }
-  function GetInsertionID()
-  {
-    return $this->listID;
-  }
+        if (!$currentUser) {
+            return array("you have to be logged in !");
+        }
 
-  function LoadFromDB()
-  {
-  }
+        if (!$currentUser->CanSubmitItems()) {
+            return array("not allowed lol !");
+        }
 
-  function Render()
-  {
-    global $partyID,$currentUser;
+        if (!trim($data["name"])) {
+            return array("oh come on you're more creative than that !");
+        }
+        return array();
+    }
+    public function Commit($data)
+    {
+        $a = array();
+        $a["name"] = trim($data["name"]);
+        $a["desc"] = $data["desc"];
+        $a["owner"] = get_login_id();
+        $a["addedUser"] = get_login_id();
+        $a["addedDate"] = date("Y-m-d H:i:s");
+        $this->listID = SQLLib::InsertRow("lists", $a);
 
-    if (!$currentUser)
-      return;
+        @unlink("cache/pouetbox_latestlists.cache");
 
-    if (!$currentUser->CanSubmitItems())
-      return;
+        return array();
+    }
+    public function GetInsertionID()
+    {
+        return $this->listID;
+    }
 
-    echo "\n\n";
-    echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+    public function LoadFromDB()
+    {
+    }
 
-    echo "  <h2>".$this->title."</h2>\n";
-    echo "  <div class='content'>\n";
-    $this->formifier->RenderForm( $this->fields );
-    echo "  </div>\n";
+    public function Render()
+    {
+        global $partyID,$currentUser;
 
-    echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
-    echo "</div>\n";
-  }
+        if (!$currentUser) {
+            return;
+        }
+
+        if (!$currentUser->CanSubmitItems()) {
+            return;
+        }
+
+        echo "\n\n";
+        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+
+        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <div class='content'>\n";
+        $this->formifier->RenderForm($this->fields);
+        echo "  </div>\n";
+
+        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "</div>\n";
+    }
 };
 
 $TITLE = "create a new list";
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL( "lists.php?which={%NEWID%}", true );
+$form->SetSuccessURL("lists.php?which={%NEWID%}", true);
 
-$form->Add( "list", new PouetBoxSubmitList() );
+$form->Add("list", new PouetBoxSubmitList());
 
-if ($currentUser && $currentUser->CanSubmitItems())
-  $form->Process();
+if ($currentUser && $currentUser->CanSubmitItems()) {
+    $form->Process();
+}
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");
 
 echo "<div id='content'>\n";
 
-if (get_login_id())
-{
-  $form->Display();
-}
-else
-{
-  require_once("include_pouet/box-login.php");
-  $box = new PouetBoxLogin();
-  $box->Render();
+if (get_login_id()) {
+    $form->Display();
+} else {
+    require_once("include_pouet/box-login.php");
+    $box = new PouetBoxLogin();
+    $box->Render();
 }
 
 echo "</div>\n";
 
 require("include_pouet/menu.inc.php");
 require_once("include_pouet/footer.php");
-
-?>
