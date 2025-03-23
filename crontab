@@ -1,3 +1,0 @@
-*/10 * * * * /usr/bin/php5-cgi -q /home/hosted/pouet/sites/www.pouet.net/cron.php >> /home/hosted/pouet/log/cron.php.log
-@daily /home/hosted/pouet/sites/www.pouet.net/bin/backup >> /home/hosted/pouet/log/backup.log
-*/5 * * * * /home/hosted/pouet/sites/www.pouet.net/bin/deploy >> /home/hosted/pouet/log/deploy.log
