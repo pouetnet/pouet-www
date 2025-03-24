@@ -22,7 +22,7 @@ if (!$currentUser) {
     $message->message = "You got logged out somehow...";
 
 } else {
-    if (isset($array['type'])) {
+    if (isset($_POST['type'])) {
 
         switch ($_POST["type"]) {
             case "oneliner":
