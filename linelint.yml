@@ -1,0 +1,8 @@
+# Used by .github/workflows/linelint.yaml
+rules:
+  # checks if file ends in a newline character
+  end-of-file:
+    # set to true to enable this rule
+    enable: true
+    # if true also checks if file ends in a single newline character
+    single-new-line: true
