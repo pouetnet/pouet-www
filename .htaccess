@@ -27,7 +27,18 @@ RewriteRule ^screenshots\/(.*)$ http://content.pouet.net/screenshots/$1 [R=301,L
 
 # maintenance mode, if needed
 
-# RewriteCond %{REMOTE_ADDR} !^123\.456\.789\.000
+# RewriteCond %{REMOTE_ADDR} !^188\.142\.212\.47
 # RewriteRule .* http://content.pouet.net/maintenance.html [R=302,L]
+
+
+# block users
+
+#RewriteCond %{REMOTE_ADDR} ^5\.9\.55\.166 [OR]
+#RewriteCond %{REMOTE_ADDR} ^47\.76\.
+RewriteCond %{REMOTE_ADDR} ^94\.31\.89\.23
+#RewriteCond %{REMOTE_ADDR} ^47\.128\.
+RewriteRule .* - [F]
+
+
 
 </IfModule>
