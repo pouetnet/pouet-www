@@ -1,8 +1,6 @@
 /cache/
+/content/
 /include_generic/credentials.inc.php
-
-# macOS dirty files
-.DS_Store
 
 # phpcs cache
 /.php-cs-fixer.cache
