@@ -1,0 +1,24 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test-mysql:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mariadb:10.11.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: pouet
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load DDL
+        run: mysql -h 127.0.0.1 -u root -proot pouet < pouet.sql
+      - name: Verify Tables
+        run: mysql -h 127.0.0.1 -u root -proot pouet -e "SHOW TABLES;"
