@@ -50,6 +50,7 @@ class PouetBoxMirrors extends PouetBox
         $links["https://hornet.org/cgi-bin/scene-search.cgi?search=".$extensionless.""] = $this->prod->name . " on the hornet archive";
         $links["https://web.archive.org/web/*/".$this->prod->download] = $this->prod->name." on the wayback machine";
         $links["http://pouet-mirror.sesse.net/*/".$this->prod->download] = $this->prod->name." on Sesse's pou\xC3\xABt.net mirror";
+        $links["https://discmaster.textfiles.com/search?q=".$extensionless."&mode=deep"] = $this->prod->name." on Discmaster";
 
         $hasAmiga = false;
         foreach ($this->prod->platforms as $v) {
