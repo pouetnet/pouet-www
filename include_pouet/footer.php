@@ -3,7 +3,7 @@
 <ul>
   <li><a href="//<?=(POUET_MOBILE ? POUET_WEB_HOSTNAME : POUET_MOBILE_HOSTNAME).$_SERVER["REQUEST_URI"]?>">switch to <?=(POUET_MOBILE ? "desktop" : "mobile")?> version</a></li>
   <li>
-    <a href="index.php">pouët.net</a> &copy; 2000-<?=date("Y")?> <a href="groups.php?which=5">mandarine</a>
+    <a href="index.php">pouët.net</a> v<a href="https://github.com/pouetnet/pouet-www">1.0-<?=substr(trim(file_get_contents(".git/refs/heads/master")), 0 , 7)?></a> &copy; 2000-<?=date("Y")?> <a href="groups.php?which=5">mandarine</a>
     - hosted on <a href="http://www.scene.org/">scene.org</a>
     - follow us on <a href="https://twitter.com/pouetdotnet">twitter</a> and <a href="https://www.facebook.com/pouet.dot.net">facebook</a>
     - join us on <a href="https://discord.gg/MCDXrrB">discord</a> and <a href="https://webchat.ircnet.net/?channels=%23pouet.net&uio=OT10cnVlde">irc</a>
