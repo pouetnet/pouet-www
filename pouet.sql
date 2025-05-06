@@ -1118,7 +1118,7 @@ CREATE TABLE `users` (
   `level` enum('administrator','moderator','gloperator','user','pr0nstahr','fakeuser','banned') DEFAULT 'user',
   `avatar` varchar(255) NOT NULL,
   `registerDate` datetime DEFAULT NULL,
-  `udlogin` varchar(255) NOT NULL DEFAULT '',
+  `udlogin` varchar(255) NOT NULL DEFAULT '' COMMENT 'United Devices login, now dead.',
   `glops` int(10) unsigned NOT NULL DEFAULT 0,
   `thumbups` int(10) NOT NULL DEFAULT 0,
   `thumbdowns` int(10) NOT NULL DEFAULT 0,
