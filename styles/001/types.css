@@ -1,5 +1,5 @@
-.platform, .platformi { background-image: url("gfx/types.png?1703701642"); }
-.type, .typei { background-image: url("gfx/types.png?1703701642"); }
+.platform, .platformi { background-image: url("gfx/types.png"); }
+.type, .typei { background-image: url("gfx/types.png"); }
 
 .type_32b { background-position: -0px -0px; }
 .type_64b { background-position: -16px -0px; }
