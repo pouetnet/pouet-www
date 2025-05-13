@@ -5,7 +5,6 @@
 }
 
 body {
-  /*background: #3A6EA5 url("gfx/trumpet.png");*/
   background: #3A6EA5 url("gfx/trumpet.svg");
   font-size: 9pt;
   font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
@@ -460,7 +459,6 @@ td.date {
   margin: 1px;
   padding-left: 22px;
   padding-bottom: 2px;
-  /*background: #224488 url("gfx/titles/bitfellas.gif") top left no-repeat;*/
   background: #224488 url("gfx/titles/bitfellas.svg") top left no-repeat;
   background-position: 3px 3px;
   color: #ffffff;
@@ -871,7 +869,6 @@ img.avatar {
 
 .innerbar_solo {
   background: linear-gradient(#24468a, #a7d6f8 25%, #a7d6f8 33%, #547ab2, #24468a);
-/*  background: url('gfx/bar.png') repeat-x;*/
   padding: 0px;
   margin: 0px 0px;
   height: 16px;
@@ -880,7 +877,6 @@ img.avatar {
 
 .innerbar {
   background: linear-gradient(#24468a, #a7d6f8 25%, #a7d6f8 33%, #547ab2, #24468a);
-/*  background: url('gfx/bar.png') repeat-x;*/
   padding: 0px;
   margin: 0px 0px;
   height: 16px;
