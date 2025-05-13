@@ -21,8 +21,6 @@ RewriteRule ^(.*)$ https://www.pouet.net/$1 [R=301,QSA,NE,L]
 # redirect all old directories to content domain
 
 RewriteRule ^avatars\/(.*)$ http://content.pouet.net/avatars/$1 [R=301,L]
-RewriteCond %{REQUEST_URI} !^/gfx/lamer/(.*)$
-RewriteRule ^gfx\/(.*)$ http://content.pouet.net/gfx/$1 [R=301,L]
 RewriteRule ^screenshots\/(.*)$ http://content.pouet.net/screenshots/$1 [R=301,L]
 
 
