@@ -475,7 +475,6 @@ td.date {
 
 .content li {
   margin-left: 40px;
-  /*clear: both;*/
 }
 
 .pouetbox_newsbox .content p {
@@ -566,7 +565,6 @@ img.avatar {
 
 #pouetbox_latestbbs .avatar {
   width: 16px;
-  /*  vertical-align: middle;*/
 }
 
 #pouetbox_latestbbs .category {
@@ -760,10 +758,6 @@ img.avatar {
 #pouetbox_prodmain #screenshot {
   text-align: center;
   vertical-align: middle;
-  /*
-  width: 400px;
-  height: 300px;
-*/
 }
 
 #pouetbox_prodmain .foot {
@@ -910,10 +904,6 @@ img.avatar {
   width: 75%;
 }
 
-/*
-#pouetbox_bbsview .navbar, #pouetbox_onelinerview .navbar, #pouetbox_prodcomments 
-*/
-
 .navbar {
   background: #224488;
   font-weight: bold;
@@ -928,10 +918,6 @@ img.avatar {
   background: #224488;
   height: 16px;
 }
-
-/*
-#pouetbox_prodcomments 
-*/
 
 .navbar {
   padding: 4px;
@@ -1045,7 +1031,6 @@ img.avatar {
 #pouetbox_usermain .content {
   min-height: 170px;
   min-width: 400px;
-  /*  display: table;*/
 }
 
 #pouetbox_usermain .bigavatar {
@@ -1070,7 +1055,6 @@ img.avatar {
 #pouetbox_usermain #userdata {
   list-style: none;
   margin-bottom: 15px;
-  /*  float: left;*/
   margin-right: 170px;
 }
 
