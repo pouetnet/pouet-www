@@ -15,7 +15,6 @@ body {
 
 @media screen and (min-width: 600px) {
   body {
-    /* kusma's idea, if it breaks it's his fault */
     position: absolute;
     min-width: 100%;
   }
