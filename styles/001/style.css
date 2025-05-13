@@ -1094,7 +1094,7 @@ img.avatar {
 }
 
 #pouetbox_usermain #logolist li {
-  background: #3A6EA5 url("gfx/trumpet.png");
+  background: #3A6EA5 url("gfx/trumpet.svg");
   text-align: center;
 }
 
@@ -1481,7 +1481,8 @@ tr.sortable th .sort_platform {
 }
 
 tr.sortable th a {
-  background: url("gfx/fleche1b.png") no-repeat;
+  background: url("gfx/fleche1a.svg") no-repeat;
+  filter: brightness(0.75);
   background-position: 0px 2px;
   padding-left: 16px;
 }
@@ -1491,7 +1492,8 @@ tr.sortable th a.selected {
 }
 
 tr.sortable th a.reverse {
-  background-image: url("gfx/fleche2b.png");
+  background-image: url("gfx/fleche2a.svg");
+  filter: brightness(0.75);
 }
 
 tr.sortable th a.reverse.selected {
@@ -2128,7 +2130,7 @@ input.autocompleteSearch {
 }
 
 .logovote .content {
-  background: #3A6EA5 url("gfx/trumpet.png");
+  background: #3A6EA5 url("gfx/trumpet.svg");
 }
 
 #pouetbox_toplist .selector {
