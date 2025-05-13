@@ -2463,7 +2463,7 @@ body>.customizerBox.floaty .content {
 }
 
 .newsTickers li.meteoriks p {
-  background: url("https://content.pouet.net/gfx/sceneorg/meteorikwinner.gif") top left no-repeat;
+  background: url("gfx/sceneorg/meteorikwinner.gif") top left no-repeat;
   padding-left: 20px;
   height: 16px;
   display: inline-block;
