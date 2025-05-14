@@ -36,6 +36,7 @@ define('POUET_ROOT_URL', 'http://'.(POUET_MOBILE ? POUET_MOBILE_HOSTNAME : POUET
 require_once( "sceneid3/sceneid3.inc.php");
 class MySceneID extends SceneID3
 {
+  private string $returnURL;
   function __construct( $options = array() ) { $this->returnURL = $options["redirectURI"]; }
   function GetClientCredentialsToken() { return true; }
   function SetStorage( $storage ) {}
