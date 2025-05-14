@@ -17,7 +17,7 @@ if (!@$_GET["code"]) {
 $rv = null;
 $err = "";
 try {
-    $returnURL = $_SESSION["__return"];
+    @$returnURL = $_SESSION["__return"];
     unset($_SESSION["__return"]);
 
     $sceneID->ProcessAuthResponse();
