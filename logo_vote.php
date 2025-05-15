@@ -47,17 +47,17 @@ class PouetBoxLogoLama extends PouetBox
     public function RenderContent()
     {
         $lama_pictures = array(
-          'logos-lamer.jpg',
-          'logos-lama.jpg',
-          'logos-dalai-lama.jpg',
-          'logos-lamerbus.jpg',
-          'logos-lamerst-by-charlie.jpg',
-          'logos-lamercream.jpg',
-          'logos-lamerjewels.jpg',
-          'logos-lamercow-by-everybody.jpg',
+          'lamer.jpg',
+          'lama.jpg',
+          'dalai-lama.jpg',
+          'lamerbus.jpg',
+          'lamerst-by-charlie.jpg',
+          'lamercream.jpg',
+          'lamerjewels.jpg',
+          'lamercow-by-everybody.jpg',
         );
 
-        echo "<img src='".POUET_CONTENT_URL."gfx/".$lama_pictures[array_rand($lama_pictures)]."' alt='Lamer picture'/>";
+        echo "<img src='gfx/lamer/".$lama_pictures[array_rand($lama_pictures)]."' alt='Lamer picture'/>";
     }
     public function RenderFooter()
     {
