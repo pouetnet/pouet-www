@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 8.5 8.5">
+    <image width="8.5" height="8.5" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAJFJREFU OI2tUkEOwCAIa5c9yTf5qL3JP7GDmgFBndmaGKPQFlCgQtp6A5NLACKl1ENKa7bNJbVaD87gTMjO 9VVoMX/X3QHgWFquKtLuW8RWxTkIhIiMjABTguQ8dfUiwxnwusw+wuchHgAY9d1biVrSz2hmIKVs D5E6Hn0eT9TuXgBo3zp0egQNxwsYoUm1/+EG+BU9t9gchiwAAAAASUVORK5CYII=" x="8.5" y="288.5" image-rendering="optimizeSpeed" transform="translate(0 -288.5)" />
+    <path d="M7.7 4.2c0 2-1.7 3.5-3.7 3.5S.3 6 .3 4.2 1 .8 4 .8c2.9 0 3.7 1.5 3.7 3.4z" fill="#fcc" stroke="#000" stroke-width=".5" />
+    <rect ry=".8" y="3.4" x="1.9" height="2.6" width="4.2" fill="#f66" stroke="#000" stroke-width=".5" stroke-linecap="round" stroke-linejoin="round" />
+    <ellipse ry=".5" rx=".8" cy="6.4" cx="4" />
+    <ellipse ry=".5" rx=".3" cy="4.8" cx="3.4" />
+    <ellipse ry=".5" rx=".3" cy="4.8" cx="4.5" />
+    <ellipse ry=".5" rx=".5" cy="2.1" cx="5.3" />
+    <ellipse ry=".5" rx=".5" cy="2.1" cx="2.6" />
+    <ellipse ry=".5" rx=".8" cy=".8" cx="1.1" fill="#fcc" stroke="#000" stroke-width=".5" stroke-linecap="round" stroke-linejoin="round" />
+    <ellipse ry=".5" rx=".8" cy=".8" cx="6.9" fill="#fcc" stroke="#000" stroke-width=".5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

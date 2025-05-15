@@ -21,10 +21,10 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
   <link rel="alternate" href="<?=_html($url)?>" type="application/rss+xml" title="pouët.net: <?=_html($title)?>">
 <?php }?>
 
-  <link rel="stylesheet" type="text/css" href="<?=POUET_CONTENT_URL?>styles/001/types.css?<?=filemtime(POUET_CONTENT_LOCAL."styles/001/types.css")?>" media="screen" />
-  <link rel="stylesheet" type="text/css" href="<?=POUET_CONTENT_URL?>styles/001/style.css?<?=filemtime(POUET_CONTENT_LOCAL."styles/001/style.css")?>" media="screen" />
+  <link rel="stylesheet" type="text/css" href="styles/001/types.css?<?=filemtime("styles/001/types.css")?>" media="screen" />
+  <link rel="stylesheet" type="text/css" href="styles/001/style.css?<?=filemtime("styles/001/style.css")?>" media="screen" />
   <?php if (POUET_MOBILE) {?>
-  <link rel="stylesheet" href="<?=POUET_CONTENT_URL?>styles/001/mobile.css?<?=filemtime(POUET_CONTENT_LOCAL."styles/001/mobile.css")?>" type="text/css" />
+  <link rel="stylesheet" href="styles/001/mobile.css?<?=filemtime("styles/001/mobile.css")?>" type="text/css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0;" />
   <?php }?>
   

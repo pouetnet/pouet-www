@@ -1,0 +1,149 @@
+body {
+  font-size: 14px;
+  line-height: 125%;
+}
+.column#leftbar, .column#middlebar, .column#rightbar,
+#content,
+#prodpagecontainer 
+{
+  display: block;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+#logo img {
+  max-width: 300px;
+}
+#screenshot img {
+  max-width: 300px;
+}
+.navbar {
+  height: auto;
+}
+.navbar .prevpage, .navbar .nextpage {
+  float: none;
+  display: table-cell;
+  width: 40%;
+  margin-bottom: 5px;
+}
+.navbar .prevpage { text-align: left; }
+.navbar .nextpage { text-align: right; }
+.navbar .selector { width: 90% !important; margin: 10px auto !important; }
+
+.pouettbl {
+  margin: 5px 0px;
+  display: block;
+  width: 100% !important;
+  padding: 1px 0px;
+}
+.pouettbl .content, .pouettbl .foot {
+  padding: 8px;
+}
+.pouettbl .foot { 
+  font-size: 10pt;
+}
+
+.content li {
+  margin-left: 10px;
+}
+
+.bbs_code, .bbs_quote {
+  display: block;
+  margin: 8px;
+}
+#pouetbox_latestbbs .category,
+#pouetbox_latestbbs .count {
+  display: none;
+}
+#pouetbox_latestbbs td {
+  padding: 4px;
+}
+#pouetbox_latestbbs tr.closed td.topic {
+  padding-left: 18px;
+}
+#credits ul li {
+  display: block;
+}
+#pouetbox_bbsopen .content,
+#pouetbox_bbspost .content,
+#pouetbox_prodpost .content {
+  padding: 0px;
+}
+#pouetbox_bbsopen textarea,
+#pouetbox_bbspost textarea,
+#pouetbox_prodpost textarea {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+.collapseToggle {
+  font-size: 80%;
+  float: right;
+  display: block;
+}
+
+.formifier .row > * {
+  display: block;
+}
+
+.formifier .row > label {
+  margin-top: 10px;
+  text-align: left;
+}
+footer {
+  font-size: 90%;
+}
+footer ul li.forceDesktop {
+  display:block;
+}
+#pouetbox_faq img {
+  max-width: 200px;
+}
+#pouetbox_faq pre {
+  white-space: pre-wrap;
+}
+.pouettbl h2, .pouettbl h3 {
+  background-image: none !important;
+  padding: 8px !important;
+}
+#pouetbox_prodpopularityhelper input {
+  width: 200px;
+}
+
+#pouetbox_usermain .bigavatar {
+  display: none;
+}
+
+#pouetbox_usermain .content {
+  min-width: auto;
+}
+#pouetbox_usermain #userdata li span.field {
+  width: auto;
+}
+#pouetbox_usermain #userdata li {
+  width: auto;
+}
+.pouetbox_newsbox .content {
+  word-wrap: break-word;
+  word-break: break-all;
+}
+.mobileNavLink {
+  text-align: center;
+  display: block;
+  padding: 5px;
+}
+#pouetbox_partyview tr > *:nth-child(n+3)
+{
+  display: none;
+}
+#pouetbox_latestoneliner #onelinermsg {
+  width: 60%;
+}
+.asciiviewer .content {
+  padding: 2px;
+}
+#welcome-avatarlist {
+  width: 100%;
+}
