@@ -152,21 +152,6 @@ function cdcstack($n)
         echo "<span></span>";
     }
     echo "</div>";
-
-    /*
-    OLD IMG VERSION
-    echo "<div class='cdcstack'>";
-    if ($n==1) {
-      echo "<img src='".POUET_CONTENT_URL."gfx/titles/coupdecoeur.gif' title='cdc' alt='cdc'>";
-    } else {
-      echo "<img src='".POUET_CONTENT_URL."gfx/cdcstack_start.gif' title='".$n." cdcs' alt='".$n." cdcs'>";
-      for ($x=0; $x<$n-2; $x++) {
-        echo "<img src='".POUET_CONTENT_URL."gfx/cdcstack_loop.gif' title='".$n." cdcs' alt='".$n." cdcs'>";
-      }
-      echo "<img src='".POUET_CONTENT_URL."gfx/cdcstack_end.gif' title='".$n." cdcs' alt='".$n." cdcs'>";
-    }
-    echo "</div>";
-    */
 }
 
 function gloperator_log($itemType, $itemID, $action, $additionalData = array())

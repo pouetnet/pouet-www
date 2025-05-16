@@ -100,7 +100,7 @@ class PouetBoxSubmitLogo extends PouetBox
 
         echo "<p><b>.gif</b> <b>.jpg</b> or <b>.png</b> width and height limit are <b>700</b>x<b>200</b></p>\n";
         echo "<p>Its size must be < <b>128KB</b>.</p>\n";
-        echo "<p>Don't forget to optimize your logo to fit well against the <a href='".POUET_CONTENT_URL."gfx/trumpet.gif'>pouet background</a>\n";
+        echo "<p>Don't forget to optimize your logo to fit well against the <a href='styles/001/gfx/trumpet.svg'>pouet background</a>\n";
         echo "(by using transparency), or it will look like a noob picture.</p>\n";
         echo "<p>The pou&euml;t background color is <b>#3A6EA5</b>.</p>\n";
         echo "<p>Before being displayed, your logo will be voted up or down by the whole Pouet community.</p>\n";

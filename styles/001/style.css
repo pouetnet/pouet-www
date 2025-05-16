@@ -5,7 +5,6 @@
 }
 
 body {
-  /*background: #3A6EA5 url("gfx/trumpet.png");*/
   background: #3A6EA5 url("gfx/trumpet.svg");
   font-size: 9pt;
   font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
@@ -16,7 +15,6 @@ body {
 
 @media screen and (min-width: 600px) {
   body {
-    /* kusma's idea, if it breaks it's his fault */
     position: absolute;
     min-width: 100%;
   }
@@ -460,7 +458,6 @@ td.date {
   margin: 1px;
   padding-left: 22px;
   padding-bottom: 2px;
-  /*background: #224488 url("gfx/titles/bitfellas.gif") top left no-repeat;*/
   background: #224488 url("gfx/titles/bitfellas.svg") top left no-repeat;
   background-position: 3px 3px;
   color: #ffffff;
@@ -477,7 +474,6 @@ td.date {
 
 .content li {
   margin-left: 40px;
-  /*clear: both;*/
 }
 
 .pouetbox_newsbox .content p {
@@ -568,7 +564,6 @@ img.avatar {
 
 #pouetbox_latestbbs .avatar {
   width: 16px;
-  /*  vertical-align: middle;*/
 }
 
 #pouetbox_latestbbs .category {
@@ -762,10 +757,6 @@ img.avatar {
 #pouetbox_prodmain #screenshot {
   text-align: center;
   vertical-align: middle;
-  /*
-  width: 400px;
-  height: 300px;
-*/
 }
 
 #pouetbox_prodmain .foot {
@@ -871,7 +862,6 @@ img.avatar {
 
 .innerbar_solo {
   background: linear-gradient(#24468a, #a7d6f8 25%, #a7d6f8 33%, #547ab2, #24468a);
-/*  background: url('gfx/bar.png') repeat-x;*/
   padding: 0px;
   margin: 0px 0px;
   height: 16px;
@@ -880,7 +870,6 @@ img.avatar {
 
 .innerbar {
   background: linear-gradient(#24468a, #a7d6f8 25%, #a7d6f8 33%, #547ab2, #24468a);
-/*  background: url('gfx/bar.png') repeat-x;*/
   padding: 0px;
   margin: 0px 0px;
   height: 16px;
@@ -914,10 +903,6 @@ img.avatar {
   width: 75%;
 }
 
-/*
-#pouetbox_bbsview .navbar, #pouetbox_onelinerview .navbar, #pouetbox_prodcomments 
-*/
-
 .navbar {
   background: #224488;
   font-weight: bold;
@@ -932,10 +917,6 @@ img.avatar {
   background: #224488;
   height: 16px;
 }
-
-/*
-#pouetbox_prodcomments 
-*/
 
 .navbar {
   padding: 4px;
@@ -1049,7 +1030,6 @@ img.avatar {
 #pouetbox_usermain .content {
   min-height: 170px;
   min-width: 400px;
-  /*  display: table;*/
 }
 
 #pouetbox_usermain .bigavatar {
@@ -1074,7 +1054,6 @@ img.avatar {
 #pouetbox_usermain #userdata {
   list-style: none;
   margin-bottom: 15px;
-  /*  float: left;*/
   margin-right: 170px;
 }
 
@@ -1094,7 +1073,7 @@ img.avatar {
 }
 
 #pouetbox_usermain #logolist li {
-  background: #3A6EA5 url("gfx/trumpet.png");
+  background: #3A6EA5 url("gfx/trumpet.svg");
   text-align: center;
 }
 
@@ -1481,7 +1460,8 @@ tr.sortable th .sort_platform {
 }
 
 tr.sortable th a {
-  background: url("gfx/fleche1b.png") no-repeat;
+  background: url("gfx/fleche1a.svg") no-repeat;
+  filter: brightness(0.75);
   background-position: 0px 2px;
   padding-left: 16px;
 }
@@ -1491,7 +1471,8 @@ tr.sortable th a.selected {
 }
 
 tr.sortable th a.reverse {
-  background-image: url("gfx/fleche2b.png");
+  background-image: url("gfx/fleche2a.svg");
+  filter: brightness(0.75);
 }
 
 tr.sortable th a.reverse.selected {
@@ -2128,7 +2109,7 @@ input.autocompleteSearch {
 }
 
 .logovote .content {
-  background: #3A6EA5 url("gfx/trumpet.png");
+  background: #3A6EA5 url("gfx/trumpet.svg");
 }
 
 #pouetbox_toplist .selector {
@@ -2463,7 +2444,7 @@ body>.customizerBox.floaty .content {
 }
 
 .newsTickers li.meteoriks p {
-  background: url("https://content.pouet.net/gfx/sceneorg/meteorikwinner.gif") top left no-repeat;
+  background: url("gfx/sceneorg/meteorikwinner.gif") top left no-repeat;
   padding-left: 20px;
   height: 16px;
   display: inline-block;
