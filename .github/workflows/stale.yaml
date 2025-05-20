@@ -12,10 +12,7 @@ jobs:
     steps:
       - uses: actions/stale@v9
         with:
-          days-before-close: 1
-          days-before-stale: 30
-          debug-only: false
           delete-branch: true
-          exempt-draft-pr: false
           remove-stale-when-updated: true
+          days-before-issue-stale: -1 # Disables stale issues
           stale-pr-message: 'This pull request has not had activity in 30 days. If there is no activity by the next day it will be closed. Closing old PRs keeps the repository clean, reduces clutter, and focuses efforts on active contributions. It prevents confusion, ensures relevance, and improves project maintainability.'
