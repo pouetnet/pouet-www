@@ -63,7 +63,7 @@ class PouetBoxOnelinerView extends PouetBox
             $p = preg_replace("/([a-z]+:\/\/\S+)/", "<a href='$1' rel='external'>$1</a>", $p);
             $p = nl2br($p);
             $p = better_wordwrap($p, 80, " ");
-            echo "<li class='cite-"".$c->user->id.'>";
+            echo "<li class='cite-".$c->user->id."'>";
             echo "<time datetime='".$c->addedDate."' title='".$c->addedDate."'>".date("H:i", strtotime($c->addedDate))."</time> ";
             echo $c->user->PrintLinkedAvatar()." ".$p;
             echo "</li>\n";
