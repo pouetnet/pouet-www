@@ -2,7 +2,6 @@
 
 RewriteEngine On
 
-
 # redirect all subdomains to http://www.pouet.net
 
 RewriteCond %{HTTPS} ^off$ [NC]
@@ -38,6 +37,7 @@ RewriteCond %{REMOTE_ADDR} ^94\.31\.89\.23
 #RewriteCond %{REMOTE_ADDR} ^47\.128\.
 RewriteRule .* - [F]
 
-
+# Prevent clickjacking by disallowing framing of the site
+Header always set X-Frame-Options "DENY"
 
 </IfModule>
