@@ -99,7 +99,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
             if (!$r->user) {
                 continue;
             }
-            echo "<li>\n";
+            echo "<li class='cite-".$r->user->id."'>\n";
             if ($this->showTimestamps) {
                 echo "<time datetime='".$r->addedDate."' title='".$r->addedDate."'>".date("H:i", strtotime($r->addedDate))."</time> ";
             }
