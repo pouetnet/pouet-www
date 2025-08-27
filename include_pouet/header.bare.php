@@ -20,9 +20,7 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
 <?php foreach ($RSS as $url => $title) {?>
   <link rel="alternate" href="<?=_html($url)?>" type="application/rss+xml" title="pouët.net: <?=_html($title)?>">
 <?php }?>
-
   <link rel="stylesheet" type="text/css" href="libs/simpleLightbox/css/simpleLightbox.min.css" media="screen" />
-
   <link rel="stylesheet" type="text/css" href="styles/001/types.css?<?=filemtime("styles/001/types.css")?>" media="screen" />
   <link rel="stylesheet" type="text/css" href="styles/001/style.css?<?=filemtime("styles/001/style.css")?>" media="screen" />
   <?php if (POUET_MOBILE) {?>
