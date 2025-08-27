@@ -2274,6 +2274,12 @@ input.autocompleteSearch {
   background-position: 2px 2px;
 }
 
+#youtubeEmbed 
+{
+  background: url("gfx/icon_youtube.png");
+  padding-left: 16px;
+}
+
 #pouetbox_admin ul {
   list-style: none;
 }
