@@ -759,6 +759,20 @@ img.avatar {
   vertical-align: middle;
 }
 
+.sslightbox {
+  position:fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  object-fit: contain;
+  background: #000c;
+  image-rendering: pixelated;
+  z-index: 1000;
+}
+
 #pouetbox_prodmain .foot {
   text-align: right;
   background: #6688AA;

@@ -170,7 +170,7 @@ class PouetBoxProdMain extends PouetBox
                 $title = "screenshot added by "._html($this->screenshot->user->nickname)." on "._html($this->screenshot->added);
             }
 
-            return "<div class=\"ourbelovedscreenshot\"><a href='".POUET_CONTENT_URL.$this->screenshotPath."'><img src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."' /></a></div>\n";
+            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."' />\n";
         } else {
             global $currentUser;
             $s = "no screenshot yet.\n";
@@ -1210,9 +1210,19 @@ document.observe("dom:loaded",function(){
 });
 //-->
 
-var lightbox = new SimpleLightbox({
-    elements: document.querySelectorAll('.ourbelovedscreenshot a')
-});
+const images=document.getElementsByClassName('pouetsscreenshotimg');
+if (images.length>0) {
+    document.getElementsByClassName('pouetsscreenshotimg')[0].addEventListener('click', function() { 
+        this.classList.toggle('sslightbox'); 
+    }); 
+
+    document.body.addEventListener('keydown', function(e) {
+        if (e.key == "Escape") {
+            var isPopupVisible = document.getElementsByClassName('pouetsscreenshotimg')[0].classList.contains('sslightbox');
+            if (isPopupVisible) document.getElementsByClassName('pouetsscreenshotimg')[0].classList.toggle('sslightbox'); 
+        }
+    });
+}
 
 var lightbox2 = new SimpleLightbox({
     elements: document.querySelectorAll('.lightBoxVideoLink')
