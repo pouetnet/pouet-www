@@ -17,7 +17,7 @@ if (!@$_GET["code"]) {
 $rv = null;
 $err = "";
 try {
-    $returnURL = $_SESSION["__return"];
+    @$returnURL = $_SESSION["__return"] ?? "";
     unset($_SESSION["__return"]);
 
     $sceneID->ProcessAuthResponse();
@@ -36,8 +36,12 @@ try {
     $welcome = false;
     if (!$user || !$user->id) {
         $entry = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
-        $r = $entry[array_rand($entry)];
-        $a = basename($r);
+        if (!empty($entry)) {
+            $r = $entry[array_rand($entry)];
+            $a = basename($r);
+        } else {
+            $a = '';
+        }
 
         $user = new PouetUser();
         $user->id = (int)$SceneIDuser["user"]["id"];
