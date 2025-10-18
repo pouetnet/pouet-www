@@ -108,7 +108,7 @@ function bbencode($text)
     if (get_setting("displayimages") || @$_GET["forceimages"]) {
         $text = preg_replace("/\[img\](.*?)\[\/img\]/i", "<img src='$1' loading='lazy' class='bbimage' alt='BB Image'/>", $text);
     } else {
-        $text = preg_replace("/\[img\](.*?)\[\/img\]/i","<a href='$1'>[image disabled]</a>",$text);
+        $text = preg_replace("/\[img\](.*?)\[\/img\]/i", "<a href='$1'>[image disabled]</a>", $text);
     }
     //  $text = preg_replace("/\s([a-zA-Z0-9]+:\/\/[a-zA-Z\.\-_0-9\+\/]+)/","<a href='$1' target='_blank'>$1</a>",$text);
     //  $text = preg_replace("/([a-zA-Z\.\-_0-9\+]+@[a-zA-Z\.\-_0-9\+]+)/","<a href='mailto:$1' target='_blank'>$1</a>",$text);
