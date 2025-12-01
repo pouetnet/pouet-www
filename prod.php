@@ -761,6 +761,8 @@ class PouetBoxProdSneakyCDCs extends PouetBox
 
 function isEventEligible($event, $prod)
 {
+    global $currentUser;
+
     $date = date("Y-m-d");
     if (!($event->votingStartDate <= $date && $date <= $event->votingEndDate)) {
         return false;
@@ -783,6 +785,12 @@ function isEventEligible($event, $prod)
             return false;
         }
     }
+
+    // Make it only eligible for me and dojoe
+    if (!($currentUser->id == 1 || $currentUser->id == 5124)) {
+        return false;
+    }
+
     return true;
 }
 
