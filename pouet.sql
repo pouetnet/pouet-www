@@ -631,6 +631,24 @@ CREATE TABLE `lists` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `localnews`
+--
+
+DROP TABLE IF EXISTS `localnews`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `localnews` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `quand` datetime /* mariadb-5.3 */ NOT NULL DEFAULT current_timestamp(),
+  `who` int(10) unsigned NOT NULL DEFAULT 0,
+  `title` varchar(255) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci PACK_KEYS=1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `logos`
 --
 
