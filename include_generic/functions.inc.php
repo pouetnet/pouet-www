@@ -554,7 +554,7 @@ function hashify($s)
 
 function enum2array($s)
 {
-    return str_getcsv(substr($s, substr($s, 0, 3) == "set" ? 4 : 5, -1), ',', "'");
+    return str_getcsv(substr($s, substr($s, 0, 3) == "set" ? 4 : 5, -1), ',', "'", "\\");
 }
 
 function is_string_meaningful($s)
