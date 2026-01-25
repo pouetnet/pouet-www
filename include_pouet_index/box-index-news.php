@@ -20,7 +20,7 @@ class PouetBoxIndexNews extends PouetBox
         echo "<div class='pouettbl ".$this->uniqueID."'>\n";
         echo " <h3><a href='".$this->link."'>"._html($this->title)."</a></h3>\n";
         echo " <div class='content'>\n".str_replace("<br>", "<br/>", $this->content)."\n</div>\n";
-        echo " <div class='foot'>lobstregated at <a href='http://www.bitfellas.org/'>BitFellas.org</a> on ".($this->timestamp)."</div>\n";
+        echo " <div class='foot'>lobstregated at <a href='https://news.scene.org/'>Scene.org</a> on ".($this->timestamp)."</div>\n";
         echo "</div>\n";
     }
 };
@@ -30,7 +30,7 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
     use PouetFrontPage;
     public $rss;
     public $limit;
-    public $rssBitfellasNews;
+    public $rssNews;
     public function __construct()
     {
         parent::__construct();
@@ -51,17 +51,17 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
 
     public function LoadFromDB()
     {
-        $this->rssBitfellasNews = $this->rss ? $this->rss->get('http://www.bitfellas.org/e107_plugins/rss_menu/rss.php?1.2') : array();
+        $this->rssNews = $this->rss ? $this->rss->get('https://news.scene.org/feeds/rss/') : array();
     }
 
     public function LoadFromCachedData($data)
     {
-        $this->rssBitfellasNews = unserialize($data);
+        $this->rssNews = unserialize($data);
     }
 
     public function GetCacheableData()
     {
-        return serialize($this->rssBitfellasNews);
+        return serialize($this->rssNews);
     }
     public function SetParameters($data)
     {
@@ -78,18 +78,18 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
 
     public function Render()
     {
-        if (@!$this->rssBitfellasNews['items']) {
-            printf('Error: Unable to open BitFeed !');
+        if (@!$this->rssNews['items']) {
+            printf('Error: Unable to open news feed !');
         } else {
             $p = new PouetBoxIndexNews();
-            for ($i = 0; $i < min(count($this->rssBitfellasNews['items']), $this->limit); $i++) {
-                if (!$this->rssBitfellasNews['items'][$i]['title']) {
+            for ($i = 0; $i < min(count($this->rssNews['items']), $this->limit); $i++) {
+                if (!$this->rssNews['items'][$i]['title']) {
                     continue;
                 }
-                $p->content = $this->rssBitfellasNews['items'][$i]['description'];
-                $p->title = $this->rssBitfellasNews['items'][$i]['title'];
-                $p->link = $this->rssBitfellasNews['items'][$i]['link'];
-                $p->timestamp = $this->rssBitfellasNews['items'][$i]['pubDate'];
+                $p->content = $this->rssNews['items'][$i]['description'];
+                $p->title = $this->rssNews['items'][$i]['title'];
+                $p->link = $this->rssNews['items'][$i]['link'];
+                $p->timestamp = $this->rssNews['items'][$i]['pubDate'];
                 $p->Render();
             }
         }
