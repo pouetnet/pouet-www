@@ -96,4 +96,4 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
     }
 };
 
-$indexAvailableBoxes[] = "News";
+$indexAvailableBoxes[] = "NewsBoxes";
