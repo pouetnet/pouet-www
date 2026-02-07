@@ -147,6 +147,21 @@ class PouetBoxProdMain extends PouetBox
         $this->screenshotPath = find_screenshot($this->prod->id);
     }
 
+    private function getYoutubeEmbedUrl($url)
+    {
+        $shortUrlRegex = '/youtu.be\/([a-zA-Z0-9_-]+)\??/i';
+        $longUrlRegex = '/youtube.com\/((?:embed)|(?:watch))((?:\?v\=)|(?:\/))([a-zA-Z0-9_-]+)/i';
+
+        if (preg_match($longUrlRegex, $url, $matches)) {
+        $youtube_id = $matches[count($matches) - 1];
+        }
+
+        if (preg_match($shortUrlRegex, $url, $matches)) {
+        $youtube_id = $matches[count($matches) - 1];
+        }
+        return 'https://www.youtube.com/embed/' . $youtube_id ;
+    }
+
     public function RenderScreenshot()
     {
         if ($this->screenshotPath) {
@@ -154,7 +169,8 @@ class PouetBoxProdMain extends PouetBox
             if ($this->screenshot) {
                 $title = "screenshot added by "._html($this->screenshot->user->nickname)." on "._html($this->screenshot->added);
             }
-            return "<img src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."'/>\n";
+
+            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."' />\n";
         } else {
             global $currentUser;
             $s = "no screenshot yet.\n";
@@ -393,7 +409,18 @@ document.observe("dom:loaded",function(){
         echo "</li>\n";
 
         foreach ($this->downloadLinks as $link) {
-            echo "<li".(@$link->id ? " id='".$link->id."'" : "").">[<a href='"._html($link->link)."'>"._html($link->type)."</a>]</li>\n";
+            echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
+            
+            if (strpos($link->link,"youtu")!==false)
+            {
+                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
+                echo "<a class='lightBoxVideoLink' href='".$this->getYoutubeEmbedUrl(_html($link->link))."'><span title='play embedded' id='youtubeEmbed' style='width=\"100%\"'></span></a>";
+            }
+            else
+            {
+                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
+            }
+            echo "</li>\n";
         }
         echo "<li>[<a href='mirrors.php?which=".$this->id."'>mirrors...</a>]</li>\n";
         echo "</ul>\n";
@@ -1182,6 +1209,25 @@ document.observe("dom:loaded",function(){
   }
 });
 //-->
+
+const images=document.getElementsByClassName('pouetsscreenshotimg');
+if (images.length>0) {
+    document.getElementsByClassName('pouetsscreenshotimg')[0].addEventListener('click', function() { 
+        this.classList.toggle('sslightbox'); 
+    }); 
+
+    document.body.addEventListener('keydown', function(e) {
+        if (e.key == "Escape") {
+            var isPopupVisible = document.getElementsByClassName('pouetsscreenshotimg')[0].classList.contains('sslightbox');
+            if (isPopupVisible) document.getElementsByClassName('pouetsscreenshotimg')[0].classList.toggle('sslightbox'); 
+        }
+    });
+}
+
+var lightbox2 = new SimpleLightbox({
+    elements: document.querySelectorAll('.lightBoxVideoLink')
+});
+
 </script>
 <?php
 } else {
