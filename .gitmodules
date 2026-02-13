@@ -3,3 +3,6 @@
 	url = https://github.com/sceneorg/sceneid3lib-php.git
 [submodule "sceneid3"]
 	url = https://github.com/sceneorg/sceneid3lib-php.git
+[submodule "content"]
+	path = content
+	url = https://github.com/pouetnet/pouet-content.git
