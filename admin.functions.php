@@ -287,7 +287,7 @@ function pouetAdmin_recacheBBS()
 
         $content .= $topic->id.", ";
 
-        SQLLib::UpdateRow("bbs_topics",$a,"id=".$topic->id);
+        SQLLib::UpdateRow("bbs_topics", $a, "id=".$topic->id);
     }
 
     @unlink('cache/pouetbox_latestbbs.cache');

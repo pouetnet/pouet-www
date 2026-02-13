@@ -7,7 +7,8 @@ class PouetBox
     public $logz;
     public $classes;
     public function __construct() // constructor
-    {$this->title = "";
+    {
+        $this->title = "";
         $this->uniqueID = "pouetbox";
         $this->classes = array();
     }
@@ -37,7 +38,8 @@ class PouetBox
     }
 
     public function RenderContent() // override
-    {echo "content comes here";
+    {
+        echo "content comes here";
     }
 
     public function RenderFooter()
@@ -129,7 +131,8 @@ class PouetBoxCachable extends PouetBox
         $this->cacheTime = 60 * 60 * 24;
     }
     public function GetCacheableData() // override
-    {return "";
+    {
+        return "";
     }
 
     public function LoadFromCachedData($data) // override

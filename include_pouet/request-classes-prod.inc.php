@@ -1164,7 +1164,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                 $a = array();
                 $a["prod"] = (int)$itemID;
                 $a["platform"] = $v;
-                SQLLib::InsertRow("prods_platforms",$a);
+                SQLLib::InsertRow("prods_platforms", $a);
             }
         }
 
