@@ -401,7 +401,7 @@ class PouetBoxCustomizerSitewide extends PouetBox
           "indexoneliner" => "front page - oneliner",
           "indexlatestadded" => "front page - latest added",
           "indexlatestreleased" => "front page - latest released",
-          "indexojnews" => "front page - bitfellas news",
+          "indexojnews" => "front page - news",
           "indexlatestcomments" => "front page - latest comments",
           "indexlatestparties" => "front page - latest parties",
           "indexbbstopics" => "front page - bbs topics",

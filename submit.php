@@ -29,7 +29,7 @@ class PouetBoxSubmit extends PouetBox
         }
         echo "<h2>free 4 all stuffz!</h2>\n";
         echo "<ul class='boxlist'>\n";
-        echo "  <li><a href='http://www.bitfellas.org/submitnews.php'>submit news via bitfellas</a></li>\n";
+        echo "  <li><a href='https://news.scene.org/submit/'>submit news via scene.org</a></li>\n";
         echo "</ul>\n";
         //echo "</div>\n";
     }
