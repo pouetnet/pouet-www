@@ -20,7 +20,7 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
 <?php foreach ($RSS as $url => $title) {?>
   <link rel="alternate" href="<?=_html($url)?>" type="application/rss+xml" title="pouët.net: <?=_html($title)?>">
 <?php }?>
-
+  <link rel="stylesheet" type="text/css" href="libs/simpleLightbox/css/simpleLightbox.min.css" media="screen" />
   <link rel="stylesheet" type="text/css" href="styles/001/types.css?<?=filemtime("styles/001/types.css")?>" media="screen" />
   <link rel="stylesheet" type="text/css" href="styles/001/style.css?<?=filemtime("styles/001/style.css")?>" media="screen" />
   <?php if (POUET_MOBILE) {?>
@@ -65,6 +65,7 @@ $newsTickers = handle_db_cache(POUET_ROOT_LOCAL . "/cache/newstickers.cache", fu
   <script src="./jsonp.js"></script>
   <script src="./cookie.js"></script>
   <script src="./autocompleter.js"></script>
+  <script src="./libs/simpleLightbox/simpleLightbox.min.js"></script>
   <script src="./script.js?<?=filemtime("script.js")?>"></script>
 
   <!--[if lt IE 9]><script src="//ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script><![endif]-->
