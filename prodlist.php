@@ -19,22 +19,24 @@ class PouetBoxProdlist extends PouetBox
 
     public function LoadFromDB()
     {
-        $s = new SQLSelect();
-
         $this->perPage = get_setting("prodlistprods");
 
         $this->page = (int)max(1, (int)@$_GET["page"]);
 
-        $s = new BM_Query("prods");
-
-        // QUERYNAUGHT INCOMING
-
+        // double query for optimization
+        
+        // First pass: get IDs first (uses indices, then actual data restricted to IDs)
+        $sqlGetIDs = new BM_Query();
+        $sqlGetIDs->AddField("prods.id");
+        $sqlGetIDs->AddTable("prods");
+        $sqlGetIDs->AddJoin("LEFT", "parties as prods_party", "prods_party.id = prods.party");
+        
         if (is_array(@$_GET["type"])) {
             $cond = array();
             foreach ($_GET["type"] as $type) {
                 $cond[] = sprintf_esc("FIND_IN_SET('%s',prods.type)", $type);
             }
-            $s->AddWhere(implode(" OR ", $cond));
+            $sqlGetIDs->AddWhere(implode(" OR ", $cond));
         }
         if (is_array(@$_GET["platform"])) {
             global $PLATFORMS;
@@ -47,89 +49,104 @@ class PouetBoxProdlist extends PouetBox
                 }
             }
             if ($platforms) {
-                $s->AddJoin("LEFT", "prods_platforms as pp", "pp.prod = prods.id");
-                $s->AddWhere(sprintf_esc("pp.platform in (%s)", implode(",", $platforms)));
+                $sqlGetIDs->AddJoin("LEFT", "prods_platforms as pp", "pp.prod = prods.id");
+                $sqlGetIDs->AddWhere(sprintf_esc("pp.platform in (%s)", implode(",", $platforms)));
             }
         }
         if (is_array(@$_GET["group"])) {
             foreach ($_GET["group"] as $v) {
                 if ($v) {
-                    $s->AddWhere(sprintf_esc("(prods.group1 = %d OR prods.group2 = %d OR prods.group3 = %d)", $v, $v, $v));
+                    $sqlGetIDs->AddWhere(sprintf_esc("(prods.group1 = %d OR prods.group2 = %d OR prods.group3 = %d)", $v, $v, $v));
                 }
             }
         }
         if (@$_GET["releaseDateFrom"]) {
-            $s->AddWhere(sprintf_esc("prods.releaseDate >= '%s'", $_GET["releaseDateFrom"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("prods.releaseDate >= '%s'", $_GET["releaseDateFrom"]));
         }
         if (@$_GET["releaseDateUntil"]) {
-            $s->AddWhere(sprintf_esc("prods.releaseDate <= '%s'", $_GET["releaseDateUntil"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("prods.releaseDate <= '%s'", $_GET["releaseDateUntil"]));
         }
         if (@$_GET["addedDateFrom"]) {
-            $s->AddWhere(sprintf_esc("prods.addedDate >= '%s'", $_GET["addedDateFrom"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("prods.addedDate >= '%s'", $_GET["addedDateFrom"]));
         }
         if (@$_GET["addedDateUntil"]) {
-            $s->AddWhere(sprintf_esc("prods.addedDate <= '%s'", $_GET["addedDateUntil"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("prods.addedDate <= '%s'", $_GET["addedDateUntil"]));
         }
         if (@$_GET["party"]) {
-            $s->AddWhere(sprintf_esc("party = %d", $_GET["party"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("party = %d", $_GET["party"]));
         }
         if (@$_GET["partyYear"]) {
-            $s->AddWhere(sprintf_esc("party_year = %d", $_GET["partyYear"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("party_year = %d", $_GET["partyYear"]));
         }
         if (@$_GET["partyRank"]) {
-            $s->AddWhere(sprintf_esc("party_place = %d", $_GET["partyRank"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("party_place = %d", $_GET["partyRank"]));
         }
         if (@$_GET["partyRankHigher"]) {
-            $s->AddWhere(sprintf_esc("party_place <= %d", $_GET["partyRankHigher"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("party_place <= %d", $_GET["partyRankHigher"]));
         }
         if (@$_GET["partyRankLower"]) {
-            $s->AddWhere(sprintf_esc("party_place >= %d", $_GET["partyRankLower"]));
+            $sqlGetIDs->AddWhere(sprintf_esc("party_place >= %d", $_GET["partyRankLower"]));
         }
 
+        $this->SetQueryOrder($sqlGetIDs);
+
+        $sqlGetIDs->SetLimit($this->perPage, (int)(($this->page - 1) * $this->perPage));
+
+        $ids = $sqlGetIDs->performWithCalcRows($this->count);
+        if ($ids) {
+          $ids = array_map(function($i){ return (int)$i->id; }, $ids);
+
+          // Second pass: Get actual prod data
+          $sqlProdData = new BM_Query("prods");
+          $sqlProdData->AddWhere("prods.id IN (".implode(",",$ids).")");
+          $this->SetQueryOrder($sqlProdData);
+          $this->prods = $sqlProdData->perform();
+        }
+        else {
+          $this->prods = array();
+        }
+        PouetCollectPlatforms($this->prods);
+        PouetCollectAwards($this->prods);
+    }
+    
+    private function SetQueryOrder(&$query)
+    {
         $dir = "DESC";
         if (@$_GET["reverse"]) {
             $dir = "ASC";
         }
         switch (@$_GET["order"]) {
-            case "type": $s->AddOrder("prods.type ".$dir);
+            case "type": $query->AddOrder("prods.type ".$dir);
                 break;
-            case "name": $s->AddOrder("prods.name ".$dir);
+            case "name": $query->AddOrder("prods.name ".$dir);
                 break;
-            case "group": $s->AddOrder("prods.group1 ".$dir);
-                $s->AddOrder("prods.group2 ".$dir);
-                $s->AddOrder("prods.group3 ".$dir);
+            case "group": $query->AddOrder("prods.group1 ".$dir);
+                $query->AddOrder("prods.group2 ".$dir);
+                $query->AddOrder("prods.group3 ".$dir);
                 break;
-            case "party": $s->AddOrder("prods_party.name ".$dir);
-                $s->AddOrder("prods.party_year ".$dir);
-                $s->AddOrder("prods.party_place ".$dir);
+            case "party": $query->AddOrder("prods_party.name ".$dir);
+                $query->AddOrder("prods.party_year ".$dir);
+                $query->AddOrder("prods.party_place ".$dir);
                 break;
-            case "thumbup": $s->AddOrder("prods.voteup ".$dir);
+            case "thumbup": $query->AddOrder("prods.voteup ".$dir);
                 break;
-            case "thumbpig": $s->AddOrder("prods.votepig ".$dir);
+            case "thumbpig": $query->AddOrder("prods.votepig ".$dir);
                 break;
-            case "thumbdown": $s->AddOrder("prods.votedown ".$dir);
+            case "thumbdown": $query->AddOrder("prods.votedown ".$dir);
                 break;
-            case "thumbdiff": $s->AddOrder("(prods.voteup - prods.votedown) ".$dir);
+            case "thumbdiff": $query->AddOrder("(prods.voteup - prods.votedown) ".$dir);
                 break;
-            case "avg": $s->AddOrder("prods.voteavg ".$dir);
+            case "avg": $query->AddOrder("prods.voteavg ".$dir);
                 break;
-            case "views": $s->AddOrder("prods.views ".$dir);
+            case "views": $query->AddOrder("prods.views ".$dir);
                 break;
-            case "added": $s->AddOrder("prods.addedDate ".$dir);
+            case "added": $query->AddOrder("prods.addedDate ".$dir);
                 break;
-            case "random": $s->AddOrder("RAND()");
+            case "random": $query->AddOrder("RAND()");
                 break;
         }
-        $s->AddOrder("prods.releaseDate ".$dir);
-        $s->AddOrder("prods.addedDate ".$dir);
-
-        $s->SetLimit($this->perPage, (int)(($this->page - 1) * $this->perPage));
-
-        //echo $s->GetQuery();
-
-        $this->prods = $s->performWithCalcRows($this->count);
-        PouetCollectPlatforms($this->prods);
-        PouetCollectAwards($this->prods);
+        $query->AddOrder("prods.releaseDate ".$dir);
+        $query->AddOrder("prods.addedDate ".$dir);
     }
 
     public function Render()

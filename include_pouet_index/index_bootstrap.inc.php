@@ -12,8 +12,7 @@ require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-latestparties.ph
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-upcomingparties.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-topmonth.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-topalltime.php");
-// Commented out until bitfellas is back up
-// require_once( POUET_ROOT_LOCAL . "/include_pouet_index/box-index-news.php");
+require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-news.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-searchbox.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-affilbutton.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-stats.php");

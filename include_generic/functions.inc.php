@@ -554,7 +554,7 @@ function hashify($s)
 
 function enum2array($s)
 {
-    return str_getcsv(substr($s, substr($s, 0, 3) == "set" ? 4 : 5, -1), ',', "'");
+    return str_getcsv(substr($s, substr($s, 0, 3) == "set" ? 4 : 5, -1), ',', "'", "\\");
 }
 
 function is_string_meaningful($s)
@@ -706,15 +706,15 @@ function get_partyresult_url($id, $year)
 function get_boardnfo_url($id)
 {
     $id = (int)$id;
-    return sprintf(POUET_CONTENT_URL . "files/nfo_bbs/%05d/%08d.txt",(int)($id / 1000),$id);
+    return sprintf(POUET_CONTENT_URL . "files/nfo_bbs/%05d/%08d.txt", (int)($id / 1000), $id);
 }
 
-define("FIXMETHREAD_ID",1024);
-define("NO_PARTY_ID",1024);
-define("POUET_CACHE_MAX",25);
+define("FIXMETHREAD_ID", 1024);
+define("NO_PARTY_ID", 1024);
+define("POUET_CACHE_MAX", 25);
 if (POUET_TEST) {
-    define("POUET_CDC_MINGLOP",4);
+    define("POUET_CDC_MINGLOP", 4);
 } else {
-    define("POUET_CDC_MINGLOP",64);
+    define("POUET_CDC_MINGLOP", 64);
 }
 define("POUET_EARLIEST_YEAR",1970);
