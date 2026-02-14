@@ -126,13 +126,12 @@ class PouetBoxListsMain extends PouetBox
 
         $dir = "ASC";
         if (@$_GET["reverse"]) $dir = "DESC";
-        //if (@$_GET["order"]) echo "we have order valued ".$_GET["order"]."\n";
         switch(@$_GET["order"])
         {
             case "type": $s->AddOrder("list_items_prod.type ".$dir); break;
             case "name": $s->AddOrder("list_items_prod.name ".$dir); break;    
             case "party": $s->AddOrder("list_items_prod_party.name ".$dir); break;    
-            case "release date": $s->AddOrder("list_items_prod_releaseDate ".$dir); break;    
+            case "release date": $s->AddOrder("list_items_prod.releaseDate ".$dir); break;    
         }        
 
         $this->prods = $s->perform();
