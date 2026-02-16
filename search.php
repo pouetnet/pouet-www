@@ -642,7 +642,7 @@ require_once("include_pouet/footer.php");
 <script>
 document.observe("dom:loaded",function()
 {
-  changeSearchType("prod","<?php POUET_CONTENT_URL ?>");
+  changeSearchType("prod","<?php echo POUET_CONTENT_URL; ?>");
 }
 );
 </script>

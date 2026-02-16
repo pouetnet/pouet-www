@@ -664,13 +664,6 @@ function trimPostContent(postContent,query,maxlen)
   }
 }
 
-String.prototype.replaceAll = function(strReplace, strWith) 
-{
-  var esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-  var reg = new RegExp(esc, 'ig');
-  return this.replace(reg, strWith);
-};
-
 // switches between different search types on search page:
 // "prod","group","party","user","bbs"
 function changeSearchType(searchType,pouetContentUrl)
@@ -746,17 +739,18 @@ function changeSearchType(searchType,pouetContentUrl)
       var topicName=item.topic;
       var postContent=item.post;
 
-      if (topicName.toLowerCase().indexOf(item.searchQuery.toLowerCase())>=0)
+      var cleanQuery = item.searchQuery.replace(/<\/?[^>]+(>|$)/g, "");
+      if (topicName.toLowerCase().indexOf(cleanQuery.toLowerCase())>=0)
       {
-        topicName=topicName.replaceAll(item.searchQuery,"<span style='background-color:yellow;color:black'>"+item.searchQuery+"</span>")
+        topicName=topicName.replaceAll(cleanQuery,"<span style='background-color:yellow;color:black'>"+cleanQuery+"</span>")
       }
 
       // trim post content to a reasonable size
-      postContent=trimPostContent(postContent.toLowerCase(),item.searchQuery.toLowerCase(),60);
+      postContent=trimPostContent(postContent.toLowerCase(),cleanQuery.toLowerCase(),60);
 
-      if (postContent.toLowerCase().indexOf(item.searchQuery.toLowerCase())>=0)
+      if (postContent.toLowerCase().indexOf(cleanQuery.toLowerCase())>=0)
       {
-        postContent = postContent.replaceAll(item.searchQuery,"<span style='background-color:yellow;color:black'>"+item.searchQuery+"</span>")
+        postContent = postContent.replaceAll(cleanQuery,"<span style='background-color:yellow;color:black'>"+cleanQuery+"</span>")
       }
 
       return "<b>"+topicName+"</b><br/>... "+postContent+" ..." ;

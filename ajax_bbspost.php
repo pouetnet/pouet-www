@@ -9,7 +9,7 @@ $sql->AddTable("bbs_posts");
 $sql->AddField("bbs_topics.topic as topic");
 $sql->AddField("bbs_topics.id as topicID");
 $sql->AddField("bbs_posts.id as id");
-if ($_POST["search"]) $sql->AddField("'".$_POST["search"]."' as searchQuery");
+if ($_POST["search"]) $sql->AddField(sprintf_esc("'%s' as searchQuery", $_POST["search"]));
 $sql->AddField("bbs_posts.post as post");
 $sql->AddField("bbs_posts.added as postDate");
 $sql->AddJoin("left","bbs_topics","bbs_posts.topic = bbs_topics.id");
