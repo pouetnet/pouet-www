@@ -736,8 +736,8 @@ function changeSearchType(searchType,pouetContentUrl)
     "width":500,
     "processRow": function(item) 
     {
-      var topicName=item.topic;
-      var postContent=item.post;
+      var topicName=item.topic.escapeHTML();
+      var postContent=item.post.escapeHTML();
 
       var cleanQuery = item.searchQuery.replace(/<\/?[^>]+(>|$)/g, "");
       if (topicName.toLowerCase().indexOf(cleanQuery.toLowerCase())>=0)
