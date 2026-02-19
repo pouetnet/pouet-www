@@ -159,6 +159,9 @@ class PouetBoxProdMain extends PouetBox
         if (preg_match($shortUrlRegex, $url, $matches)) {
         $youtube_id = $matches[count($matches) - 1];
         }
+
+        if (!isset($youtube_id)) return $url;
+
         return 'https://www.youtube.com/embed/' . $youtube_id ;
     }
 
@@ -414,7 +417,7 @@ document.observe("dom:loaded",function(){
             if (strpos($link->link,"youtu")!==false)
             {
                 echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
-                echo "<a class='lightBoxVideoLink' href='".$this->getYoutubeEmbedUrl(_html($link->link))."'><span title='play embedded' id='youtubeEmbed' style='width=\"100%\"'></span></a>";
+                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl(_html($link->link)))."'><span title='play embedded' id='youtubeEmbed' style='width:\"100%\"'></span></a>";
             }
             else
             {
