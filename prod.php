@@ -172,11 +172,11 @@ class PouetBoxProdMain extends PouetBox
                 }
             }
         } elseif ($host === "youtube.com" || substr($host, -12) === ".youtube.com") {
-            $path = trim((string)@$parsed["path"], "/");
+            $path = trim(isset($parsed["path"]) ? (string)$parsed["path"] : "", "/");
             if ($path !== "") {
                 $parts = explode("/", $path);
                 if (!empty($parts[1]) && in_array($parts[0], array("embed", "shorts", "live"), true)) {
-                    $videoId = $parts[1];
+                    $videoId = explode("/", $parts[1])[0];
                 }
             }
 
