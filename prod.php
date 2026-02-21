@@ -188,7 +188,7 @@ class PouetBoxProdMain extends PouetBox
             }
         }
 
-        if (!$videoId || !preg_match('/^[a-zA-Z0-9_-]+$/', $videoId)) {
+        if (!$videoId || !preg_match('/^[a-zA-Z0-9_-]+$/', $videoId) || strlen($videoId) !== 11) {
             return $url;
         }
 
