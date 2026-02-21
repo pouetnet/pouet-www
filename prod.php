@@ -165,6 +165,23 @@ class PouetBoxProdMain extends PouetBox
         return 'https://www.youtube.com/embed/' . $youtube_id ;
     }
 
+    private function isEmbeddableYoutubeUrl($url)
+    {
+        $parsed = parse_url($url);
+        if (!$parsed || !isset($parsed["host"])) {
+            return false;
+        }
+
+        $host = strtolower($parsed["host"]);
+        if (strpos($host, "www.") === 0) {
+            $host = substr($host, 4);
+        }
+
+        return $host === "youtube.com"
+            || $host === "youtu.be"
+            || substr($host, -12) === ".youtube.com";
+    }
+
     public function RenderScreenshot()
     {
         if ($this->screenshotPath) {
@@ -414,11 +431,10 @@ document.observe("dom:loaded",function(){
         foreach ($this->downloadLinks as $link) {
             echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
             
-            $parsedUrl = parse_url($link->link);
-            if ((strstr($parsedUrl["host"], "youtube.com") !== false)||(strstr($parsedUrl["host"], "youtu.be") !== false)) 
+            if ($this->isEmbeddableYoutubeUrl($link->link))
             {
                 echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
-                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl(_html($link->link)))."'><span title='play embedded' class='youtubeEmbed' style='width:\"100%\"'></span></a>";
+                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'></span></a>";
             }
             else
             {
