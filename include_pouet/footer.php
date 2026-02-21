@@ -13,6 +13,10 @@ function pouet_footer_git_short_hash()
 
     if (strpos($head, "ref: ") === 0) {
         $ref = trim(substr($head, 5));
+        // Ensure the ref stays within the expected refs/ namespace to avoid path traversal
+        if (strpos($ref, "refs/") !== 0) {
+            return "unknown";
+        }
         $refFile = $gitDir . "/" . $ref;
         if (is_readable($refFile)) {
             return substr(trim(file_get_contents($refFile)), 0, 7);
@@ -20,13 +24,16 @@ function pouet_footer_git_short_hash()
 
         $packedRefs = $gitDir . "/packed-refs";
         if (is_readable($packedRefs)) {
-            foreach (file($packedRefs, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-                if ($line[0] === "#" || $line[0] === "^") {
-                    continue;
-                }
-                $parts = explode(" ", $line, 2);
-                if (count($parts) === 2 && trim($parts[1]) === $ref) {
-                    return substr($parts[0], 0, 7);
+            $lines = file($packedRefs, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines !== false) {
+                foreach ($lines as $line) {
+                    if ($line[0] === "#" || $line[0] === "^") {
+                        continue;
+                    }
+                    $parts = explode(" ", $line, 2);
+                    if (count($parts) === 2 && trim($parts[1]) === $ref) {
+                        return substr($parts[0], 0, 7);
+                    }
                 }
             }
         }
