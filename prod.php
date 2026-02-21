@@ -182,7 +182,7 @@ class PouetBoxProdMain extends PouetBox
 
             if (!$videoId && !empty($parsed["query"])) {
                 parse_str($parsed["query"], $query);
-                if (!empty($query["v"])) {
+                if (isset($query["v"]) && is_string($query["v"]) && $query["v"] !== '') {
                     $videoId = $query["v"];
                 }
             }
