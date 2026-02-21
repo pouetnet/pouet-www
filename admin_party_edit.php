@@ -94,13 +94,13 @@ class PouetBoxAdminDeleteParty extends PouetBox
 <script>
 document.observe("dom:loaded",function(){
   $("pouetbox_partydelete").up("form").observe("submit",function(e){
-    if ($F("check") != "<?=_js($this->checkString)?>")
+    if ($F("check") != <?=json_encode($this->checkString, JSON_HEX_TAG)?>)
     {
       alert("Enter the verification string!");
       e.stop();
       return;
     }
-    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE \"<?=_js($this->party->name)?>\"?!"))
+    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE " + <?=json_encode($this->party->name, JSON_HEX_TAG)?> + "?!"))
       e.stop();
   });
 });

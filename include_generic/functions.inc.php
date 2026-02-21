@@ -608,10 +608,6 @@ function _html($s)
 {
     return htmlspecialchars($s ?: "", ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "utf-8");
 }
-function _js($s)
-{
-    return addcslashes($s, "\x00..\x1f'\"\\/");
-}
 function _like($s)
 {
     return addcslashes($s, "%_");
