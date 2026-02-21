@@ -19,8 +19,8 @@ class CSRFProtect
     }
     public function GenerateTokens()
     {
-        $name  = "Protect".sprintf("%06d", rand(0, 999999));
-        $token = sha1(time() . rand(0, 9999));
+        $name  = "Protect" . bin2hex(random_bytes(4));
+        $token = bin2hex(random_bytes(32));
         $_SESSION["CSRFProtect"][$name]["token"] = $token;
         $_SESSION["CSRFProtect"][$name]["time"] = time();
         return array("name" => $name,"token" => $token);
@@ -33,7 +33,7 @@ class CSRFProtect
     }
     public function ValidateToken()
     {
-        if (@$_SESSION["CSRFProtect"][ $_POST["ProtName"] ] && $_SESSION["CSRFProtect"][ $_POST["ProtName"] ]["token"] == $_POST["ProtValue"]) {
+        if (@$_SESSION["CSRFProtect"][ $_POST["ProtName"] ] && hash_equals($_SESSION["CSRFProtect"][ $_POST["ProtName"] ]["token"], (string)$_POST["ProtValue"])) {
             unset($_SESSION["CSRFProtect"][ $_POST["ProtName"] ]);
             return true;
         }
