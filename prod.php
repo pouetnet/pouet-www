@@ -149,20 +149,41 @@ class PouetBoxProdMain extends PouetBox
 
     private function getYoutubeEmbedUrl($url)
     {
-        $shortUrlRegex = '/youtu.be\/([a-zA-Z0-9_-]+)\??/i';
-        $longUrlRegex = '/youtube.com\/((?:embed)|(?:watch))((?:\?v\=)|(?:\/))([a-zA-Z0-9_-]+)/i';
-
-        if (preg_match($longUrlRegex, $url, $matches)) {
-        $youtube_id = $matches[count($matches) - 1];
+        $parsed = parse_url($url);
+        if (!$parsed || !isset($parsed["host"])) {
+            return $url;
         }
 
-        if (preg_match($shortUrlRegex, $url, $matches)) {
-        $youtube_id = $matches[count($matches) - 1];
+        $videoId = null;
+        $host = strtolower($parsed["host"]);
+        if (strpos($host, "www.") === 0) {
+            $host = substr($host, 4);
         }
 
-        if (!isset($youtube_id)) return $url;
+        if ($host === "youtu.be" && !empty($parsed["path"])) {
+            $videoId = trim($parsed["path"], "/");
+        } elseif ($host === "youtube.com" || substr($host, -12) === ".youtube.com") {
+            $path = trim((string)@$parsed["path"], "/");
+            if ($path !== "") {
+                $parts = explode("/", $path);
+                if (!empty($parts[1]) && in_array($parts[0], array("embed", "shorts", "live"), true)) {
+                    $videoId = $parts[1];
+                }
+            }
 
-        return 'https://www.youtube.com/embed/' . $youtube_id ;
+            if (!$videoId && !empty($parsed["query"])) {
+                parse_str($parsed["query"], $query);
+                if (!empty($query["v"])) {
+                    $videoId = $query["v"];
+                }
+            }
+        }
+
+        if (!$videoId || !preg_match('/^[a-zA-Z0-9_-]+$/', $videoId)) {
+            return $url;
+        }
+
+        return "https://www.youtube.com/embed/".$videoId;
     }
 
     private function isEmbeddableYoutubeUrl($url)
