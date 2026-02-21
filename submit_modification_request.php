@@ -56,7 +56,7 @@ class PouetBoxModificationRequest extends PouetBox
         $a["requestDate"] = date("Y-m-d H:i:s");
         $a["userID"] = get_login_id();
 
-        $a["requestBlob"] = serialize($post);
+        $a["requestBlob"] = json_encode($post);
 
         global $reqID;
         $reqID = SQLLib::InsertRow("modification_requests", $a);
