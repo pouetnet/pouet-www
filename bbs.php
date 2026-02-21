@@ -168,11 +168,7 @@ class PouetBoxBBSTopicList extends PouetBox
         ?>
 <script>
 <!--
-var threadCategories = $A([<?php
-foreach ($this->categories as $v) {
-    echo "'"._js($v)."',";
-}
-        ?>]);
+var threadCategories = $A(<?=json_encode(array_values($this->categories), JSON_HEX_TAG)?>);
 document.observe("dom:loaded",function(){
   var sel = new Element("select",{"id":"categoryFilter"});
   $("th_category").insert(sel);
