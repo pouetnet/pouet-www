@@ -414,10 +414,11 @@ document.observe("dom:loaded",function(){
         foreach ($this->downloadLinks as $link) {
             echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
             
-            if (strpos($link->link,"youtu")!==false)
+            $parsedUrl = parse_url($link->link);
+            if ((strstr($parsedUrl["host"], "youtube.com") !== false)||(strstr($parsedUrl["host"], "youtu.be") !== false)) 
             {
                 echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
-                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl(_html($link->link)))."'><span title='play embedded' id='youtubeEmbed' style='width:\"100%\"'></span></a>";
+                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl(_html($link->link)))."'><span title='play embedded' class='youtubeEmbed' style='width:\"100%\"'></span></a>";
             }
             else
             {
