@@ -146,7 +146,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
   {
     var videoIDs = {};
     var playlistIDs = {};
-    var ytAPIKey = "<?=YOUTUBE_FRONTEND_KEY?>";
+    var ytAPIKey = <?=json_encode(YOUTUBE_FRONTEND_KEY)?>;
     parentElement.select("a[rel='external']").each(function(element){
       var videoID = element.href.match(/youtu(\.be\/|.*v=)([a-zA-Z0-9_\-]{11})/);
       if (videoID)
