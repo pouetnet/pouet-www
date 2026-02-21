@@ -142,9 +142,9 @@ class PouetBoxAdminEditFAQList extends PouetBox
         echo "  </tr>\n";
         foreach ($this->items as $r) {
             echo "  <tr>\n";
-            echo "    <td>".$r->id."</td>\n";
-            echo "    <td>".$r->category."</td>\n";
-            echo "    <td><a href='admin_faq.php?id=".(int)$r->id."'>".$r->question."</a></td>\n";
+            echo "    <td>".(int)$r->id."</td>\n";
+            echo "    <td>"._html($r->category)."</td>\n";
+            echo "    <td><a href='admin_faq.php?id=".(int)$r->id."'>"._html($r->question)."</a></td>\n";
             echo "    <td>".($r->deprecated ? "yes" : "&nbsp;")."</td>\n";
             echo "  </tr>\n";
         }
