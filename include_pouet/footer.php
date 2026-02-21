@@ -1,7 +1,6 @@
 <footer>
 
 <ul>
-  <li><a href="//<?=(POUET_MOBILE ? POUET_WEB_HOSTNAME : POUET_MOBILE_HOSTNAME).$_SERVER["REQUEST_URI"]?>">switch to <?=(POUET_MOBILE ? "desktop" : "mobile")?> version</a></li>
 <?php
 function pouet_footer_git_short_hash()
 {
@@ -44,6 +43,7 @@ function pouet_footer_git_short_hash()
     return substr($head, 0, 7);
 }
 ?>
+  <li><a href="//<?=_html((POUET_MOBILE ? POUET_WEB_HOSTNAME : POUET_MOBILE_HOSTNAME).$_SERVER["REQUEST_URI"])?>">switch to <?=(POUET_MOBILE ? "desktop" : "mobile")?> version</a></li>
   <li>
     <a href="index.php">pouët.net</a> v<a href="https://github.com/pouetnet/pouet-www">1.0-<?=pouet_footer_git_short_hash()?></a> &copy; 2000-<?=date("Y")?> <a href="groups.php?which=5">mandarine</a>
     - hosted on <a href="http://www.scene.org/">scene.org</a>
