@@ -289,7 +289,13 @@ class PouetBoxAdminEditProdAwards extends PouetBoxEditConnectionsBase
 
         $a = array();
         $a["awardType"] = $data["awardType"];
-        $a["categoryID"] = $data["awardCategory"];
+        if (!in_array($a["awardType"], $this->types, true)) {
+            return array("invalid award type");
+        }
+        $a["categoryID"] = (int)$data["awardCategory"];
+        if (!isset($this->categories[$a["categoryID"]])) {
+            return array("invalid award category");
+        }
         if (@$data["editAwardsID"]) {
             SQLLib::UpdateRow("awards", $a, "id=".(int)$data["editAwardsID"]);
             $a["id"] = $data["editAwardsID"];
@@ -375,6 +381,9 @@ class PouetBoxAdminEditProdLinks extends PouetBoxEditConnectionsBase
         $a = array();
         $a["type"] = $data["type"];
         $a["link"] = $data["link"];
+        if (!filter_var($a["link"], FILTER_VALIDATE_URL)) {
+            return array("invalid URL");
+        }
         if (@$data["editLinkID"]) {
             SQLLib::UpdateRow("downloadlinks", $a, "id=".(int)$data["editLinkID"]);
             $a["id"] = $data["editLinkID"];
@@ -475,10 +484,13 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["party"] = $data["partyID"];
-        $a["party_year"] = $data["partyYear"];
-        $a["party_place"] = $data["partyPlace"];
-        $a["party_compo"] = nullify($data["partyCompo"]);
+        $a["party"] = (int)$data["partyID"];
+        if (!PouetParty::Spawn($a["party"])) {
+            return array("invalid party");
+        }
+        $a["party_year"] = (int)$data["partyYear"];
+        $a["party_place"] = (int)$data["partyPlace"];
+        $a["party_compo"] = nullify($data["partyCompo"]) ? (int)$data["partyCompo"] : null;
         if (@$data["editPartyID"]) {
             SQLLib::UpdateRow("prodotherparty", $a, "id=".(int)$data["editPartyID"]);
             $a["id"] = $data["editPartyID"];
@@ -583,7 +595,10 @@ class PouetBoxAdminEditProdCredits extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["userID"] = $data["userID"];
+        $a["userID"] = (int)$data["userID"];
+        if (!PouetUser::Spawn($a["userID"])) {
+            return array("invalid user");
+        }
         $a["role"] = $data["role"];
         if (@$data["editCreditID"]) {
             SQLLib::UpdateRow("credits", $a, "id=".(int)$data["editCreditID"]);
@@ -674,10 +689,14 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
         }
 
         list($direction, $type) = explode(":", $data["type"], 2);
+        $relatedProdId = (int)$data["prod"];
+        if (!PouetProd::Spawn($relatedProdId)) {
+            return array("invalid prod");
+        }
         $a = array();
         $a["type"] = $type;
-        $a["original"]   = $direction == "o" ? $this->prod->id : $data["prod"];
-        $a["derivative"] = $direction == "d" ? $this->prod->id : $data["prod"];
+        $a["original"]   = $direction == "o" ? $this->prod->id : $relatedProdId;
+        $a["derivative"] = $direction == "d" ? $this->prod->id : $relatedProdId;
         if (@$data["editAffilID"]) {
             SQLLib::UpdateRow("affiliatedprods", $a, "id=".(int)$data["editAffilID"]);
             $a["id"] = $data["editAffilID"];

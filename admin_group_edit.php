@@ -99,7 +99,7 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["board"] = $data["board"];
+        $a["board"] = (int)$data["board"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
             SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);

@@ -55,7 +55,7 @@ class PouetBoxAdminEditBoard extends PouetBoxSubmitBoard
             foreach ($data["platform"] as $v) {
                 $a = array();
                 $a["board"] = (int)$this->id;
-                $a["platform"] = $v;
+                $a["platform"] = (int)$v;
                 SQLLib::InsertRow("boards_platforms", $a);
             }
         }
@@ -126,7 +126,7 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["group"] = $data["group"];
+        $a["group"] = (int)$data["group"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
             SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);

@@ -39,6 +39,13 @@ class PouetBoxAdminEditPartyEdition extends PouetBoxSubmitPartyEdition
         $sql["demozoo"] = (int)$data["demozooID"];
         $sql["artcity"] = $data["artcity"];
 
+        if ($sql["download"] && !filter_var($sql["download"], FILTER_VALIDATE_URL)) {
+            return array("invalid download URL");
+        }
+        if ($sql["artcity"] && !filter_var($sql["artcity"], FILTER_VALIDATE_URL)) {
+            return array("invalid artcity URL");
+        }
+
         $links = SQLLib::selectRow(sprintf_esc("select * from partylinks where party = %d and year = %d", $this->id, $this->year));
         if ($links) {
             SQLLib::UpdateRow("partylinks", $sql, sprintf_esc("party = %d and year = %d", $this->id, $this->year));
