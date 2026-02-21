@@ -19,8 +19,8 @@ RewriteRule ^(.*)$ https://www.pouet.net/$1 [R=301,QSA,NE,L]
 
 # redirect all old directories to content domain
 
-RewriteRule ^avatars\/(.*)$ http://content.pouet.net/avatars/$1 [R=301,L]
-RewriteRule ^screenshots\/(.*)$ http://content.pouet.net/screenshots/$1 [R=301,L]
+RewriteRule ^avatars\/(.*)$ https://content.pouet.net/avatars/$1 [R=301,L]
+RewriteRule ^screenshots\/(.*)$ https://content.pouet.net/screenshots/$1 [R=301,L]
 
 
 # maintenance mode, if needed
@@ -37,7 +37,10 @@ RewriteCond %{REMOTE_ADDR} ^94\.31\.89\.23
 #RewriteCond %{REMOTE_ADDR} ^47\.128\.
 RewriteRule .* - [F]
 
+</IfModule>
+
 # Prevent clickjacking by disallowing framing of the site
 Header always set X-Frame-Options "DENY"
-
-</IfModule>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Content-Security-Policy "upgrade-insecure-requests"
