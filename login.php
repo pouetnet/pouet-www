@@ -10,6 +10,9 @@ if (@$_GET["error"]) {
 
 if (!@$_GET["code"]) {
     $_SESSION["__return"] = @$_GET["return"];
+    if (method_exists($sceneID, "SetScope")) {
+        $sceneID->SetScope("basic user:email");
+    }
     $sceneID->PerformAuthRedirect();
     exit();
 }
@@ -54,6 +57,36 @@ try {
     if ($user->IsBanned()) {
         redirect("error.php?e=".rawurlencode("We dun like yer type 'round these parts."));
     }
+
+    $email = trim((string)@$SceneIDuser["user"]["email"]);
+    if (!$email && !empty($SceneIDuser["user"]["mail"])) {
+        $email = trim((string)$SceneIDuser["user"]["mail"]);
+    }
+    if (!$email && !empty($SceneIDuser["user"]["emails"]) && is_array($SceneIDuser["user"]["emails"])) {
+        foreach ($SceneIDuser["user"]["emails"] as $entry) {
+            if (is_string($entry) && filter_var(trim($entry), FILTER_VALIDATE_EMAIL)) {
+                $email = trim($entry);
+                break;
+            }
+            if (is_array($entry)) {
+                foreach (array("email","value","address") as $key) {
+                    if (!empty($entry[$key]) && filter_var(trim($entry[$key]), FILTER_VALIDATE_EMAIL)) {
+                        $email = trim($entry[$key]);
+                        break 2;
+                    }
+                }
+            }
+        }
+    }
+    if (!($email && filter_var($email, FILTER_VALIDATE_EMAIL))) {
+        $email = null;
+    }
+
+    SQLLib::UpdateRow("users", array(
+      "sceneIDLastRefresh" => date("Y-m-d H:i:s"),
+      "sceneIDData" => serialize($SceneIDuser["user"]),
+      "email" => $email
+    ), sprintf_esc("id=%d", $user->id));
 
     $_SESSION["user"] = $user;
 

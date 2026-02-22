@@ -62,7 +62,7 @@ if (POUET_TEST) {
 $lifetime = 60 * 60 * 24 * 365;
 @ini_set('session.cookie_lifetime', $lifetime);
 
-session_name("POUETSESS3");
+session_name("POUETSESS4");
 session_set_cookie_params($lifetime, POUET_ROOT_PATH, POUET_COOKIE_DOMAIN);
 @session_start();
 
