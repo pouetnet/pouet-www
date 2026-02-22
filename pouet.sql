@@ -1115,6 +1115,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(10) NOT NULL DEFAULT 0,
   `nickname` varchar(16) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
   `level` enum('administrator','moderator','gloperator','user','pr0nstahr','fakeuser','banned') DEFAULT 'user',
   `avatar` varchar(255) NOT NULL,
   `registerDate` datetime DEFAULT NULL,
