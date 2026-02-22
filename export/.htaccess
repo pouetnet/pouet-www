@@ -1,1 +1,1 @@
-Header set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Origin "*"

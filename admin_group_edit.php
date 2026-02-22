@@ -99,7 +99,7 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["board"] = $data["board"];
+        $a["board"] = (int)$data["board"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
             SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);
@@ -204,13 +204,13 @@ class PouetBoxAdminDeleteGroup extends PouetBox
 <script>
 document.observe("dom:loaded",function(){
   $("pouetbox_groupdelete").up("form").observe("submit",function(e){
-    if ($F("check") != "<?=_js($this->checkString)?>")
+    if ($F("check") != <?=json_encode($this->checkString, JSON_HEX_TAG)?>)
     {
       alert("Enter the verification string!");
       e.stop();
       return;
     }
-    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE \"<?=_js($this->group->name)?>\"?!"))
+    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE " + <?=json_encode($this->group->name, JSON_HEX_TAG)?> + "?!"))
       e.stop();
   });
 });

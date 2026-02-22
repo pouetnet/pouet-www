@@ -147,6 +147,71 @@ class PouetBoxProdMain extends PouetBox
         $this->screenshotPath = find_screenshot($this->prod->id);
     }
 
+    private function getYoutubeEmbedUrl($url)
+    {
+        $parsed = parse_url($url);
+        if (!$parsed || !isset($parsed["host"])) {
+            return $url;
+        }
+
+        $videoId = null;
+        $host = strtolower($parsed["host"]);
+        if (strpos($host, "www.") === 0) {
+            $host = substr($host, 4);
+        }
+
+        if ($host === "youtu.be" && !empty($parsed["path"])) {
+            $path = trim((string)$parsed["path"], "/");
+            if ($path !== "") {
+                $segments = explode("/", $path);
+                foreach ($segments as $segment) {
+                    if ($segment !== "") {
+                        $videoId = $segment;
+                        break;
+                    }
+                }
+            }
+        } elseif ($host === "youtube.com" || substr($host, -12) === ".youtube.com") {
+            $path = trim(isset($parsed["path"]) ? (string)$parsed["path"] : "", "/");
+            if ($path !== "") {
+                $parts = explode("/", $path);
+                if (!empty($parts[1]) && in_array($parts[0], array("embed", "shorts", "live"), true)) {
+                    $videoId = explode("/", $parts[1])[0];
+                }
+            }
+
+            if (!$videoId && !empty($parsed["query"])) {
+                parse_str($parsed["query"], $query);
+                if (isset($query["v"]) && is_string($query["v"]) && $query["v"] !== '') {
+                    $videoId = $query["v"];
+                }
+            }
+        }
+
+        if (!$videoId || !preg_match('/^[a-zA-Z0-9_-]+$/', $videoId) || strlen($videoId) !== 11) {
+            return $url;
+        }
+
+        return "https://www.youtube.com/embed/".$videoId;
+    }
+
+    private function isEmbeddableYoutubeUrl($url)
+    {
+        $parsed = parse_url($url);
+        if (!$parsed || !isset($parsed["host"])) {
+            return false;
+        }
+
+        $host = strtolower($parsed["host"]);
+        if (strpos($host, "www.") === 0) {
+            $host = substr($host, 4);
+        }
+
+        return $host === "youtube.com"
+            || $host === "youtu.be"
+            || substr($host, -12) === ".youtube.com";
+    }
+
     public function RenderScreenshot()
     {
         if ($this->screenshotPath) {
@@ -154,7 +219,8 @@ class PouetBoxProdMain extends PouetBox
             if ($this->screenshot) {
                 $title = "screenshot added by "._html($this->screenshot->user->nickname)." on "._html($this->screenshot->added);
             }
-            return "<img src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."'/>\n";
+
+            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."' />\n";
         } else {
             global $currentUser;
             $s = "no screenshot yet.\n";
@@ -393,7 +459,18 @@ document.observe("dom:loaded",function(){
         echo "</li>\n";
 
         foreach ($this->downloadLinks as $link) {
-            echo "<li".(@$link->id ? " id='".$link->id."'" : "").">[<a href='"._html($link->link)."'>"._html($link->type)."</a>]</li>\n";
+            echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
+            
+            if ($this->isEmbeddableYoutubeUrl($link->link))
+            {
+                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
+                echo " [<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'>embed</span></a>]";
+            }
+            else
+            {
+                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
+            }
+            echo "</li>\n";
         }
         echo "<li>[<a href='mirrors.php?which=".$this->id."'>mirrors...</a>]</li>\n";
         echo "</ul>\n";
@@ -1182,6 +1259,25 @@ document.observe("dom:loaded",function(){
   }
 });
 //-->
+
+const images=document.getElementsByClassName('pouetsscreenshotimg');
+if (images.length>0) {
+    document.getElementsByClassName('pouetsscreenshotimg')[0].addEventListener('click', function() { 
+        this.classList.toggle('sslightbox'); 
+    }); 
+
+    document.body.addEventListener('keydown', function(e) {
+        if (e.key == "Escape") {
+            var isPopupVisible = document.getElementsByClassName('pouetsscreenshotimg')[0].classList.contains('sslightbox');
+            if (isPopupVisible) document.getElementsByClassName('pouetsscreenshotimg')[0].classList.toggle('sslightbox'); 
+        }
+    });
+}
+
+var lightbox2 = new SimpleLightbox({
+    elements: document.querySelectorAll('.lightBoxVideoLink')
+});
+
 </script>
 <?php
 } else {

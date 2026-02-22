@@ -55,7 +55,7 @@ class PouetBoxAdminEditBoard extends PouetBoxSubmitBoard
             foreach ($data["platform"] as $v) {
                 $a = array();
                 $a["board"] = (int)$this->id;
-                $a["platform"] = $v;
+                $a["platform"] = (int)$v;
                 SQLLib::InsertRow("boards_platforms", $a);
             }
         }
@@ -126,7 +126,7 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
         }
 
         $a = array();
-        $a["group"] = $data["group"];
+        $a["group"] = (int)$data["group"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
             SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);
@@ -235,13 +235,13 @@ class PouetBoxAdminDeleteBoard extends PouetBox
 <script>
 document.observe("dom:loaded",function(){
   $("pouetbox_boarddelete").up("form").observe("submit",function(e){
-    if ($F("check") != "<?=_js($this->checkString)?>")
+    if ($F("check") != <?=json_encode($this->checkString, JSON_HEX_TAG)?>)
     {
       alert("Enter the verification string!");
       e.stop();
       return;
     }
-    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE \"<?=_js($this->board->name)?>\"?!"))
+    if (!confirm("ARE YOU REALLY SURE YOU WANT TO DELETE " + <?=json_encode($this->board->name, JSON_HEX_TAG)?> + "?!"))
       e.stop();
   });
 });

@@ -37,7 +37,7 @@ class PouetBoxAdminModificationRequests extends PouetBox
             return array();
         }
 
-        $reqData = unserialize($req->requestBlob);
+        $reqData = json_decode($req->requestBlob, true);
         global $REQUESTTYPES;
         if ($REQUESTTYPES[$req->requestType]) {
             $errors = null;
@@ -111,7 +111,7 @@ class PouetBoxAdminModificationRequests extends PouetBox
             echo "</td>\n";
             echo "    <td>".$REQUESTTYPES[$r->requestType]::Describe()."</td>\n";
             echo "    <td>";
-            $data = unserialize($r->requestBlob);
+            $data = json_decode($r->requestBlob, true);
 
             global $REQUESTTYPES;
             if ($REQUESTTYPES[$r->requestType]) {
@@ -146,7 +146,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
   {
     var videoIDs = {};
     var playlistIDs = {};
-    var ytAPIKey = "<?=YOUTUBE_FRONTEND_KEY?>";
+    var ytAPIKey = <?=json_encode(YOUTUBE_FRONTEND_KEY)?>;
     parentElement.select("a[rel='external']").each(function(element){
       var videoID = element.href.match(/youtu(\.be\/|.*v=)([a-zA-Z0-9_\-]{11})/);
       if (videoID)
