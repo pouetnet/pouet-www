@@ -15,14 +15,14 @@ class PouetBoxSearchBoxMain extends PouetBox
     {
         echo "<div class='content r1'>\n";
         echo "I'm looking for\n";
-        echo "<input type='text' name='what' size='25' value=\""._html(@$_GET["what"])."\"/>\n";
+        echo "<span id='searchInputSpan'><input id='pouetSearchInput' type='text' size='25' value=\""._html(@$_GET["what"])."\"/></span>\n";
         echo "and this is a [\n";
 
         $types = array("prod","group","party"/*,"board"*/,"user","bbs");
         $a = array();
         $selected = @$_GET["type"] ? $_GET["type"] : "prod";
         foreach ($types as $t) {
-            $a[] = "<label><input type='radio' name='type' value='".$t."' ".($t == $selected ? " checked='checked'" : "")."/>&nbsp;".$t."</label>\n";
+            $a[] = "<input onClick='changeSearchType(this.value,\"".POUET_CONTENT_URL."\")' type='radio' name='type' value='".$t."' id='search".$t."' ".($t==$selected?" checked='checked'":"")." />&nbsp;<label for='search".$t."'>".$t."</label>\n";            
         }
 
         echo implode(" |\n", $a);
@@ -633,6 +633,16 @@ if ($results) {
 }
 echo "</form>\n";
 echo "</div>\n";
+?>
 
+<script>
+document.observe("dom:loaded",function()
+{
+  var selectedType = $$("input[name='type']:checked").first();
+  changeSearchType(selectedType ? selectedType.value : "prod","<?php echo POUET_CONTENT_URL; ?>");    
+}
+);
+</script>
+<?php
 require("include_pouet/menu.inc.php");
 require_once("include_pouet/footer.php");

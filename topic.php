@@ -208,7 +208,7 @@ document.observe("dom:loaded",function(){
         "method":"post",
         "parameters":$H({"id":cid}).toQueryString(),
         "onSuccess":function(transport){
-          $("message").value += "[quote]" + transport.responseJSON.post.strip() + "[/quote]";
+          $("message").value += "[quote]" + transport.responseJSON[0].post.strip() + "[/quote]";
           try { $("message").scrollTo(); } catch(ex) {} // needs try-catch because of some dumbass popup blockers
         }
       });
