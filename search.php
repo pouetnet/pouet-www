@@ -642,7 +642,8 @@ require_once("include_pouet/footer.php");
 <script>
 document.observe("dom:loaded",function()
 {
-  changeSearchType("prod","<?php echo POUET_CONTENT_URL; ?>");
+  var selectedType = $$("input[name='type']:checked").first();
+  changeSearchType(selectedType ? selectedType.value : "prod","<?php echo POUET_CONTENT_URL; ?>");    
 }
 );
 </script>
