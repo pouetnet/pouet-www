@@ -464,7 +464,7 @@ document.observe("dom:loaded",function(){
             if ($this->isEmbeddableYoutubeUrl($link->link))
             {
                 echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
-                echo "<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'></span></a>";
+                echo " [<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'>embed</span></a>]";
             }
             else
             {
