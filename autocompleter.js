@@ -25,9 +25,7 @@ Autocompleter = Class.create({
       parent.insert(this.finalSelection);
     }
 
-    var searchBoxOptions={"class":"autocompleteSearch","style":"position:relative","placeholder":this.options.placeholder};
-    if (this.options.searchBox) { searchBoxOptions["name"]="what"; searchBoxOptions["autocomplete"]="off"; }
-    this.searchBox = new Element("input",searchBoxOptions);    
+    this.searchBox = new Element("input",{"class":"autocompleteSearch","style":"position:relative","placeholder":this.options.placeholder});
     parent.insert( this.searchBox );
 
     if (this.options.dropdown)
@@ -165,11 +163,6 @@ Autocompleter = Class.create({
     {
       var item = li.retrieve("item");
 
-      if (this.options.onClickUrl)
-      {
-        location.href=this.options.onClickUrl+item.id;
-        return;
-      }
       this.select( item.id, item.name );
     } 
     else
