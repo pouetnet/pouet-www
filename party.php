@@ -62,7 +62,7 @@ class PouetBoxPartyHeader extends PouetBox
         }
 
         if ($this->partylinks && $this->partylinks->csdb) {
-            echo " [<a href='http://csdb.dk/event/?id=".(int)$this->partylinks->csdb."'>csdb</a>]";
+            echo " [<a href='https://csdb.dk/event/?id=".(int)$this->partylinks->csdb."'>csdb</a>]";
         } elseif ($currentUser && $currentUser->CanSubmitItems()) {
             printf(" [<a class='submitadditional' href='submit_party_edition_info.php?which=%d&amp;when=%d'>+csdb</a>]\n", $this->party->id, $this->year);
         }

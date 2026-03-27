@@ -109,7 +109,7 @@ class PouetBoxPartyList extends PouetBox
                         echo " [<a href='http://www.slengpung.com/?eventid=".(int)$this->partylinks[$party->id][$year]->slengpung."'>slengpung</a>]";
                     }
                     if ($this->partylinks[$party->id][$year]->csdb) {
-                        echo " [<a href='http://csdb.dk/event/?id=".(int)$this->partylinks[$party->id][$year]->csdb."'>csdb</a>]";
+                        echo " [<a href='https://csdb.dk/event/?id=".(int)$this->partylinks[$party->id][$year]->csdb."'>csdb</a>]";
                     }
                     if ($this->partylinks[$party->id][$year]->zxdemo) {
                         echo " [<a href='http://zxdemo.org/party.php?id=".(int)$this->partylinks[$party->id][$year]->zxdemo."'>zxdemo</a>]";
