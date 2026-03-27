@@ -518,7 +518,7 @@ class PouetBoxUserMain extends PouetBox
         if ($this->user->csdb || $this->user->slengpung || $this->user->zxdemo || $this->user->demozoo) {
             echo "<li class='header'>portals:</li>\n";
             if ($this->user->csdb) {
-                echo $this->AddRow("csdb", "<a href='https://csdb.dk/scener/?id=".$this->user->csdb."'>profile</a>", true);
+                echo $this->AddRow("csdb", "<a href='https://csdb.dk/scener/?id=".(int)$this->user->csdb."'>profile</a>", true);
             }
             if ($this->user->slengpung) {
                 echo $this->AddRow("slengpung", "<a href='http://www.slengpung.com/?userid=".$this->user->slengpung."'>pictures</a>", true);
