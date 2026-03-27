@@ -13,5 +13,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Linelint
-        uses: fernandrone/linelint@master
+      - name: Check trailing newlines
+        run: |
+          FAILED=0
+          while IFS= read -r file; do
+            if [[ -f "$file" ]] && [[ -s "$file" ]] && [[ -n "$(tail -c1 "$file")" ]]; then
+              echo "::error file=$file::File does not end with a newline"
+              FAILED=1
+            fi
+          done < <(git ls-files)
+          exit $FAILED
