@@ -103,7 +103,7 @@ class PouetBoxGroupMain extends PouetBox
             echo sprintf(" [<a href='%s'>web</a>]", _html($this->group->web));
         }
         if ($this->group->csdb) {
-            echo sprintf(" [<a href='http://csdb.dk/group/?id=%d'>csdb</a>]", $this->group->csdb);
+            echo sprintf(" [<a href='https://csdb.dk/group/?id=%d'>csdb</a>]", $this->group->csdb);
         }
         if ($this->group->zxdemo) {
             echo sprintf(" [<a href='http://zxdemo.org/author.php?id=%d'>zxdemo</a>]", $this->group->zxdemo);

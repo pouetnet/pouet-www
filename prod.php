@@ -126,7 +126,7 @@ class PouetBoxProdMain extends PouetBox
             $o = new stdClass();
             $o->type = "csdb";
             $o->id = "csdbID";
-            $o->link = "http://csdb.dk/release/?id=".(int)$this->prod->csdb;
+            $o->link = "https://csdb.dk/release/?id=".(int)$this->prod->csdb;
             $this->downloadLinks[] = $o;
         }
         if ($this->prod->zxdemo) {
