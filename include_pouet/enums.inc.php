@@ -97,7 +97,7 @@ $IM_TYPES = array(
     "display" => function ($in) { return sprintf("<a href='https://facebook.com/%s'>fb.com/%s</a>", _html($in), _html($in)); }
   ),
   "Instagram" => array(
-    "capture" => "(?:instagram\.com\/)?@?(\w{1,15})\/?$",
+    "capture" => "(?:instagram\.com\/)?@?([\w\.]{1,15})\/?$",
     "display" => function ($in) { return sprintf("<a href='https://instagram.com/%s'>@%s</a>", _html($in), _html($in)); }
   ),
   "Jabber" => array(
