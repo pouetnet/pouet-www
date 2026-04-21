@@ -192,7 +192,18 @@ class PouetBoxProdMain extends PouetBox
             return $url;
         }
 
-        return "https://www.youtube.com/embed/".$videoId;
+        // extract optional timestamp
+        $videoTimestamp=null;
+        if (!empty($parsed["query"])) {
+            parse_str($parsed["query"], $query);
+            if (isset($query["t"]) && is_string($query["t"]) && $query["t"] !== '') {
+                // remove eventual trailing "s" (we assume the timestamp is in the nnnnns format)
+                $query["t"] = preg_replace('/s$/', '', $query["t"]);
+                $videoTimestamp = "?start=" . $query["t"];
+            }
+        }
+
+        return "https://www.youtube.com/embed/".$videoId.$videoTimestamp;
     }
 
     private function isEmbeddableYoutubeUrl($url)
