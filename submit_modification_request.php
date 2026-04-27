@@ -56,10 +56,6 @@ class PouetBoxModificationRequest extends PouetBox
         $a["requestDate"] = date("Y-m-d H:i:s");
         $a["userID"] = get_login_id();
 
-        if (@$post["newLink"]) {
-            $post["newLink"]=trim($post["newLink"]);
-        }
-
         $a["requestBlob"] = json_encode($post);
 
         global $reqID;
