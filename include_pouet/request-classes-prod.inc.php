@@ -43,7 +43,7 @@ class PouetRequest_Prod_AddLink extends PouetRequestBase
             return $errors;
         }
 
-        $output["newLink"] = $input["newLink"];
+        $output["newLink"] = trim($input["newLink"]);
         $output["newLinkKey"] = $input["newLinkKey"];
         return array();
     }
