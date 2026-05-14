@@ -153,7 +153,8 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
 
     public static function ValidateRequest($input, &$output)
     {
-        $errors = validateLink($input["newLink"]);
+        $newLink = trim($input["newLink"]);
+        $errors = validateLink($newLink);
         if ($errors) {
             return $errors;
         }
@@ -167,14 +168,14 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
             return array("nice try :|");
         }
 
-        if (strcmp($row->link, $input["newLink"]) === 0 && strcasecmp($row->type, $input["newLinkKey"]) === 0) {
+        if (strcmp($row->link, $newLink) === 0 && strcasecmp($row->type, $input["newLinkKey"]) === 0) {
             return array("you didn't change anything :|");
         }
 
         $output["linkID"] = $input["linkID"];
         $output["oldLink"] = $input["oldLink"];
         $output["oldLinkKey"] = $input["oldLinkKey"];
-        $output["newLink"] = trim($input["newLink"]);
+        $output["newLink"] = $newLink;
         $output["newLinkKey"] = $input["newLinkKey"];
         $output["reason"] = $input["reason"];
         return array();
