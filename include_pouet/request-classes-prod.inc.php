@@ -174,7 +174,7 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         $output["linkID"] = $input["linkID"];
         $output["oldLink"] = $input["oldLink"];
         $output["oldLinkKey"] = $input["oldLinkKey"];
-        $output["newLink"] = $input["newLink"];
+        $output["newLink"] = trim($input["newLink"]);
         $output["newLinkKey"] = $input["newLinkKey"];
         $output["reason"] = $input["reason"];
         return array();
