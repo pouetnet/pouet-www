@@ -1,5 +1,4 @@
 /cache/
-/content
 /include_generic/credentials.inc.php
 
 # phpcs cache
