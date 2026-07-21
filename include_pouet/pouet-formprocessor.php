@@ -62,7 +62,7 @@ class PouetFormProcessor
         if (count($this->errors)) {
             $msg = new PouetBoxModalMessage(true);
             $msg->classes[] = "errorbox";
-            $msg->title = "An error has occured:";
+            $msg->title = "An error has occurred:";
             $msg->message = "<ul><li>".implode("</li><li>", $this->errors)."</li></ul>";
             $msg->Render();
         } else {

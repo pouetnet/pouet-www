@@ -11,7 +11,7 @@ $errormessage = "";
 ////////////////////////////////////////////////////////////
 
 $message = new PouetBoxModalMessage(false, true);
-$message->title = "An error has occured:";
+$message->title = "An error has occurred:";
 
 $box = null;
 $thing = "";
