@@ -9,7 +9,7 @@ $errormessage = "";
 
 $message = new PouetBoxModalMessage(false, true);
 $message->classes[] = "errorbox";
-$message->title = "An error has occured:";
+$message->title = "An error has occurred:";
 $message->message = $_GET["e"];
 
 require_once("include_pouet/header.php");

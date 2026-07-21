@@ -144,7 +144,7 @@ if (get_login_id() && $box->prods) {
 } elseif (!$box->prods) {
     $msg = new PouetBoxModalMessage(true);
     $msg->classes[] = "errorbox";
-    $msg->title = "An error has occured:";
+    $msg->title = "An error has occurred:";
     $msg->message = "You cannot add stuff to a party that has no prods !";
     $msg->Render();
 } else {

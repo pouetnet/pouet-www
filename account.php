@@ -537,7 +537,7 @@ if (!get_login_id()) {
 
     $message = new PouetBoxModalMessage(false, true);
     $message->classes[] = "errorbox";
-    $message->title = "An error has occured:";
+    $message->title = "An error has occurred:";
     $message->message = "You need to be logged in for this!";
     $message->Render();
 } else {
