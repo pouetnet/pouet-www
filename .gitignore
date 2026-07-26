@@ -4,3 +4,6 @@
 
 # phpcs cache
 /.php-cs-fixer.cache
+
+# dump_SQL_for_dev output (contains a 21MB SQL dump)
+/contribs/

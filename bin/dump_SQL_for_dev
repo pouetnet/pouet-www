@@ -15,14 +15,18 @@ LANG=C
 
 function dump_tables_with_public_data()
 {
-    TABLES=("affiliatedbbses"
+    TABLES=("affiliatedboards"
+            "awards_categories"
+            "awardssuggestions_categories"
+            "awardssuggestions_events"
+            "compotypes"
             "affiliatedprods"
             "awardscand_2007"
             "awardscand_2008"
             "awardscand_2010"
             "awardscand_2011"
-            "bbses_platforms"
-            "bbsesaka"
+            "boards_platforms"
+            "boardsaka"
             "buttons"
             "cdc"
             "credits"
@@ -30,7 +34,7 @@ function dump_tables_with_public_data()
             "faq"
             "groupsaka"
             "links"
-            "listitems"
+            "list_items"
             "news"
             "ojnews"
             "partiesaka"
@@ -48,7 +52,7 @@ function dump_tables_with_public_data()
 
 function dump_tables_without_data()
 {
-    TABLES=("editrequests"
+    TABLES=("modification_requests"
             "gloperator_log"
             "prods_refs"
             "ud")
@@ -80,21 +84,21 @@ function dump_tables_with_selective_data()
     # Get the list of users in the format (1,2,3) to be used by INs
     FILTER="($TMP_VAR)"
 
-    TABLES_WITH_COND=("bbs_ads;adder IN $FILTER OR added in $FILTER"
+    TABLES_WITH_COND=("boards_ads;adder IN $FILTER OR added in $FILTER"
                       "bbs_posts;author IN $FILTER"
                       "bbs_topics;userfirstpost IN $FILTER OR userlastpost IN $FILTER"
-                      "bbses;adder IN $FILTER"
+                      "boards;addedUser IN $FILTER"
                       "comments;who IN $FILTER"
-                      "groups;added IN $FILTER"
-                      "lists;adder IN $FILTER OR upkeeper IN $FILTER"
+                      "groups;addedUser IN $FILTER"
+                      "lists;addedUser IN $FILTER OR owner IN $FILTER"
                       "logos;author1 IN $FILTER OR author2 IN $FILTER"
                       "logos_votes;user IN $FILTER"
                       "nfos;user IN $FILTER"
                       "oldnicks;user IN $FILTER"
                       "oneliner;who IN $FILTER"
                       "othernfos;adder IN $FILTER"
-                      "parties;added IN $FILTER"
-                      "prods;added IN $FILTER"
+                      "parties;addedUser IN $FILTER"
+                      "prods;addedUser IN $FILTER"
                       "screenshots;user IN $FILTER"
                       "users;id IN $FILTER"
                       "users_cdcs;user IN $FILTER"
