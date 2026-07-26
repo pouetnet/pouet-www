@@ -122,7 +122,7 @@ function dump_tables_with_selective_data()
 }
 
 # Make sure we are in the good folder
-if [ ! -f COPYING ]
+if [ ! -f bootstrap.inc.php ]
 then
     echo "Launch me in the root folder"
     exit 1
