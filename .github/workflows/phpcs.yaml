@@ -1,5 +1,8 @@
 on: workflow_dispatch # Only runs when manually triggered for now
 
+permissions:
+  contents: read
+
 jobs:
   phpcs:
     runs-on: ubuntu-latest
