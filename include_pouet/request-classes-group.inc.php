@@ -98,10 +98,10 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
                 default:
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($group->{$k});
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($v);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
             }
         }

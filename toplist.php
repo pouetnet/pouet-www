@@ -121,7 +121,7 @@ class PouetBoxTopList extends PouetBox
         echo "<div class='selector'>";
         echo "<form action='toplist.php' method='get'>\n";
         $this->formifier->RenderForm($this->fields);
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</form>\n";
         echo "</div>";
     }

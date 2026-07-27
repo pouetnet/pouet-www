@@ -13,7 +13,7 @@ function PouetAdmin_recacheFrontPagePartial_Form()
 {
     echo "<ul>";
     foreach (glob("cache/*") as $v) {
-        echo "<li><input type='checkbox' name='deleteCache["._html(basename($v))."]' id='"._html($v)."'/> <label for='"._html($v)."'>"._html($v)."</label></li>\n";
+        echo "<li><input type='checkbox' name='deleteCache["._html(basename($v))."]' id='"._html($v)."'> <label for='"._html($v)."'>"._html($v)."</label></li>\n";
     }
     echo "</ul>";
 }
@@ -53,7 +53,7 @@ class PouetBoxAdmin extends PouetBox
                 $func();
             }
 
-            echo "<input name='".$k."' type='submit' value='submit'/>";
+            echo "<input name='".$k."' type='submit' value='submit'>";
             echo "</form>";
             echo "</li>\n";
         }

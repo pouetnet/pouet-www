@@ -129,7 +129,7 @@ class PouetBoxAdminEditTopic extends PouetBox
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";
 
-        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         echo "</div>\n";
     }
 };

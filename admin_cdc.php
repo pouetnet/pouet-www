@@ -68,8 +68,8 @@ class PouetBoxAdminAddCDC extends PouetBoxEditConnectionsBase
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td colspan='2'><input name='which' value='"._html($row ? $row->prod->id : "")."' class='prodID'/></td>\n";
-        echo "    <td><input name='addedDate' value='"._html($row && $row->addedDate ? $row->addedDate : date("Y-m-d"))."'/></td>\n";
+        echo "    <td colspan='2'><input name='which' value='"._html($row ? $row->prod->id : "")."' class='prodID'></td>\n";
+        echo "    <td><input name='addedDate' value='"._html($row && $row->addedDate ? $row->addedDate : date("Y-m-d"))."'></td>\n";
     }
     public function RenderNormalRow($v)
     {

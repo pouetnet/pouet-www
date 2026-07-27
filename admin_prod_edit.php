@@ -221,13 +221,13 @@ class PouetBoxAdminDeleteProd extends PouetBox
     }
     public function RenderBody()
     {
-        echo "<div class='content'/>";
+        echo "<div class='content'>";
         echo "  <p>To make sure you want to delete <b>this</b> prod, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'/>";
-        echo "  <input id='check' name='check' autocomplete='no'/>";
+        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
-        echo "<div class='foot'/>";
-        echo "  <input type='submit' value='Submit' />";
+        echo "<div class='foot'>";
+        echo "  <input type='submit' value='Submit'>";
         echo "</div>";
         ?>
 <script>
@@ -402,8 +402,8 @@ class PouetBoxAdminEditProdLinks extends PouetBoxEditConnectionsBase
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='type' value='"._html($row ? $row->type : "")."'/></td>\n";
-        echo "    <td><input name='link' value='"._html($row ? $row->link : "")."' type='url'/></td>\n";
+        echo "    <td><input name='type' value='"._html($row ? $row->type : "")."'></td>\n";
+        echo "    <td><input name='link' value='"._html($row ? $row->link : "")."' type='url'></td>\n";
     }
     public function RenderNormalRow($v)
     {
@@ -511,7 +511,7 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='partyID' value='"._html($row && $row->party ? $row->party->id : "")."' class='partyID'/></td>\n";
+        echo "    <td><input name='partyID' value='"._html($row && $row->party ? $row->party->id : "")."' class='partyID'></td>\n";
 
         echo "    <td><select name='partyYear'>";
         foreach ($this->years as $k => $v) {
@@ -620,8 +620,8 @@ class PouetBoxAdminEditProdCredits extends PouetBoxEditConnectionsBase
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='userID' value='"._html($row && $row->user ? $row->user->id : "")."' class='userID'/></td>\n";
-        echo "    <td><input name='role' value='"._html($row ? $row->role : "")."' class='role'/></td>\n";
+        echo "    <td><input name='userID' value='"._html($row && $row->user ? $row->user->id : "")."' class='userID'></td>\n";
+        echo "    <td><input name='role' value='"._html($row ? $row->role : "")."' class='role'></td>\n";
     }
     public function RenderNormalRow($v)
     {
@@ -640,7 +640,7 @@ document.observe("dom:loaded",function(){
       new Autocompleter(tr.down(".userID"), {
         "dataUrl":"./ajax_users.php",
         "processRow": function(item) {
-          return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'/> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
+          return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
         }
       });
     }
@@ -723,7 +723,7 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
 
         $a = ($row && $this->prod->id == $row->prodOriginal->id ? $AFFILIATIONS_ORIGINAL : $AFFILIATIONS_INVERSE);
 
-        //echo "    <td><input name='type' value='"._html(($this->prod->id == $row->prodOriginal->id ? "o" : "d").":".$row->type)."'/></td>\n";
+        //echo "    <td><input name='type' value='"._html(($this->prod->id == $row->prodOriginal->id ? "o" : "d").":".$row->type)."'></td>\n";
         echo "<td><select name='type'>";
         foreach ($AFFILIATIONS_ORIGINAL as $k => $v) {
             printf("<option value='o:%s'%s>%s</option>", $k, ($row && $row->prodOriginal && $this->prod->id == $row->prodOriginal->id && $k == $row->type) ? " selected='selected'" : "", $v);
@@ -733,7 +733,7 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
         }
         echo "</select></td>\n";
 
-        echo "    <td><input name='prod' value='"._html($row && $row->prodOriginal && $row->prodDerivative ? ($this->prod->id == $row->prodOriginal->id ? $row->prodDerivative->id : $row->prodOriginal->id) : "")."' class='prodID'/></td>\n";
+        echo "    <td><input name='prod' value='"._html($row && $row->prodOriginal && $row->prodDerivative ? ($this->prod->id == $row->prodOriginal->id ? $row->prodDerivative->id : $row->prodOriginal->id) : "")."' class='prodID'></td>\n";
     }
     public function RenderNormalRow($v)
     {

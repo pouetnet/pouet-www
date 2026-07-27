@@ -109,9 +109,9 @@ class PouetBoxSubmitBoard extends PouetBox
           "phonenumber" => array(
             "name" => "phone number",
             "infoAfter" =>
-              "follow this standard: <b>+countrycode-citycode-phonenumber</b> eg: <b>+7-095-391XXXX</b> for a moscow bbs<br />".
-              "if it isnt demoscene related <b>DONT ADD IT</b><br />".
-              "if it has illegal stuff on it and is still in service <b>DONT ADD IT</b><br /> or atleast ask the sysop first, or dont state the actual numbers, be safe before sorry.<br />".
+              "follow this standard: <b>+countrycode-citycode-phonenumber</b> eg: <b>+7-095-391XXXX</b> for a moscow bbs<br>".
+              "if it isnt demoscene related <b>DONT ADD IT</b><br>".
+              "if it has illegal stuff on it and is still in service <b>DONT ADD IT</b><br> or atleast ask the sysop first, or dont state the actual numbers, be safe before sorry.<br>".
               "on any cases unless you are/were the sysop, or have his/her permission, <b>dont disclose the last numbers</b>."
           ),
           "telnetip" => array(
@@ -145,7 +145,7 @@ class PouetBoxSubmitBoard extends PouetBox
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";
 
-        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         echo "</div>\n";
     }
 };

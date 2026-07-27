@@ -82,13 +82,13 @@ class PouetBoxAdminDeleteParty extends PouetBox
     }
     public function RenderBody()
     {
-        echo "<div class='content'/>";
+        echo "<div class='content'>";
         echo "  <p>To make sure you want to delete <b>this</b> party, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'/>";
-        echo "  <input id='check' name='check' autocomplete='no'/>";
+        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
-        echo "<div class='foot'/>";
-        echo "  <input type='submit' value='Submit' />";
+        echo "<div class='foot'>";
+        echo "  <input type='submit' value='Submit'>";
         echo "</div>";
         ?>
 <script>

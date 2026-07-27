@@ -231,12 +231,12 @@ class PouetBoxProdMain extends PouetBox
                 $title = "screenshot added by "._html($this->screenshot->user->nickname)." on "._html($this->screenshot->added);
             }
 
-            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."' />\n";
+            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."'>\n";
         } else {
             global $currentUser;
             $s = "no screenshot yet.\n";
             if ($currentUser && $currentUser->CanSubmitItems()) {
-                $s .= sprintf("<br/>[<a class='submitadditional' href='submit_prod_info.php?which=%d'>submit one!</a>]", $this->prod->id);
+                $s .= sprintf("<br>[<a class='submitadditional' href='submit_prod_info.php?which=%d'>submit one!</a>]", $this->prod->id);
             }
             return $s;
         }
@@ -367,7 +367,7 @@ class PouetBoxProdMain extends PouetBox
     public function RenderPopularity()
     {
         $pop = (int)calculate_popularity($this->prod->views);
-        echo "popularity : ".$pop."%<br/>\n";
+        echo "popularity : ".$pop."%<br>\n";
         echo progress_bar($pop, $pop."%");
 
         $this->prod->RenderAwards();
@@ -401,10 +401,10 @@ class PouetBoxProdMain extends PouetBox
             $row = SQLLib::SelectRow(sprintf_esc("select * from watchlist where prodID = %d and userID = %d", $this->prod->id, $currentUser->id));
             if ($row) {
                 echo "<input type='hidden' name='wlAction' value='removeFromWatchlist'>";
-                echo "<input type='submit' value='remove from watchlist' class='remove'/>";
+                echo "<input type='submit' value='remove from watchlist' class='remove'>";
             } else {
                 echo "<input type='hidden' name='wlAction' value='addToWatchlist'>";
-                echo "<input type='submit' value='add to watchlist' class='add'/>";
+                echo "<input type='submit' value='add to watchlist' class='add'>";
             }
             echo "</form>";
             ?>
@@ -611,7 +611,7 @@ class PouetBoxProdPopularityHelper extends PouetBox
     {
         $url = POUET_ROOT_URL . "prod.php?which=".$this->prod->id;
         echo "<p>increase the popularity of this prod by spreading this URL:</p>\n";
-        echo "<input type='text' value='"._html($url)."' readonly='readonly' />\n";
+        echo "<input type='text' value='"._html($url)."' readonly='readonly'>\n";
         echo "<p>or via:\n";
 
         echo "  <a href='https://www.facebook.com/sharer/sharer.php?u="._html(rawurlencode($url))."'>facebook</a>\n";
@@ -1071,9 +1071,9 @@ class PouetBoxProdPost extends PouetBox
             if (!$this->myVote) {
                 echo " <div id='prodvote'>\n";
                 echo " this prod\n";
-                echo " <label id='ratingrulez'><input type='radio' name='rating' value='rulez'/> rulez</label>\n";
-                echo " <label id='ratingpig'><input type='radio' name='rating' value='isok' checked='true'/> is ok</label>\n";
-                echo " <label id='ratingsucks'><input type='radio' name='rating' value='sucks'/> sucks</label>\n";
+                echo " <label id='ratingrulez'><input type='radio' name='rating' value='rulez'> rulez</label>\n";
+                echo " <label id='ratingpig'><input type='radio' name='rating' value='isok' checked='true'> is ok</label>\n";
+                echo " <label id='ratingsucks'><input type='radio' name='rating' value='sucks'> sucks</label>\n";
                 echo " </div>\n";
             }
             echo " <textarea name='comment' id='comment'></textarea>\n";
@@ -1203,10 +1203,10 @@ if (@$_POST["wlAction"] && $currentUser) {
         $csrf->PrintToken();
         if ($_POST["wlAction"] == "addToWatchlist") {
             echo "<input type='hidden' name='wlAction' value='removeFromWatchlist'>";
-            echo "<input type='submit' value='remove from watchlist' class='remove'/>";
+            echo "<input type='submit' value='remove from watchlist' class='remove'>";
         } elseif ($_POST["wlAction"] == "removeFromWatchlist") {
             echo "<input type='hidden' name='wlAction' value='addToWatchlist'>";
-            echo "<input type='submit' value='add to watchlist' class='add'/>";
+            echo "<input type='submit' value='add to watchlist' class='add'>";
         }
         exit();
     }

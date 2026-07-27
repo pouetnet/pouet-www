@@ -124,11 +124,11 @@ class PouetBoxAdminModificationRequests extends PouetBox
             printf("<form action='%s' method='post' enctype='multipart/form-data'>\n", _html(selfPath()));
             $csrf = new CSRFProtect();
             $csrf->PrintToken();
-            printf("  <input type='hidden' name='requestID' value='%d'/>", $r->id);
-            printf("  <input type='submit' name='requestAccept' value='accept !'/>");
-            printf("  <input type='submit' name='requestDeny' value='deny !'/>");
+            printf("  <input type='hidden' name='requestID' value='%d'>", $r->id);
+            printf("  <input type='submit' name='requestAccept' value='accept !'>");
+            printf("  <input type='submit' name='requestDeny' value='deny !'>");
             printf("  <span class='result'></span>");
-            printf("  <input type='hidden' name='%s' value='%s'/>\n", PouetFormProcessor::fieldName, "adminModReq");
+            printf("  <input type='hidden' name='%s' value='%s'>\n", PouetFormProcessor::fieldName, "adminModReq");
             printf("</form>\n\n\n");
 
             echo "</td>\n";
@@ -256,7 +256,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
   function fireError( e, msg )
   {
     console.error( "[pouet] There's been an error:\n--------------\n" + msg );
-    fireErrorOverlay( "There's been an error:<br/>" + msg );
+    fireErrorOverlay( "There's been an error:<br>" + msg );
     
     e.element().select("input[type='submit']").invoke("removeAttribute","disabled");
     
@@ -290,7 +290,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
       {
         if (!transport.responseJSON || !transport.responseJSON.success)
         {
-          var msg = (transport.responseJSON && transport.responseJSON.errors) ? transport.responseJSON.errors.join("<br/>") : transport.responseText;
+          var msg = (transport.responseJSON && transport.responseJSON.errors) ? transport.responseJSON.errors.join("<br>") : transport.responseText;
 
           fireError( e, msg );
           

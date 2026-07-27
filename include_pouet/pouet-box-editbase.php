@@ -46,8 +46,8 @@ class PouetBoxEditConnectionsBase extends PouetBox
         echo "<td>";
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
-        echo "<input type='hidden' name='del".static::$slug."' value='".($row ? $row->id : 0)."'/>";
-        echo "<input type='submit' value='Delete!'/>";
+        echo "<input type='hidden' name='del".static::$slug."' value='".($row ? $row->id : 0)."'>";
+        echo "<input type='submit' value='Delete!'>";
         echo "</td>\n";
     }
     public function RenderEditRowEnd($row = null)
@@ -56,9 +56,9 @@ class PouetBoxEditConnectionsBase extends PouetBox
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
         if ($row && $row->id) {
-            echo "<input type='hidden' name='edit".static::$slug."ID' value='".$row->id."'/>";
+            echo "<input type='hidden' name='edit".static::$slug."ID' value='".$row->id."'>";
         }
-        echo "<input type='submit' value='Submit'/>";
+        echo "<input type='submit' value='Submit'>";
         echo "</td>\n";
     }
     public function RenderBody()

@@ -193,7 +193,7 @@ class PouetBoxListsMain extends PouetBox
         echo $this->list->name;
         echo "</div>\n";
 
-        echo " <div class='content' id='description'>".nl2br(_html($this->list->desc))."</div>\n";
+        echo " <div class='content' id='description'>".nl2br(_html($this->list->desc), false)."</div>\n";
 
         echo "<h2>maintainers</h2>";
         echo "<ul class='boxlist'>\n";
@@ -212,7 +212,7 @@ class PouetBoxListsMain extends PouetBox
                 echo $d->group->RenderFull();
                 echo "</span>\n";
                 if ($this->CanEdit()) {
-                    printf("  <span class='list-delete'><input type='submit' name='listDeleteGroup[%d]' value='delete'/></span>", $d->group->id);
+                    printf("  <span class='list-delete'><input type='submit' name='listDeleteGroup[%d]' value='delete'></span>", $d->group->id);
                 }
                 echo "</li>\n";
             }
@@ -267,7 +267,7 @@ class PouetBoxListsMain extends PouetBox
                 echo $d->prod->RenderReleaseDate();
                 echo "</td>\n";
                 if ($this->CanEdit()) {
-                    printf("  <td class='list-delete'><input type='submit' name='listDeleteProd[%d]' value='delete'/></td>",$d->prod->id);
+                    printf("  <td class='list-delete'><input type='submit' name='listDeleteProd[%d]' value='delete'></td>",$d->prod->id);
                 }
                 echo "</tr>\n";
             }
@@ -283,7 +283,7 @@ class PouetBoxListsMain extends PouetBox
                 echo $d->party->RenderFull();
                 echo "</span>\n";
                 if ($this->CanEdit()) {
-                    printf("  <span class='list-delete'><input type='submit' name='listDeleteParty[%d]' value='delete'/></span>", $d->party->id);
+                    printf("  <span class='list-delete'><input type='submit' name='listDeleteParty[%d]' value='delete'></span>", $d->party->id);
                 }
                 echo "</li>\n";
             }
@@ -303,7 +303,7 @@ class PouetBoxListsMain extends PouetBox
                 echo $d->user->glops." glöps";
                 echo "</span>\n";
                 if ($this->CanEdit()) {
-                    printf("  <span class='list-delete'><input type='submit' name='listDeleteUser[%d]' value='delete'/></span>", $d->user->id);
+                    printf("  <span class='list-delete'><input type='submit' name='listDeleteUser[%d]' value='delete'></span>", $d->user->id);
                 }
                 echo "</li>\n";
             }
@@ -437,7 +437,7 @@ document.observe("dom:loaded",function(){
     return item.name.escapeHTML() + (item.disambiguation ? " <span class='group-disambig'>" + item.disambiguation.escapeHTML() + "</span>" : "");
   }});
   new Autocompleter($("userID"),  {"dataUrl":"./ajax_users.php","processRow": function(item) {
-    return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'/> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
+    return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
   }});
 });
 //-->
@@ -513,7 +513,7 @@ class PouetBoxListsAddMaintainer extends PouetBox
 document.observe("dom:loaded",function(){
   new Autocompleter($("maintainerID"),  {"dataUrl":"./ajax_users.php",
     "processRow": function(item) {
-      return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'/> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
+      return "<img class='avatar' src='<?=POUET_CONTENT_URL?>avatars/" + item.avatar.escapeHTML() + "'> " + item.name.escapeHTML() + " <span class='glops'>" + item.glops + " glöps</span>";
     }
   });
 });
@@ -568,13 +568,13 @@ class PouetBoxListsDelete extends PouetBox
     }
     public function RenderBody()
     {
-        echo "<div class='content'/>";
+        echo "<div class='content'>";
         echo "  <p>To make sure you want to delete <b>this</b> list, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'/>";
-        echo "  <input id='check' name='check' autocomplete='no'/>";
+        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
-        echo "<div class='foot'/>";
-        echo "  <input type='submit' value='Submit' />";
+        echo "<div class='foot'>";
+        echo "  <input type='submit' value='Submit'>";
         echo "</div>";
         ?>
 <script>

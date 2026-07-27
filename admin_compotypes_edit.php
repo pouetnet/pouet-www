@@ -56,7 +56,7 @@ class PouetBoxCompotypesEditBox extends PouetBoxEditConnectionsBase
     public function RenderEditRow($row = null)
     {
         echo "    <td>"._html($row ? $row->id : "")."</td>\n";
-        echo "    <td><input name='componame' value='"._html($row ? $row->componame : "")."'/></td>\n";
+        echo "    <td><input name='componame' value='"._html($row ? $row->componame : "")."'></td>\n";
     }
     public function RenderNormalRow($row)
     {

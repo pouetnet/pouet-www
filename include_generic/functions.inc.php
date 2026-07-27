@@ -271,9 +271,9 @@ function parse_message($p)
 {
     $p = htmlspecialchars($p, ENT_QUOTES);
     $p = bbencode($p, true);
-    $p = nl2br($p);
+    $p = nl2br($p, false);
     $p = preg_replace_callback("/<code>(.*?)<\/code>/ims", function ($s) {
-        return str_replace("<br />", "", $s[0]);
+        return str_replace("<br>", "", $s[0]);
     }, $p);
     //$p = better_wordwrap($p,80," ");
     return $p;

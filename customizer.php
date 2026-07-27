@@ -171,7 +171,7 @@ class PouetBoxCustomizer extends PouetBox
             printf("<option value='%s'>%s</option>\n", $v, _html($p->title));
         }
         echo "</select>";
-        echo "  <input type='submit' name='addBox' value='Submit' />";
+        echo "  <input type='submit' name='addBox' value='Submit'>";
         echo " </div>\n";
         echo " <div class='content'>\n";
         $x = 0;
@@ -190,18 +190,18 @@ class PouetBoxCustomizer extends PouetBox
                 echo _html($p->title);
                 echo "<span class='controls'>";
                 if ($y > 0) {
-                    printf("  <input type='submit' class='move' name='up[%s][%d]' value='&#9650;'/>", _html($bar), $y);
+                    printf("  <input type='submit' class='move' name='up[%s][%d]' value='&#9650;'>", _html($bar), $y);
                 }
                 if ($y < count($boxlist) - 1) {
-                    printf("  <input type='submit' class='move' name='down[%s][%d]' value='&#9660;'/>", _html($bar), $y);
+                    printf("  <input type='submit' class='move' name='down[%s][%d]' value='&#9660;'>", _html($bar), $y);
                 }
                 if ($x > 0) {
-                    printf("  <input type='submit' class='move' name='left[%s][%d]' value='&#9664;'/>", _html($bar), $y);
+                    printf("  <input type='submit' class='move' name='left[%s][%d]' value='&#9664;'>", _html($bar), $y);
                 }
                 if ($x < count($this->boxes) - 1) {
-                    printf("  <input type='submit' class='move' name='right[%s][%d]' value='&#9654;'/>", _html($bar), $y);
+                    printf("  <input type='submit' class='move' name='right[%s][%d]' value='&#9654;'>", _html($bar), $y);
                 }
-                printf("  <input type='submit' class='close' name='delete[%s][%d]' value='X' title='remove box'/>", _html($bar), $y);
+                printf("  <input type='submit' class='close' name='delete[%s][%d]' value='X' title='remove box'>", _html($bar), $y);
                 echo "</span>";
                 echo "    </h2>\n";
                 if (has_trait($p, "PouetFrontPage")) {
@@ -370,8 +370,8 @@ document.observe("dom:loaded",function(){
     }
     public function RenderFooter()
     {
-        echo "  <div class='foot'/>";
-        echo "    <input type='submit' value='Submit' />";
+        echo "  <div class='foot'>";
+        echo "    <input type='submit' value='Submit'>";
         echo "  </div>";
         echo "</div>";
     }
@@ -488,8 +488,8 @@ class PouetBoxCustomizerSitewide extends PouetBox
     }
     public function RenderFooter()
     {
-        echo "  <div class='foot'/>";
-        echo "    <input type='submit' value='Submit' />";
+        echo "  <div class='foot'>";
+        echo "    <input type='submit' value='Submit'>";
         echo "  </div>";
         echo "</div>";
     }
@@ -557,7 +557,7 @@ class PouetBoxCustomizerPanic extends PouetBox
     public function RenderContent()
     {
         echo "  <p>Click this button to reset your front page to 'factory default', in case something breaks !</p>";
-        echo "  <input type='submit' value='reset front page settings !'/>";
+        echo "  <input type='submit' value='reset front page settings !'>";
         ?>
 <script>
 document.observe("dom:loaded",function(){
