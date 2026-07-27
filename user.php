@@ -166,7 +166,7 @@ class PouetBoxUserMain extends PouetBox
         $s = "";
         echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
         echo " <h2>";
-        echo "<img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='avatar'/> ";
+        echo "<img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='avatar'> ";
         echo "<span>"._html($this->user->nickname)."</span> information";
 
         if ($currentUser && $currentUser->id == $this->user->id) {
@@ -490,7 +490,7 @@ class PouetBoxUserMain extends PouetBox
         global $currentUser;
         $s = "";
         echo "<div class='content'>\n";
-        echo "<div class='bigavatar'><img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='big avatar'/></div>\n";
+        echo "<div class='bigavatar'><img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='big avatar'></div>\n";
         echo "<ul id='userdata'>\n";
 
         echo "<li class='header'>general:</li>\n";
@@ -584,7 +584,7 @@ class PouetBoxUserMain extends PouetBox
                 foreach ($this->logos as $l) {
                     echo "<li>";
                     echo "<div class='logo'>";
-                    echo "<img src='".POUET_CONTENT_URL."logos/"._html($l->file)."' alt=''/>";
+                    echo "<img src='".POUET_CONTENT_URL."logos/"._html($l->file)."' alt=''>";
                     echo "<span class='logovotes'>current votes: "._html($l->vote_count)."</span>";
                     echo "</div>";
                     echo "</li>";

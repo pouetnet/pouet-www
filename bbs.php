@@ -161,7 +161,7 @@ class PouetBoxBBSTopicList extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -222,7 +222,7 @@ echo "<form action='bbs.php' method='get'>\n";
 
 foreach ($_GET as $k => $v) {
     if ($k != "type" && $k != "platform" && $k != "page") {
-        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'/>\n";
+        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
     }
 }
 

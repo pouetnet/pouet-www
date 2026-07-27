@@ -37,7 +37,7 @@ class PouetBoxAvatarGallery extends PouetBox
 
         echo "<ul id='avatargallery'>\n";
         foreach ($g as $v) {
-            printf("  <li><img src='".POUET_CONTENT_URL."avatars/%s' alt='%s' title='%s'/></li>\n", basename($v), basename($v), basename($v));
+            printf("  <li><img src='".POUET_CONTENT_URL."avatars/%s' alt='%s' title='%s'></li>\n", basename($v), basename($v), basename($v));
         }
         echo "</ul>\n";
 
@@ -144,10 +144,10 @@ class PouetBoxSubmitAvatar extends PouetBox
         echo "<br>";
         echo "then your avatar will be available with the others.<br>";
         echo "<br>";
-        echo "<input type='file' name='avatar' accept='image/gif'/>";
+        echo "<input type='file' name='avatar' accept='image/gif'>";
 
         echo "  </div>\n";
-        echo "  <div class='foot'><input name='submit' type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input name='submit' type='submit' value='Submit'></div>";
         echo "</div>\n";
     }
 };

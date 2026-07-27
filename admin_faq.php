@@ -97,7 +97,7 @@ class PouetBoxAdminEditFAQ extends PouetBox
         echo "  <h2>".$this->title;
         if ($this->id) {
             printf(": #%d", $this->id);
-            printf("<input type='hidden' name='faqID' value='%d'/>", $this->id);
+            printf("<input type='hidden' name='faqID' value='%d'>", $this->id);
         } else {
             echo " - add new";
         }
@@ -105,7 +105,7 @@ class PouetBoxAdminEditFAQ extends PouetBox
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";
-        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         echo "</div>\n";
     }
 }

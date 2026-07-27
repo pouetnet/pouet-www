@@ -48,7 +48,7 @@ class PouetPaginator
 
         echo "  <form action='".$this->url["path"]."' method='get'>\n";
         foreach ($this->query as $k => $v) {
-            echo "  <input type='hidden' name='"._html($k)."' value='"._html($v)."'/>\n";
+            echo "  <input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
         }
         echo "   go to page <select name='page'>\n";
 
@@ -57,7 +57,7 @@ class PouetPaginator
         }
 
         echo "   </select> of ".$this->numPages."\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "  </form>\n";
         echo "  </div>\n";
         echo "</div>\n";

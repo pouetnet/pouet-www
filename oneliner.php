@@ -61,7 +61,7 @@ class PouetBoxOnelinerView extends PouetBox
             $p = _html($p);
             //$p = bbencode($p,true);
             $p = preg_replace("/([a-z]+:\/\/\S+)/", "<a href='$1' rel='external'>$1</a>", $p);
-            $p = nl2br($p);
+            $p = nl2br($p, false);
             $p = better_wordwrap($p, 80, " ");
             echo "<li class='cite-".$c->user->id."'>";
             echo "<time datetime='".$c->addedDate."' title='".$c->addedDate."'>".date("H:i", strtotime($c->addedDate))."</time> ";

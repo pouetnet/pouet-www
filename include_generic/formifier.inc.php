@@ -12,7 +12,7 @@ class Formifier
         echo "  <div class='formifier'>\n";
         foreach ($fields as $k => $v) {
             if (@$v["type"] == "hidden") {
-                echo "    <input type='hidden' name='"._html($k)."' id='"._html($k)."' value='"._html($v["value"])."'/>\n";
+                echo "    <input type='hidden' name='"._html($k)."' id='"._html($k)."' value='"._html($v["value"])."'>\n";
                 continue;
             }
             echo "  <div class='row' id='row_".$k."'>\n";
@@ -25,10 +25,10 @@ class Formifier
                     break;
                 case "statichidden":
                     echo "    <div class='static' id='".$k."'>".(@$v["fields"] ? $v["fields"][$v["value"]] : $v["value"])."</div>\n";
-                    echo "    <input type='hidden' name='".$k."' id='".$k."' value='".@$v["value"]."'/>\n";
+                    echo "    <input type='hidden' name='".$k."' id='".$k."' value='".@$v["value"]."'>\n";
                     break;
                 case "date":
-                    echo "    <input type='date' name='".$k."' id='".$k."' value='"._html(@$v["value"])."'/>\n";
+                    echo "    <input type='date' name='".$k."' id='".$k."' value='"._html(@$v["value"])."'>\n";
                     break;
                 case "dateMonth":
                     $year = $month = null;
@@ -99,16 +99,16 @@ document.observe("dom:loaded",function(){
                     echo "    </select>\n";
                     break;
                 case "password":
-                    echo "    <input type='password' name='".$k."' id='".$k."' value='"."'/>\n";
+                    echo "    <input type='password' name='".$k."' id='".$k."' value='"."'>\n";
                     break;
                 case "checkbox":
-                    echo "    <input type='checkbox' name='".$k."' id='".$k."' ".(@$v["value"] ? " checked='checked'" : "")."/>\n";
+                    echo "    <input type='checkbox' name='".$k."' id='".$k."' ".(@$v["value"] ? " checked='checked'" : "").">\n";
                     break;
                 case "file":
                     echo "    <div>\n";
-                    echo "      <input type='file' name='".$k."' id='".$k."'".(@$v["accept"] ? " accept='"._html($v["accept"])."'" : "")."/>\n";
+                    echo "      <input type='file' name='".$k."' id='".$k."'".(@$v["accept"] ? " accept='"._html($v["accept"])."'" : "").">\n";
                     if ($this->canDeleteFiles) {
-                        echo "      <input type='checkbox' name='".$k."_delete' id='".$k."_delete' /> <label for='".$k."_delete'>Delete file</label>\n";
+                        echo "      <input type='checkbox' name='".$k."_delete' id='".$k."_delete'> <label for='".$k."_delete'>Delete file</label>\n";
                         $confirmFields[] = $k."_delete";
                     }
                     echo "    </div>\n";
@@ -123,19 +123,19 @@ document.observe("dom:loaded",function(){
                         echo " max='"._html((int)$v["max"])."'";
                         $v["value"] = min((int)$v["value"], (int)$v["max"]);
                     }
-                    echo " name='".$k."' id='".$k."' value='"._html(@$v["value"])."'/>\n";
+                    echo " name='".$k."' id='".$k."' value='"._html(@$v["value"])."'>\n";
                     break;
                 case "url":
-                    echo "    <input type='url' name='".$k."' id='".$k."' ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'/>\n";
+                    echo "    <input type='url' name='".$k."' id='".$k."' ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'>\n";
                     break;
                 case "email":
-                    echo "    <input type='email' name='".$k."' id='".$k."' ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'/>\n";
+                    echo "    <input type='email' name='".$k."' id='".$k."' ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'>\n";
                     break;
                 case "textarea":
                     echo "    <textarea name='".$k."' id='".$k."'>"._html(@$v["value"])."</textarea>\n";
                     break;
                 default:
-                    echo "    <input name='".$k."' id='".$k."'".(@$v["html"] ? " ".$v["html"] : "")." ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'/>\n";
+                    echo "    <input name='".$k."' id='".$k."'".(@$v["html"] ? " ".$v["html"] : "")." ".(@$v["maxlength"] ? "maxlength='".(int)$v["maxlength"]."' " : "")."value='"._html(@$v["value"])."'>\n";
                     break;
             }
             if (@$v["info"]) {

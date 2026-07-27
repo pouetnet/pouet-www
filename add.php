@@ -68,7 +68,7 @@ if ($box) {
             }
         } else {
             $message->classes[] = "errorbox";
-            $message->message = is_array($errormessage) ? implode("<br/>", $errormessage) : $errormessage;
+            $message->message = is_array($errormessage) ? implode("<br>", $errormessage) : $errormessage;
         }
     }
 } else {

@@ -382,7 +382,7 @@ class PouetBoxAccount extends PouetBox
             $this->formifier->RenderForm($this->fieldsCDC);
             echo "  </div>\n";
         }
-        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         echo "</div>\n";
     }
 };

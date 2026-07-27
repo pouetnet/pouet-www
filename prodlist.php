@@ -236,7 +236,7 @@ class PouetBoxProdlist extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -291,7 +291,7 @@ class PouetBoxProdlistSelectors extends PouetBox
         echo "</tr>\n";
 
         echo "<tr>\n";
-        echo "  <td class='foot' colspan='2'><input type='submit' value='Submit'/></td>\n";
+        echo "  <td class='foot' colspan='2'><input type='submit' value='Submit'></td>\n";
         echo "</tr>\n";
         echo "</table>\n";
     }
@@ -320,10 +320,10 @@ foreach ($_GET as $k => $v) {
     if ($k != "page" && $k != "type" && $k != "platform") { // hidden fields only
         if (is_array($v)) {
             foreach ($v as $k2 => $v2) {
-                echo "<input type='hidden' name='"._html($k)."[]' value='"._html($v2)."'/>\n";
+                echo "<input type='hidden' name='"._html($k)."[]' value='"._html($v2)."'>\n";
             }
         } else {
-            echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'/>\n";
+            echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
         }
     }
 }

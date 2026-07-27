@@ -86,7 +86,7 @@ class PouetBoxBBSOpen extends PouetBox
         echo " <input type='hidden' name='type' value='bbs'>\n";
 
         echo " <label for='topic'>topic:</label>\n";
-        echo " <input name='topic' id='topic'/>\n";
+        echo " <input name='topic' id='topic'>\n";
 
         echo " <label for='category'>category:</label>\n";
         echo " <select name='category' id='category'>\n";

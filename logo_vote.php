@@ -16,7 +16,7 @@ class PouetBoxLogoVote extends PouetBox
 
     public function RenderContent()
     {
-        echo "<img src=".POUET_CONTENT_URL."logos/"._html($this->logo->file)." alt='logo'/>";
+        echo "<img src=".POUET_CONTENT_URL."logos/"._html($this->logo->file)." alt='logo'>";
     }
     public function RenderFooter()
     {
@@ -24,9 +24,9 @@ class PouetBoxLogoVote extends PouetBox
         echo "    <form action='".$_SERVER["REQUEST_URI"]."' method='post'>";
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
-        echo "      <input name='logoID' type='hidden' value='".(int)$this->logo->id."'/>";
-        echo "      <input name='submit' type='submit' value='rulez'/>";
-        echo "      <input name='submit' type='submit' value='sucks'/>";
+        echo "      <input name='logoID' type='hidden' value='".(int)$this->logo->id."'>";
+        echo "      <input name='submit' type='submit' value='rulez'>";
+        echo "      <input name='submit' type='submit' value='sucks'>";
         echo "    </form>\n";
         echo "  </div>\n";
         echo "</div>\n";
@@ -57,7 +57,7 @@ class PouetBoxLogoLama extends PouetBox
           'lamercow-by-everybody.jpg',
         );
 
-        echo "<img src='gfx/lamer/".$lama_pictures[array_rand($lama_pictures)]."' alt='Lamer picture'/>";
+        echo "<img src='gfx/lamer/".$lama_pictures[array_rand($lama_pictures)]."' alt='Lamer picture'>";
     }
     public function RenderFooter()
     {

@@ -53,7 +53,7 @@ if ($currentUser) {
             echo " <ul id='welcome-avatarlist'>";
             for ($x = 0; $x < 30; $x++) {
                 $a = basename($avatars[$x]);
-                printf("<li><a href='welcome.php?avatar=%s'><img src='".POUET_CONTENT_URL."avatars/%s' class='avatar'/></a></li>", rawurlencode($a), rawurlencode($a));
+                printf("<li><a href='welcome.php?avatar=%s'><img src='".POUET_CONTENT_URL."avatars/%s' class='avatar'></a></li>", rawurlencode($a), rawurlencode($a));
             }
             echo " </ul>";
 

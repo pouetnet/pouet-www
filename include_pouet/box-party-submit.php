@@ -65,7 +65,7 @@ class PouetBoxSubmitParty extends PouetBox
           "name" => array(
             "name" => "party name",
             "required" => true,
-            "infoAfter" => "only enter the party name, but <b>not</b> the year !<br/>eg. <b>Assembly</b> and not <strike><b>Assembly 1996</b></strike>",
+            "infoAfter" => "only enter the party name, but <b>not</b> the year !<br>eg. <b>Assembly</b> and not <strike><b>Assembly 1996</b></strike>",
           ),
           "website" => array(
             "name" => "website url",
@@ -99,7 +99,7 @@ class PouetBoxSubmitParty extends PouetBox
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";
 
-        echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         echo "</div>\n";
         ?>
 <script>

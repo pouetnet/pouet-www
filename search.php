@@ -15,20 +15,20 @@ class PouetBoxSearchBoxMain extends PouetBox
     {
         echo "<div class='content r1'>\n";
         echo "I'm looking for\n";
-        echo "<input type='text' name='what' size='25' value=\""._html(@$_GET["what"])."\"/>\n";
+        echo "<input type='text' name='what' size='25' value=\""._html(@$_GET["what"])."\">\n";
         echo "and this is a [\n";
 
         $types = array("prod","group","party"/*,"board"*/,"user","bbs");
         $a = array();
         $selected = @$_GET["type"] ? $_GET["type"] : "prod";
         foreach ($types as $t) {
-            $a[] = "<label><input type='radio' name='type' value='".$t."' ".($t == $selected ? " checked='checked'" : "")."/>&nbsp;".$t."</label>\n";
+            $a[] = "<label><input type='radio' name='type' value='".$t."' ".($t == $selected ? " checked='checked'" : "").">&nbsp;".$t."</label>\n";
         }
 
         echo implode(" |\n", $a);
 
         echo "]</div>\n";
-        echo "<div class='foot'><input type='submit' value='Submit' /></div>";
+        echo "<div class='foot'><input type='submit' value='Submit'></div>";
     }
 
 };
@@ -140,7 +140,7 @@ class PouetBoxSearchProd extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -243,7 +243,7 @@ class PouetBoxSearchGroup extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -339,7 +339,7 @@ class PouetBoxSearchParty extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -436,7 +436,7 @@ class PouetBoxSearchUser extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -565,7 +565,7 @@ class PouetBoxSearchBBS extends PouetBox
             printf("    <option value='%d'%s>%d</option>\n", $x, $x == $this->page ? " selected='selected'" : "", $x);
         }
         echo "  </select>\n";
-        echo "  <input type='submit' value='Submit'/>\n";
+        echo "  <input type='submit' value='Submit'>\n";
         echo "</td>\n";
         echo "</tr>\n";
         echo "</table>\n";
@@ -624,7 +624,7 @@ echo "</form>\n";
 echo "<form action='search.php' method='get'>\n";
 foreach ($_GET as $k => $v) {
     if ($k != "page") {
-        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'/>\n";
+        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
     }
 }
 

@@ -113,7 +113,7 @@ class PouetBoxAdminEditUser extends PouetBox
         echo "  </div>\n";
 
         if ($currentUser->IsAdministrator()) {
-            echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+            echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         }
         echo "</div>\n";
     }

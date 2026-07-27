@@ -28,8 +28,8 @@ class CSRFProtect
     public function PrintToken()
     {
         $a = $this->GenerateTokens();
-        printf("<input type='hidden' name='ProtName' value='%s'/>\n", _html($a["name"]));
-        printf("<input type='hidden' name='ProtValue' value='%s'/>\n", _html($a["token"]));
+        printf("<input type='hidden' name='ProtName' value='%s'>\n", _html($a["name"]));
+        printf("<input type='hidden' name='ProtValue' value='%s'>\n", _html($a["token"]));
     }
     public function ValidateToken()
     {

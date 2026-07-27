@@ -174,7 +174,7 @@ class PouetBoxModificationRequest extends PouetBox
         }
 
         if (!$error) {
-            echo "  <div class='foot'><input type='submit' value='Submit' /></div>";
+            echo "  <div class='foot'><input type='submit' value='Submit'></div>";
         }
         echo "</div>\n";
     }
@@ -199,7 +199,7 @@ echo "<div id='content'>\n";
 $form = new PouetFormProcessor();
 
 $form->successMessage =
-  "your request was recorded and will be processed by a glöperator eventually !</a> <br/>". // l33t h4x
+  "your request was recorded and will be processed by a glöperator eventually !</a> <br>". // l33t h4x
   "you can keep track of the status of your requests <a href='account.php#pouetbox_accountreq'>on your accounts page !";
 
 if (@$_REQUEST["prod"]) {

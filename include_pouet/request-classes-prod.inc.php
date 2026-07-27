@@ -54,7 +54,7 @@ class PouetRequest_Prod_AddLink extends PouetRequestBase
         $s .= "<a href='"._html($data["newLink"])."' rel='external'>"._html(shortify_cut($data["newLink"], 50))."</a>";
         foreach (self::$links as $k => $v) {
             if (preg_match($k, $data["newLink"])) {
-                $s .= "<br/><b>(will be stored as ".$v." ID instead of a link)</b>";
+                $s .= "<br><b>(will be stored as ".$v." ID instead of a link)</b>";
             }
         }
         return $s;
@@ -194,19 +194,19 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         }
 
         if (@$data["oldLinkKey"] && (!$row || $row->link != $data["oldLink"])) {
-            $s .= "<br/>";
+            $s .= "<br>";
             $s .= "<b>old</b>: ";
             $s .= _html($data["oldLinkKey"])." - ";
             $s .= "<a href='"._html($data["oldLink"])."' rel='external'>"._html(shortify_cut($data["oldLink"], 50))."</a>";
         }
 
-        $s .= "<br/>";
+        $s .= "<br>";
         $s .= "<b>new</b>: ";
         $s .= _html($data["newLinkKey"])." - ";
         $s .= "<a href='"._html($data["newLink"])."' rel='external'>"._html(shortify_cut($data["newLink"], 50))."</a>";
 
         if (@$data["reason"]) {
-            $s .= "<br/>";
+            $s .= "<br>";
             $s .= "<b>reason</b>: ";
             $s .= _html($data["reason"]);
         }
@@ -291,7 +291,7 @@ class PouetRequest_Prod_RemoveLink extends PouetRequestBase
             $s .= _html($row->type)." - ";
             $s .= "<a href='"._html($row->link)."' rel='external'>"._html(shortify_cut($row->link, 50))."</a>";
         }
-        $s .= "<br/><b>reason</b>: ";
+        $s .= "<br><b>reason</b>: ";
         $s .= _html($data["reason"]);
         return $s;
     }
@@ -336,7 +336,7 @@ class PouetRequest_Prod_AddCredit extends PouetRequestBase
         $js .= "  new Autocompleter($('userID'), {\n";
         $js .= "    'dataUrl':'./ajax_users.php',\n";
         $js .= "    'processRow': function(item) {\n";
-        $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'/> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
+        $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
         $js .= "    }\n";
         $js .= "  });\n";
         $js .= "});\n";
@@ -437,7 +437,7 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
             $js .= "  new Autocompleter($('userID'), {\n";
             $js .= "    'dataUrl':'./ajax_users.php',\n";
             $js .= "    'processRow': function(item) {\n";
-            $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'/> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
+            $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
             $js .= "    }\n";
             $js .= "  });\n";
             $js .= "});\n";
@@ -522,7 +522,7 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
         $row = reset($l);
 
         $user = PouetUser::Spawn($data["userID"]);
-        $out .= "<br/><b>new</b>: ";
+        $out .= "<br><b>new</b>: ";
         if ($user) {
             $out .= $user->PrintLinkedAvatar()." ";
             $out .= $user->PrintLinkedName();
@@ -710,13 +710,13 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
             $s .= "<a href='"._html($prod->download)."' rel='external'>"._html(shortify_cut($prod->download, 50))."</a>";
         }
         if (@$data["oldDownloadLink"] && $prod->download != $data["oldDownloadLink"]) {
-            $s .= "<br/><b>old</b>: ";
+            $s .= "<br><b>old</b>: ";
             $s .= "<a href='"._html($data["oldDownloadLink"])."' rel='external'>"._html(shortify_cut($data["oldDownloadLink"], 50))."</a>";
         }
-        $s .= "<br/><b>new</b>: ";
+        $s .= "<br><b>new</b>: ";
         $s .= "<a href='"._html($data["downloadLink"])."' rel='external'>"._html(shortify_cut($data["downloadLink"], 50))."</a>";
         if (@$data["reason"]) {
-            $s .= "<br/><b>reason</b>: ";
+            $s .= "<br><b>reason</b>: ";
             $s .= _html($data["reason"]);
         }
 
@@ -988,16 +988,16 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                 case "type":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $prod->RenderTypeIcons();
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $prod->types = $v ?: array();
                     $s .= $prod->RenderTypeIcons();
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "platform":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $prod->RenderPlatformIcons();
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $prod->platforms = array();
                     if (@$v) {
@@ -1006,7 +1006,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                         }
                     }
                     $s .= $prod->RenderPlatformIcons();
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "group3":
                     $groupIdx++;
@@ -1018,105 +1018,105 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                     $group = @$prod->groups[$groupIdx];
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $group ? $group->RenderLong() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $group = PouetGroup::Spawn($v);
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $group ? $group->RenderLong() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "partyID":
                     $party = ($prod && $prod->party && $prod->party->id) ? PouetParty::Spawn($prod->party->id) : null;
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $party = PouetParty::Spawn($v);
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "invitationParty":
                     $party = PouetParty::Spawn($prod->invitation);
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $party = PouetParty::Spawn($v);
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "invitationYear":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($prod->invitationyear);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($v);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "partyYear":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= @$prod->placings[0]->year;
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($v);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "partyCompo":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= @$COMPOTYPES[$prod->placings[0]->compo];
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= @$COMPOTYPES[$v];
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "partyRank":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= _html(@$ranks[$prod->placings[0]->ranking]);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html(@$ranks[$v]);
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "releaseDate":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= _html(renderHalfDate($prod->releaseDate));
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html(renderHalfDate($v));
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "boardID":
                     $board = PouetBoard::Spawn($prod->{$k});
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $board ? $board->RenderLink() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $board = PouetBoard::Spawn($v);
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $board ? $board->RenderLink() : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "demozooID":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $prod->demozoo ? sprintf("<a href='https://demozoo.org/productions/%d/'>%d</a>", $prod->demozoo, $prod->demozoo) : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $v ? sprintf("<a href='https://demozoo.org/productions/%d/'>%d</a>", $v, $v) : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 case "csdbID":
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= $prod->csdb ? sprintf("<a href='https://csdb.dk/release/?id=%d'>%d</a>", $prod->csdb, $prod->csdb) : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= $v ? sprintf("<a href='https://csdb.dk/release/?id=%d'>%d</a>", $v, $v) : "<i>none</i>";
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     break;
                 default:
                     $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($prod->{$k});
-                    $s .= "<br/>";
+                    $s .= "<br>";
                     $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
                     $s .= _html($v);
-                    $s .= "<br/>";
+                    $s .= "<br>";
             }
         }
         return $s;

@@ -121,8 +121,8 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='board' value='"._html($row ? $row->board->id : "")."'/></td>\n";
-        //    echo "    <td><input name='type' value='"._html($row->type)."'/></td>\n";
+        echo "    <td><input name='board' value='"._html($row ? $row->board->id : "")."'></td>\n";
+        //    echo "    <td><input name='type' value='"._html($row->type)."'></td>\n";
         echo "    <td><select name='type'>\n";
         foreach ($this->types as $v) {
             printf("<option%s>%s</option>", ($row && $row->type == $v) ? " selected='selected'" : "", _html($v));
@@ -192,13 +192,13 @@ class PouetBoxAdminDeleteGroup extends PouetBox
     }
     public function RenderBody()
     {
-        echo "<div class='content'/>";
+        echo "<div class='content'>";
         echo "  <p>To make sure you want to delete <b>this</b> group, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'/>";
-        echo "  <input id='check' name='check' autocomplete='no'/>";
+        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
-        echo "<div class='foot'/>";
-        echo "  <input type='submit' value='Submit' />";
+        echo "<div class='foot'>";
+        echo "  <input type='submit' value='Submit'>";
         echo "</div>";
         ?>
 <script>
