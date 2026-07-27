@@ -18,7 +18,7 @@ class PouetBoxIndexLogin extends PouetBoxLogin
             return;
         }
         echo "<div class='content loggedin'>\n";
-        echo "you are logged in as<br/>\n";
+        echo "you are logged in as<br>\n";
         echo $currentUser->PrintLinkedAvatar()." ";
         echo $currentUser->PrintLinkedName();
         echo "</div>\n";

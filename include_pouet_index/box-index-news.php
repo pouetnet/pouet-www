@@ -19,7 +19,7 @@ class PouetBoxIndexNews extends PouetBox
     {
         echo "<div class='pouettbl ".$this->uniqueID."'>\n";
         echo " <h3><a href='".$this->link."'>"._html($this->title)."</a></h3>\n";
-        echo " <div class='content'>\n".str_replace("<br>", "<br/>", $this->content)."\n</div>\n";
+        echo " <div class='content'>\n".str_replace("<br/>", "<br>", $this->content)."\n</div>\n";
         echo " <div class='foot'>lobstregated at <a href='https://news.scene.org/'>Scene.org</a> on ".($this->timestamp)."</div>\n";
         echo "</div>\n";
     }
