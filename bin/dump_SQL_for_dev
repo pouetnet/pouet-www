@@ -146,6 +146,7 @@ ssh pouet "cat tmp/*.sql >> tmp/$DUMP_FILE"
 ssh pouet "gzip tmp/$DUMP_FILE"
 
 echo "Downloading the DDL..."
+mkdir -p contribs
 scp pouet:tmp/$DUMP_FILE.gz contribs/
 gunzip -f contribs/$DUMP_FILE.gz
 
