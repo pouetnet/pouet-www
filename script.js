@@ -1,11 +1,11 @@
 function NameWarning(opt)
 {
   if(!$("row_name")) return;
-  
+
   var nameWarning = new Element("div",{"id":"nameWarning","class":"submitWarning"});
   $("row_name").parentNode.insertBefore(nameWarning,$("row_name").nextSibling);
   nameWarning.hide();
-  
+
   var timeout = null;
   $("name").observe("keyup",function(){
     if ($("name").value.length > 0)
@@ -36,7 +36,7 @@ function AddPreviewButton( button )
 {
   var origTextarea = document.body.select("textarea").first();
   if (!origTextarea) return;
-  
+
   var previewButton = new Element("input",{"type":"submit","id":"submitPreview","value":"Preview"});
   button.parentNode.insertBefore(previewButton,button);
   previewButton.observe("click",function(e){
@@ -47,15 +47,15 @@ function AddPreviewButton( button )
     var x = (screen.width - w) / 2;
     var y = (screen.height - h) / 2;
     var wnd = window.open("","previewWnd","left="+x+",top="+y+",width="+w+",height="+h+",resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes");
-  
+
     var form = new Element("form",{"method":"post","target":"previewWnd","action":"preview.php"});
     document.body.insert(form);
-    
+
     var textarea = new Element("textarea",{"name":"message"});
     //textarea.update( origTextarea.value );
     textarea.value = origTextarea.value;
     form.insert(textarea);
-    
+
     form.submit();
 
     form.remove();
@@ -100,7 +100,7 @@ function adjustSubmitFormFields()
 
 function PrepareSubmitForm()
 {
-  NameWarning({"ajaxURL":"./ajax_prods.php","linkURL":"prod.php?which="});  
+  NameWarning({"ajaxURL":"./ajax_prods.php","linkURL":"prod.php?which="});
 
   var fields = $A([
     "row_csdbID",
@@ -120,7 +120,7 @@ function PrepareSubmitForm()
   fields.each(function(item){
     if ($(item)) $(item).hide();
   });
-  
+
   var resetCompos = function()
   {
     var options = $("partyCompo").select("option");
@@ -160,10 +160,10 @@ function PrepareSubmitForm()
               if (transport.responseJSON.compos.indexOf(parseInt(i.value,10)) == -1)
                 og2.insert( i );
             });
-            
+
             $("partyCompo").insert( {top:options.find(function(i){ return i.value == 0; })} );
             $("partyCompo").value = v;
-            
+
           }
           else
           {
@@ -172,7 +172,7 @@ function PrepareSubmitForm()
         },
     });
   };
-  
+
   if ($("platform")) $("platform").observe("change",adjustSubmitFormFields);
   if ($("type")) $("type").observe("change",adjustSubmitFormFields);
   adjustSubmitFormFields();
@@ -210,7 +210,7 @@ function PreparePostForm( form )
       var re2 = new RegExp("\\[/"+item+"[^a-z]","gi");
       if ((ta.value.match(re1) || []).length != (ta.value.match(re2) || []).length)
         broken = item;
-    });    
+    });
     if (broken)
     {
       if (!confirm("your ["+broken+"] bbcode is broken ! are you sure you want to post it ?"))
@@ -221,7 +221,7 @@ function PreparePostForm( form )
 function InstrumentAdminEditorForAjax( parentElement, formAction, _options )
 {
   var options = _options || {};
-  
+
   parentElement.select(".edit").each(function(item){
     var tr = item.up("tr");
     item.observe("click",function(e){
@@ -265,7 +265,7 @@ function InstrumentAdminEditorForAjax( parentElement, formAction, _options )
       e.stop();
       if(!confirm("Are you sure you want to delete this item?"))
         return;
-  
+
       //var opt = item.href.toQueryParams();
       var opt = Form.serializeElements( tr.select("input,select"), {hash:true} );
       opt = $H(opt).merge( item.href.toQueryParams() ).toObject();
@@ -337,7 +337,7 @@ function fadeOverlays()
   elements.each(function(item){
     if (!$(item)) return;
     item = $(item);
-    
+
     item.style.opacity = parseFloat(item.style.opacity) - step;
     //console.log(item.style.opacity);
     if (item.style.opacity <= step + 0.01) // wahey chrome precision!
@@ -576,16 +576,16 @@ function CollapsibleHeaders( elements )
   elements.each(function(box){
     if (!box.down("h2,h3"))
       return;
-    
+
     var header = box.down("h2,h3");
     var elements = header.nextSiblings();
-    
+
     var container = new Element("div",{"class":"collapseContainer"});
-    
+
     elements.each(function(i){ container.insert(i); });
-    
+
     box.insert(container);
-    
+
     var toggle = new Element("span",{"class":"collapseToggle"});
     header.insert( toggle );
 
@@ -598,8 +598,8 @@ function CollapsibleHeaders( elements )
     {
       toggle.update("show");
       container.hide();
-    }    
-    
+    }
+
     var _box = box;
     header.observe("click",function(){
       if (toggle.innerHTML == "show")
@@ -614,7 +614,7 @@ function CollapsibleHeaders( elements )
         container.hide();
         if (_box && _box.id) Cookie.setData('pouetHeadersShown-'+_box.id,false);
       }
-    });      
+    });
   });
 }
 
@@ -624,7 +624,7 @@ function checkForNewsTickers()
   {
     return;
   }
-  
+
   var container = null;
   $H(newsTickers).each(function(kvp){
     if(Date.now() > kvp.value.expires*1000)

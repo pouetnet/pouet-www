@@ -1,0 +1,20 @@
+# Enforce .editorconfig rules on all files.
+# See <https://github.com/editorconfig-checker/editorconfig-checker>
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  editorconfig:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: editorconfig-checker
+        uses: editorconfig-checker/action-editorconfig-checker@v2
+      - run: editorconfig-checker

@@ -4,7 +4,7 @@ body {
 }
 .column#leftbar, .column#middlebar, .column#rightbar,
 #content,
-#prodpagecontainer 
+#prodpagecontainer
 {
   display: block;
   width: 100%;
@@ -39,7 +39,7 @@ body {
 .pouettbl .content, .pouettbl .foot {
   padding: 8px;
 }
-.pouettbl .foot { 
+.pouettbl .foot {
   font-size: 10pt;
 }
 

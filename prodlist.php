@@ -24,13 +24,13 @@ class PouetBoxProdlist extends PouetBox
         $this->page = (int)max(1, (int)@$_GET["page"]);
 
         // double query for optimization
-        
+
         // First pass: get IDs first (uses indices, then actual data restricted to IDs)
         $sqlGetIDs = new BM_Query();
         $sqlGetIDs->AddField("prods.id");
         $sqlGetIDs->AddTable("prods");
         $sqlGetIDs->AddJoin("LEFT", "parties as prods_party", "prods_party.id = prods.party");
-        
+
         if (is_array(@$_GET["type"])) {
             $cond = array();
             foreach ($_GET["type"] as $type) {
@@ -108,7 +108,7 @@ class PouetBoxProdlist extends PouetBox
         PouetCollectPlatforms($this->prods);
         PouetCollectAwards($this->prods);
     }
-    
+
     private function SetQueryOrder(&$query)
     {
         $dir = "DESC";

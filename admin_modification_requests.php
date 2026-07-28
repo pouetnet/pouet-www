@@ -176,7 +176,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
           },
         });
         return;
-      }      
+      }
       var demozooProdID = element.href.match(/demozoo\.org\/productions\/([0-9]+)/);
       if (demozooProdID)
       {
@@ -252,23 +252,23 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
   $$("#pouetbox_adminreq th[colspan]").first().insert( "]" );
 <?php
 }
-        ?>  
+        ?>
   function fireError( e, msg )
   {
     console.error( "[pouet] There's been an error:\n--------------\n" + msg );
     fireErrorOverlay( "There's been an error:<br>" + msg );
-    
+
     e.element().select("input[type='submit']").invoke("removeAttribute","disabled");
-    
+
     var result = e.element().select(".result").first();
     result.update("&#x26A0;");
     result.setAttribute("title","There's been an internal error; check console for details.");
   }
-  
+
   $$("#pouetbox_adminreq input[type='submit']").invoke("observe","click",function(e){ e.element().setAttribute("clicked","true"); });
   $$("#pouetbox_adminreq form").invoke("observe","submit",function(e){
     e.stop();
-    
+
     var reqAction = e.element().select("input[type='submit'][clicked='true']").first().name;
     var reason = null;
     if (reqAction == "requestDeny")
@@ -286,14 +286,14 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
       method: e.element().method,
       parameters: opt,
       onException: function(r, ex) { fireError( e, ex ); throw ex; },
-      onSuccess: function(transport) 
+      onSuccess: function(transport)
       {
         if (!transport.responseJSON || !transport.responseJSON.success)
         {
           var msg = (transport.responseJSON && transport.responseJSON.errors) ? transport.responseJSON.errors.join("<br>") : transport.responseText;
 
           fireError( e, msg );
-          
+
           return;
         }
 

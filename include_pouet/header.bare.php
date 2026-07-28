@@ -27,7 +27,7 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
   <link rel="stylesheet" href="styles/001/mobile.css?<?=filemtime("styles/001/mobile.css")?>" type="text/css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0;">
   <?php }?>
-  
+
 <?php
   if ($metaValues) {
       foreach ($metaValues as $k => $v) {
@@ -50,14 +50,14 @@ $newsTickers = handle_db_cache(POUET_ROOT_LOCAL . "/cache/newstickers.cache", fu
     return $tickers;
 });
 
-?>  
+?>
 
   <script>
   <!--
     var pixelWidth = screen.width;
     var Pouet = {};
     Pouet.isMobile = <?=POUET_MOBILE ? "true" : "false"?>;
-    
+
     var newsTickers = <?=($newsTickers ? json_encode($newsTickers) : "{}");?>;
   //-->
   </script>
