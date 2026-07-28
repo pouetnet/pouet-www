@@ -7,7 +7,7 @@ var Cookie = {
 
   init: function(options, data) {
     Cookie.options = Object.extend(Cookie.options, options || {});
-  
+
     var payload = Cookie.retrieve();
       if(payload) {
           Cookie.data = payload.evalJSON();
@@ -38,12 +38,12 @@ var Cookie = {
           return null;
       }
 
-      var len = start + Cookie.options.name.length + 1;   
+      var len = start + Cookie.options.name.length + 1;
       var end = document.cookie.indexOf(';', len);
 
       if(end == -1) {
           end = document.cookie.length;
-      } 
+      }
       return unescape(document.cookie.substring(len, end));
   },
   store: function() {
@@ -61,6 +61,6 @@ var Cookie = {
       document.cookie = Cookie.options.name + '=' + Cookie.getOptions() + ';expires=Thu, 01-Jan-1970 00:00:01 GMT';
   },
   getOptions: function() {
-      return (Cookie.options.path ? ';path=' + Cookie.options.path : '') + (Cookie.options.domain ? ';domain=' + Cookie.options.domain : '') + (Cookie.options.secure ? ';secure' : '');      
+      return (Cookie.options.path ? ';path=' + Cookie.options.path : '') + (Cookie.options.domain ? ';domain=' + Cookie.options.domain : '') + (Cookie.options.secure ? ';secure' : '');
   }
 };

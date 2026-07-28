@@ -196,7 +196,7 @@ nav li {
 }
 
 nav li:first-child {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAQMAAACTPww9AAAAA1BMVEX8/vwlkMVqAAAACklEQVR4XmOAAgAACAABnWENdQAAAABJRU5ErkJggg==) center left no-repeat, 
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAQMAAACTPww9AAAAA1BMVEX8/vwlkMVqAAAACklEQVR4XmOAAgAACAABnWENdQAAAABJRU5ErkJggg==) center left no-repeat,
     url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAQMAAACTPww9AAAAA1BMVEX8/vwlkMVqAAAACklEQVR4XmOAAgAACAABnWENdQAAAABJRU5ErkJggg==) center right no-repeat;
   padding-left: 9px;
 }
@@ -2188,7 +2188,7 @@ input.autocompleteSearch {
   font-weight: bold;
 }
 
-#pouetbox_cdc .notifications 
+#pouetbox_cdc .notifications
 {
   text-align: center;
 }

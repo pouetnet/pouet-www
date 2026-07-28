@@ -129,10 +129,10 @@ class PouetBoxListsMain extends PouetBox
         switch(@$_GET["order"])
         {
             case "type": $s->AddOrder("list_items_prod.type ".$dir); break;
-            case "name": $s->AddOrder("list_items_prod.name ".$dir); break;    
-            case "party": $s->AddOrder("list_items_prod_party.name ".$dir); break;    
-            case "release date": $s->AddOrder("list_items_prod.releaseDate ".$dir); break;    
-        }        
+            case "name": $s->AddOrder("list_items_prod.name ".$dir); break;
+            case "party": $s->AddOrder("list_items_prod_party.name ".$dir); break;
+            case "release date": $s->AddOrder("list_items_prod.releaseDate ".$dir); break;
+        }
 
         $this->prods = $s->perform();
 
@@ -221,7 +221,7 @@ class PouetBoxListsMain extends PouetBox
 
         if ($this->prods) {
             echo "<h2>prods</h2>";
-            
+
             echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
 
             $headers = array(
@@ -243,16 +243,16 @@ class PouetBoxListsMain extends PouetBox
             {
                 echo "<th></th>";
             }
-            echo "</tr>\n";            
+            echo "</tr>\n";
 
             foreach ($this->prods as $d) {
                 echo "<tr>\n";
-                
-                echo "<td>\n";                
+
+                echo "<td>\n";
                 echo $d->prod->RenderTypeIcons();
                 echo "</td>\n";
 
-                echo "<td>\n";                
+                echo "<td>\n";
                 echo $d->prod->RenderSingleRowShort();
                 echo $d->prod->RenderPlatformIcons();
                 echo "</td>\n";

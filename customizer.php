@@ -281,7 +281,7 @@ document.observe("dom:loaded",function(){
       item.remove();
       Event.observe(window, 'beforeunload', function(e) {
         e.returnValue = 'are you sure you want to leave without saving the order ?';
-      });          
+      });
     });
     item.down("h2").setStyle({"cursor":"move"});
     item.down("h2").observe("mousedown",function(ev){
@@ -313,7 +313,7 @@ document.observe("dom:loaded",function(){
         targetColumn.insert({"bottom":item});
       else
         c[targetPosition].insert({"before":item});
-    });    
+    });
   });
   document.observe("mousemove",function(ev){
     var el = document.body.down(".floaty");
@@ -337,10 +337,10 @@ document.observe("dom:loaded",function(){
           targetColumn.insert({"bottom":item});
         else
           c[targetPosition].insert({"before":item});
-          
+
         Event.observe(window, 'beforeunload', function(e) {
           e.returnValue = 'are you sure you want to leave without saving the order ?';
-        });          
+        });
       }
     }
   });

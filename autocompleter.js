@@ -8,9 +8,9 @@ Autocompleter = Class.create({
       lockSelect: true,
       width: null,
       placeholder: "",
-    },options || {}); 
+    },options || {});
     var instance = this;
-    
+
     this.originalElement.hide();
     var parent = $(originalElement.parentNode);
 
@@ -47,7 +47,7 @@ Autocompleter = Class.create({
     }
     this.keyboardSelection = -1;
     this.lastSearch = "";
-    
+
     // we use this to hide the list if the user clicks on something else.
     // we have to use this because the "blur" event fires before the "click",
     // and we won't be able to use the click to find out what we clicked if
@@ -62,7 +62,7 @@ Autocompleter = Class.create({
       if (instance.searchBox.value.length >= 1)
         instance.showAutocomplete( instance.searchBox.value );
     });
-    
+
     this.searchBox.observe("keydown",function(e){
       var items = instance.autoCompleteList.select("li");
       if (e.keyCode == Event.KEY_UP)
@@ -127,7 +127,7 @@ Autocompleter = Class.create({
       this.lastSearch = instance.searchBox.value;
       instance.showAutocomplete(instance.searchBox.value);
     },this);
-    
+
     if (this.originalElement.value.length > 0)
     {
       if (this.options.keyValue)
@@ -135,7 +135,7 @@ Autocompleter = Class.create({
         new Ajax.Request(options.dataUrl,{
           method: "post",
           parameters: $H({"id":this.originalElement.value}).toQueryString(),
-          onSuccess: function(transport) 
+          onSuccess: function(transport)
           {
             instance.select( transport.responseJSON[0].id, transport.responseJSON[0].name );
           },
@@ -144,7 +144,7 @@ Autocompleter = Class.create({
       else
       {
         this.searchBox.value = this.originalElement.value;
-      }      
+      }
     }
   },
   reset:function(complete)
@@ -154,7 +154,7 @@ Autocompleter = Class.create({
     this.originalElement.value = "";
     if (this.finalSelection)
       this.finalSelection.hide();
-    this.searchBox.show();  
+    this.searchBox.show();
   },
   selectListItem: function(li)
   {
@@ -164,7 +164,7 @@ Autocompleter = Class.create({
       var item = li.retrieve("item");
 
       this.select( item.id, item.name );
-    } 
+    }
     else
     {
       if (this.finalSelection)
@@ -189,7 +189,7 @@ Autocompleter = Class.create({
       this.finalSelection.show();
       this.searchBox.hide();
     }
-    
+
     if (this.options.onSelectItem)
       this.options.onSelectItem(id);
   },
@@ -199,7 +199,7 @@ Autocompleter = Class.create({
     new Ajax.Request(this.options.dataUrl,{
       method: "post",
       parameters: $H({"search":term}).toQueryString(),
-      onSuccess: function(transport) 
+      onSuccess: function(transport)
       {
         instance.keyboardSelection = -1;
         var results = $A( transport.responseJSON );
@@ -209,7 +209,7 @@ Autocompleter = Class.create({
         }
         instance.autoCompleteList.show();
         instance.autoCompleteList.update("");
-  
+
         instance.autoCompleteList.setStyle({
           "top" :(instance.searchBox.cumulativeOffset().top + instance.searchBox.getLayout().get("height") + 4) + "px",
           "left":instance.searchBox.cumulativeOffset().left + "px",

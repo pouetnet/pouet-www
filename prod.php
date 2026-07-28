@@ -471,7 +471,7 @@ document.observe("dom:loaded",function(){
 
         foreach ($this->downloadLinks as $link) {
             echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
-            
+
             if ($this->isEmbeddableYoutubeUrl($link->link))
             {
                 echo "[<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'>embed</span></a>] ";
@@ -1273,14 +1273,14 @@ document.observe("dom:loaded",function(){
 
 const images=document.getElementsByClassName('pouetsscreenshotimg');
 if (images.length>0) {
-    document.getElementsByClassName('pouetsscreenshotimg')[0].addEventListener('click', function() { 
-        this.classList.toggle('sslightbox'); 
-    }); 
+    document.getElementsByClassName('pouetsscreenshotimg')[0].addEventListener('click', function() {
+        this.classList.toggle('sslightbox');
+    });
 
     document.body.addEventListener('keydown', function(e) {
         if (e.key == "Escape") {
             var isPopupVisible = document.getElementsByClassName('pouetsscreenshotimg')[0].classList.contains('sslightbox');
-            if (isPopupVisible) document.getElementsByClassName('pouetsscreenshotimg')[0].classList.toggle('sslightbox'); 
+            if (isPopupVisible) document.getElementsByClassName('pouetsscreenshotimg')[0].classList.toggle('sslightbox');
         }
     });
 }
