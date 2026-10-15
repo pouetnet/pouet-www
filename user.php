@@ -175,6 +175,15 @@ class PouetBoxUserMain extends PouetBox
         if ($currentUser && $currentUser->IsModerator()) {
             printf(" [<a href='admin_user_edit.php?who=%d' class='adminlink'>admin</a>]\n", $this->id);
         }
+        // local dev only: the SceneID mock logs in as any user id
+        $isMe = $currentUser && $currentUser->id == $this->user->id;
+        if (POUET_TEST && class_exists("MySceneID") && !$isMe) {
+            printf(
+                " [<a href='login.php?as=%d&amp;return=%s' class='adminlink'>log in as</a>]\n",
+                $this->id,
+                rawurlencode("user.php?who=".$this->id)
+            );
+        }
 
         echo " <span id='glops'><span>".$this->user->glops."</span> glöps</span>";
         echo "</h2>\n";
