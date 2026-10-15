@@ -1,8 +1,11 @@
+# Also called by the other pouet-* site repos (workflow_call), so every site
+# gets the same lint. Their check is named "php / lint".
 on:
   push:
     branches:
       - master
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -16,12 +19,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          # Same as prod: without it, code after a bare "<?" is never parsed.
+          ini-values: short_open_tag=On
       - name: Lint PHP files
-        run: |
-          set -e  # Exit on any error
-          failed=0
-          for file in $(find . -name "*.php"); do
-            echo "Linting $file"
-            php -l "$file" || failed=1
-          done
-          exit $failed
+        # Tracked files only (skips the sceneid3 submodule); fails if any file fails
+        run: git ls-files -z '*.php' | xargs -0 -r -n1 php -l
