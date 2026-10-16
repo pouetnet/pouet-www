@@ -31,7 +31,9 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
 <?php
   if ($metaValues) {
       foreach ($metaValues as $k => $v) {
-          printf("  <meta property=\"%s\" content=\"%s\">\n", $k, _html($v));
+          // OpenGraph uses "property", X only documents "name" for its twitter:* tags
+          $attr = str_starts_with($k, "twitter:") ? "name" : "property";
+          printf("  <meta %s=\"%s\" content=\"%s\">\n", $attr, $k, _html($v));
       }
   }
 if ($linkedData) {
