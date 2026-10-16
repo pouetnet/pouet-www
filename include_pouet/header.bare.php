@@ -67,6 +67,7 @@ $newsTickers = handle_db_cache(POUET_ROOT_LOCAL . "/cache/newstickers.cache", fu
   <script src="./autocompleter.js"></script>
   <script src="./libs/simpleLightbox/simpleLightbox.min.js"></script>
   <script src="./script.js?<?=filemtime("script.js")?>"></script>
+  <script data-goatcounter="https://pouet.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 
   <!--[if lt IE 9]><script src="//ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script><![endif]-->
   <!--[if IE]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
