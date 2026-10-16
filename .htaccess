@@ -49,6 +49,7 @@ Header always set Content-Security-Policy "upgrade-insecure-requests"
 # included, bin/ holds maintainer scripts and cache/ runtime cache files
 RedirectMatch 404 (?i)^/(bin|cache|include_generic|include_pouet|include_pouet_index)(/|$)
 RedirectMatch 404 (?i)^/admin\.functions\.php(/|$)
+RedirectMatch 404 (?i)^/(README\.md|LICENSE)$
 
 # Uploads live on content.pouet.net only, so they never run on www's origin.
 # Old /content/ links (from when www served them) go there. RedirectMatch,

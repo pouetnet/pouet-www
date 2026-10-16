@@ -1,5 +1,31 @@
 # Pouët.net
 
+The main [Pouët.net](https://www.pouet.net) website.
+
+## Running it locally
+
+The local stack (Docker images matching production, configs and sample
+data) lives in [pouet-infra](https://github.com/pouetnet/pouet-infra),
+which is only open to the team for now. If you have access:
+
+```sh
+git clone git@github.com:pouetnet/pouet-infra.git
+cd pouet-infra
+just setup
+```
+
+This clones this repo and the other site repos under `sites/`, starts
+everything and loads sample data. www is then on <http://localhost:8080>,
+logged in as user 1. Its `README.md` and `TESTING.md` have the details.
+
+## Contributing
+
+Open a pull request against `master`. PRs are squash-merged once CI
+passes, and a merged PR is live on www.pouet.net within a minute.
+
+If your change alters the database schema, update `pouet.sql` in the same
+PR.
+
 ## Team
 
 ### Former maintainers
