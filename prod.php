@@ -1146,7 +1146,8 @@ if ($main->prod) {
     $TITLE = $main->prod->name.($main->prod->groups ? " by ".$main->prod->RenderGroupsPlain() : "");
 
     $metaValues["og:type"] = "website";
-    $metaValues["twitter:card"] = "summary_large_image";
+    $metaValues["og:url"] = POUET_ROOT_URL . "prod.php?which=" . $main->prod->id;
+    $metaValues["twitter:card"] = "summary";
     $metaValues["twitter:site"] = "@pouetdotnet";
 
     $desc = implode(" / ", $main->prod->types);
@@ -1180,6 +1181,19 @@ if ($main->prod) {
         $metaValues["og:image"] =
         $metaValues["twitter:image"] =
         $linkedData["image"] = POUET_CONTENT_URL . $main->screenshotPath;
+        $metaValues["og:image:alt"] =
+        $metaValues["twitter:image:alt"] = "Screenshot of " . $TITLE;
+
+        $size = @getimagesize(POUET_CONTENT_LOCAL . $main->screenshotPath);
+        if ($size) {
+            // without the size, Facebook shows no image on the first share of a page
+            $metaValues["og:image:width"] = $size[0];
+            $metaValues["og:image:height"] = $size[1];
+            // X drops large card images under 300x157 (e.g. 256x192 ZX Spectrum screens)
+            if ($size[0] >= 300 && $size[1] >= 157) {
+                $metaValues["twitter:card"] = "summary_large_image";
+            }
+        }
     }
 
 
