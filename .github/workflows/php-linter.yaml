@@ -19,8 +19,25 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          # Same as prod: without it, code after a bare "<?" is never parsed.
-          ini-values: short_open_tag=On
+          # Same as the sites' .user.ini
+          ini-values: short_open_tag=Off
       - name: Lint PHP files
         # Tracked files only (skips the sceneid3 submodule); fails if any file fails
         run: git ls-files -z '*.php' | xargs -0 -r -n1 php -l
+      - name: Forbid short open tags
+        # php -l takes the code after a bare "<?" for text, so tokenize with
+        # short_open_tag on to find them
+        run: |
+          # shellcheck disable=SC2016 # the $s are PHP's
+          git ls-files -z '*.php' | xargs -0 -r php -d short_open_tag=On -r '
+            $bad = 0;
+            foreach (array_slice($argv, 1) as $f) {
+              foreach (token_get_all(file_get_contents($f)) as $t) {
+                if (is_array($t) && $t[0] === T_OPEN_TAG && strtolower(rtrim($t[1])) !== "<?php") {
+                  echo "::error file=$f,line=$t[2]::Short open tag, use <?php\n";
+                  $bad = 1;
+                }
+              }
+            }
+            exit($bad);
+          ' --
