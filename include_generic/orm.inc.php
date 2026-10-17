@@ -27,20 +27,19 @@ class BM_Node
             $this->$k = $v;
         }
         if ($this->table) {
-            $this->class = $BM_ORM_CLASSES[$this->table];
+            // tables without an ORM class (e.g. credits) get no fields
+            $this->class = $BM_ORM_CLASSES[$this->table] ?? null;
         }
 
-        if ($this->table && $BM_ORM_CLASSES[$this->table]) {
+        if ($this->class) {
             $func = $this->fieldFunc ? $this->fieldFunc : "getFields";
-            foreach ($BM_ORM_CLASSES[$this->table]::$func() as $v) {
+            foreach ($this->class::$func() as $v) {
                 $query->AddField($this->getTableInstanceName() . "." . $v . " as " . ($this->getTableInstanceName() ? $this->getTableInstanceName() . "_" : "") . $v);
             }
         }
     }
     public function &attach(&$query, $local, $relations, $additionalCondition = null)
     {
-        global $BM_ORM_CLASSES;
-
         $condition = "";
 
         list($relationTable) = array_keys($relations);
@@ -66,8 +65,8 @@ class BM_Node
         $node = new BM_Node($query, array("id" => $relationTableAlias,"table" => $relationTableCanonical,"prefix" => $prefix));
         $this->attachments[] = $node;
 
-        if ($BM_ORM_CLASSES[$relationTableCanonical]) {
-            $BM_ORM_CLASSES[$relationTableCanonical]::onAttach($node, $query);
+        if ($node->class) {
+            $node->class::onAttach($node, $query);
         }
 
         return $node;
@@ -90,12 +89,11 @@ class BM_Query extends SQLSelect
     public $root;
     public function __construct($table = null)
     {
-        global $BM_ORM_CLASSES;
         $this->root = array();
         if ($table) {
             $this->root = new BM_Node($this, array("table" => $table));
-            if ($BM_ORM_CLASSES[$table]) {
-                $BM_ORM_CLASSES[$table]::onAttach($this->root, $this);
+            if ($this->root->class) {
+                $this->root->class::onAttach($this->root, $this);
             }
             $this->AddTable($table);
         } else {
