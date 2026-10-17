@@ -247,7 +247,7 @@ function pouetAdmin_createDataDump()
     gzwrite($gz, "\n".']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
-    $out[] = sprintf("dumped %d groups into %s", count($rows), $filename);
+    $out[] = sprintf("dumped %d parties into %s", count($rows), $filename);
 
     // boards
     $filename = $dir . "/pouetdatadump-boards-" . substr(preg_replace("/[^0-9]+/", "", $dateStamp), 0, 8) . ".json.gz";
@@ -266,7 +266,7 @@ function pouetAdmin_createDataDump()
     gzwrite($gz, "\n".']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
-    $out[] = sprintf("dumped %d groups into %s", count($rows), $filename);
+    $out[] = sprintf("dumped %d boards into %s", count($rows), $filename);
 
     return implode("\n", $out);
 }
