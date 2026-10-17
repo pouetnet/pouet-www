@@ -15,8 +15,10 @@ just setup
 ```
 
 This clones this repo and the other site repos under `sites/`, starts
-everything and loads sample data. www is then on <http://localhost:8080>,
-logged in as user 1. Its `README.md` and `TESTING.md` have the details.
+everything and loads sample data. www is then on
+<http://www.pouet.localhost>, and <http://www.pouet.localhost/login.php>
+logs you in as user 1, an admin. Its `README.md` and `TESTING.md` have the
+details.
 
 ## Contributing
 
