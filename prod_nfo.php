@@ -27,7 +27,7 @@ class PouetBoxProdNfo extends PouetBoxASCIIViewer
         $s->AddField("added");
         $s->AddTable("nfos");
         $s->SetLimit(1);
-        $s->attach(array("nfos" => "user"), array("users as user" => "id"));
+        $s->attach(["nfos" => "user"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("prod=%d", $this->prod->id));
         $rows = $s->perform();
         $this->nfo = $rows ? reset($rows) : null;
@@ -38,17 +38,17 @@ class PouetBoxProdNfo extends PouetBoxASCIIViewer
     {
         parent::RenderHeader();
 
-        echo " <h2><big>".$this->prod->RenderLink()."</big>";
+        echo " <h2><big>" . $this->prod->RenderLink() . "</big>";
         if ($this->prod->groups) {
-            echo " by ".$this->prod->RenderGroupsLong();
+            echo " by " . $this->prod->RenderGroupsLong();
         }
         echo "</h2>\n";
     }
     public function RenderBody()
     {
-        $this->asciiFilename = get_local_nfo_path((int)$_GET["which"]);
+        $this->asciiFilename = get_local_nfo_path((int) $_GET["which"]);
         if ($this->nfo) {
-            $this->bodyTitle = "nfo added by "._html($this->nfo->user->nickname)." on "._html($this->nfo->added);
+            $this->bodyTitle = "nfo added by " . _html($this->nfo->user->nickname) . " on " . _html($this->nfo->added);
         }
 
         parent::RenderBody();
@@ -73,7 +73,7 @@ $box = new PouetBoxProdNfo();
 $box->Load();
 
 if ($box->prod) {
-    $TITLE = $box->prod->name.($box->prod->groups ? " by ".$box->prod->RenderGroupsPlain() : "")." :: nfo";
+    $TITLE = $box->prod->name . ($box->prod->groups ? " by " . $box->prod->RenderGroupsPlain() : "") . " :: nfo";
 }
 
 require_once("include_pouet/header.php");

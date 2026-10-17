@@ -75,17 +75,17 @@ session_set_cookie_params([
 
 $sceneID = null;
 if (POUET_TEST && class_exists("MySceneID")) {
-    $sceneID = new MySceneID(array(
-      "clientID" => SCENEID_USER,
-      "clientSecret" => SCENEID_PASS,
-      "redirectURI" => POUET_ROOT_URL . "login.php",
-    ));
+    $sceneID = new MySceneID([
+        "clientID" => SCENEID_USER,
+        "clientSecret" => SCENEID_PASS,
+        "redirectURI" => POUET_ROOT_URL . "login.php",
+    ]);
 } elseif (class_exists("SceneID3")) {
-    $sceneID = new SceneID3(array(
-      "clientID" => SCENEID_USER,
-      "clientSecret" => SCENEID_PASS,
-      "redirectURI" => POUET_ROOT_URL_SECURE . "login.php",
-    ));
+    $sceneID = new SceneID3([
+        "clientID" => SCENEID_USER,
+        "clientSecret" => SCENEID_PASS,
+        "redirectURI" => POUET_ROOT_URL_SECURE . "login.php",
+    ]);
 }
 
 $currentUser = null;
@@ -99,7 +99,7 @@ if (get_login_id()) {
             $_SERVER["REMOTE_ADDR"],
             $host,
             date("Y-m-d H:i:s"),
-            $id
+            $id,
         ));
         $currentUser = PouetUser::Spawn($id);
     }
@@ -109,7 +109,7 @@ if (defined("POUET_EXCEPTION_LOG")) {
     set_exception_handler(function ($ex) {
         LOG::Error($ex);
         if (POUET_TEST) {
-            echo "<pre>"._html($ex)."</pre>";
+            echo "<pre>" . _html($ex) . "</pre>";
         }
     });
 }
@@ -124,29 +124,29 @@ $timer["page"]["start"] = microtime_float();
 
 $currentUserSettings = null;
 if ($currentUser) {
-    if ($ephemeralStorage->has("settings:".$currentUser->id)) {
-        $currentUserSettings = $ephemeralStorage->get("settings:".$currentUser->id);
+    if ($ephemeralStorage->has("settings:" . $currentUser->id)) {
+        $currentUserSettings = $ephemeralStorage->get("settings:" . $currentUser->id);
     }
     if (!$currentUserSettings) {
         $currentUserSettings = SQLLib::SelectRow(sprintf_esc("select * from usersettings where id=%d", $currentUser->id));
         if ($currentUserSettings) {
-            $ephemeralStorage->set("settings:".$currentUser->id, $currentUserSettings);
+            $ephemeralStorage->set("settings:" . $currentUser->id, $currentUserSettings);
         }
     }
     if (!$currentUserSettings) {
         require_once("include_pouet/default_usersettings.php");
         $currentUserSettings = $DEFAULT_USERSETTINGS;
-        $ephemeralStorage->set("settings:".$currentUser->id, $currentUserSettings);
+        $ephemeralStorage->set("settings:" . $currentUser->id, $currentUserSettings);
     }
 } else {
     require_once("include_pouet/default_usersettings.php");
     $currentUserSettings = $DEFAULT_USERSETTINGS;
 }
 $TITLE = "";
-$metaValues = array();
+$metaValues = [];
 $metaValues["og:type"] = "website";
 $metaValues["og:site_name"] = "pou\xC3\xABt.net";
 
-$RSS = array();
-$linkedData = array();
+$RSS = [];
+$linkedData = [];
 $linkedData["@context"] = "https://schema.org/";

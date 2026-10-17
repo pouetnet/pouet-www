@@ -5,7 +5,7 @@ require_once("include_pouet/box-board-submit.php");
 require_once("include_pouet/pouet-box-editbase.php");
 
 if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("board.php?which=".(int)$_GET["which"]);
+    redirect("board.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -18,27 +18,27 @@ class PouetBoxAdminEditBoard extends PouetBoxSubmitBoard
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->board = SQLLib::SelectRow(sprintf_esc("SELECT * FROM boards WHERE id = %d", $this->id));
 
-        $this->title = "edit this board: <a href='boards.php?which=".$this->id."'>"._html($this->board->name)."</a>";
+        $this->title = "edit this board: <a href='boards.php?which=" . $this->id . "'>" . _html($this->board->name) . "</a>";
     }
     public function Commit($data)
     {
         global $boardID;
 
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["sysop"] = trim($data["sysop"]);
 
-        if ($data["started_year"] && $data["started_month"] && checkdate((int)$data["started_month"], 15, (int)$data["started_year"])) {
+        if ($data["started_year"] && $data["started_month"] && checkdate((int) $data["started_month"], 15, (int) $data["started_year"])) {
             $a["started"] = sprintf("%04d-%02d-15", $data["started_year"], $data["started_month"]);
         } elseif ($data["started_year"]) {
             $a["started"] = sprintf("%04d-00-15", $data["started_year"]);
         }
 
-        if ($data["closed_year"] && $data["closed_month"] && checkdate((int)$data["closed_month"], 15, (int)$data["closed_year"])) {
+        if ($data["closed_year"] && $data["closed_month"] && checkdate((int) $data["closed_month"], 15, (int) $data["closed_year"])) {
             $a["closed"] = sprintf("%04d-%02d-15", $data["closed_year"], $data["closed_month"]);
         } elseif ($data["closed_year"]) {
             $a["closed"] = sprintf("%04d-00-15", $data["closed_year"]);
@@ -47,22 +47,22 @@ class PouetBoxAdminEditBoard extends PouetBoxSubmitBoard
         $a["phonenumber"] = trim($data["phonenumber"]);
         $a["telnetip"] = trim($data["telnetip"]);
 
-        SQLLib::UpdateRow("boards", $a, "id=".$this->id);
+        SQLLib::UpdateRow("boards", $a, "id=" . $this->id);
 
-        SQLLib::Query(sprintf_esc("delete from boards_platforms where board = %d", (int)$this->id));
+        SQLLib::Query(sprintf_esc("delete from boards_platforms where board = %d", (int) $this->id));
         if (@$data["platform"]) {
             $data["platform"] = array_unique($data["platform"]);
             foreach ($data["platform"] as $v) {
-                $a = array();
-                $a["board"] = (int)$this->id;
-                $a["platform"] = (int)$v;
+                $a = [];
+                $a["board"] = (int) $this->id;
+                $a["platform"] = (int) $v;
                 SQLLib::InsertRow("boards_platforms", $a);
             }
         }
 
         gloperator_log("board", $this->id, "board_edit");
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -103,7 +103,7 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
         $this->id = $board->id;
         $this->title = "board affiliations links";
 
-        $this->headers = array("board","type");
+        $this->headers = ["board","type"];
 
         $row = SQLLib::selectRow("DESC affiliatedboards type");
         $this->types = enum2array($row->Type);
@@ -112,7 +112,7 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
         $s->AddField("affiliatedboards.id");
         $s->AddField("affiliatedboards.type");
         $s->AddTable("affiliatedboards");
-        $s->attach(array("affiliatedboards" => "group"), array("groups as group" => "id"));
+        $s->attach(["affiliatedboards" => "group"], ["groups as group" => "id"]);
         $s->AddField("affiliatedboards_group.id as affiliatedboards_group_id");
         $s->AddWhere(sprintf_esc("`board`=%d", $this->board->id));
         $this->data = $s->perform();
@@ -120,22 +120,22 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
     public function Commit($data)
     {
         if (@$data["delBoardAffil"]) {
-            SQLLib::Query("delete from affiliatedboards where id=".(int)$data["delBoardAffil"]);
-            gloperator_log("board", (int)$this->board->id, "board_affil_del");
-            return array();
+            SQLLib::Query("delete from affiliatedboards where id=" . (int) $data["delBoardAffil"]);
+            gloperator_log("board", (int) $this->board->id, "board_affil_del");
+            return [];
         }
 
-        $a = array();
-        $a["group"] = (int)$data["group"];
+        $a = [];
+        $a["group"] = (int) $data["group"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
-            SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);
+            SQLLib::UpdateRow("affiliatedboards", $a, "id=" . (int) $data["editBoardAffilID"]);
             $a["id"] = $data["editBoardAffilID"];
-            gloperator_log("board", (int)$this->board->id, "board_affil_edit", array("id" => $a["id"]));
+            gloperator_log("board", (int) $this->board->id, "board_affil_edit", ["id" => $a["id"]]);
         } else {
             $a["board"] = $this->board->id;
             $a["id"] = SQLLib::InsertRow("affiliatedboards", $a);
-            gloperator_log("board", (int)$this->board->id, "board_affil_add", array("id" => $a["id"]));
+            gloperator_log("board", (int) $this->board->id, "board_affil_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $o = toObject($a);
@@ -144,11 +144,11 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
             $this->RenderNormalRowEnd($o);
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='group' value='"._html($row ? $row->group->id : "")."'></td>\n";
+        echo "    <td><input name='group' value='" . _html($row ? $row->group->id : "") . "'></td>\n";
         echo "    <td><select name='type'>\n";
         foreach ($this->types as $v) {
             printf("<option%s>%s</option>", ($row && $row->type == $v) ? " selected='selected'" : "", _html($v));
@@ -157,8 +157,8 @@ class PouetBoxAdminEditBoardAffil extends PouetBoxEditConnectionsBase
     }
     public function RenderNormalRow($v)
     {
-        echo "    <td>".$v->group->RenderLong()."</td>\n";
-        echo "    <td>"._html($v->type)."</td>\n";
+        echo "    <td>" . $v->group->RenderLong() . "</td>\n";
+        echo "    <td>" . _html($v->type) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -201,14 +201,14 @@ class PouetBoxAdminDeleteBoard extends PouetBox
         global $verificationStrings;
         $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-        $this->title = "delete this board: "._html($board->name);
+        $this->title = "delete this board: " . _html($board->name);
     }
     public function Validate($data)
     {
         if ($data["check"] != $data["checkOrig"]) {
-            return array("wrong verification string !");
+            return ["wrong verification string !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
@@ -217,15 +217,15 @@ class PouetBoxAdminDeleteBoard extends PouetBox
         SQLLib::Query(sprintf_esc("DELETE FROM boards_platforms WHERE board=%d", $this->board->id));
         SQLLib::Query(sprintf_esc("DELETE FROM boards WHERE id=%d", $this->board->id));
 
-        gloperator_log("board", (int)$this->board->id, "board_delete", get_object_vars($this->board));
+        gloperator_log("board", (int) $this->board->id, "board_delete", get_object_vars($this->board));
 
-        return array();
+        return [];
     }
     public function RenderBody()
     {
         echo "<div class='content'>";
-        echo "  <p>To make sure you want to delete <b>this</b> board, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <p>To make sure you want to delete <b>this</b> board, type \"" . $this->checkString . "\" here:</p>";
+        echo "  <input name='checkOrig' type='hidden' value='" . _html($this->checkString) . "'>";
         echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
         echo "<div class='foot'>";
@@ -252,9 +252,9 @@ document.observe("dom:loaded",function(){
 
 ///////////////////////////////////////////////////////////////////////////////
 
-$boxen = array(
-  "PouetBoxAdminEditBoardAffil",
-);
+$boxen = [
+    "PouetBoxAdminEditBoardAffil",
+];
 if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
     // ajax responses
     $group = new stdClass();
@@ -269,7 +269,7 @@ if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("boards.php?which=".(int)$_GET["which"], true);
+$form->SetSuccessURL("boards.php?which=" . (int) $_GET["which"], true);
 
 $box = new PouetBoxAdminEditBoard($_GET["which"]);
 $form->Add("board", $box);
@@ -280,7 +280,7 @@ if ($currentUser && $currentUser->CanEditItems()) {
     $form->Process();
 }
 
-$TITLE = "edit a board: ".$box->board->name;
+$TITLE = "edit a board: " . $box->board->name;
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");

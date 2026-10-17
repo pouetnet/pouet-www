@@ -13,7 +13,7 @@ function PouetAdmin_recacheFrontPagePartial_Form()
 {
     echo "<ul>";
     foreach (glob("cache/*") as $v) {
-        echo "<li><input type='checkbox' name='deleteCache["._html(basename($v))."]' id='"._html($v)."'> <label for='"._html($v)."'>"._html($v)."</label></li>\n";
+        echo "<li><input type='checkbox' name='deleteCache[" . _html(basename($v)) . "]' id='" . _html($v) . "'> <label for='" . _html($v) . "'>" . _html($v) . "</label></li>\n";
     }
     echo "</ul>";
 }
@@ -31,15 +31,15 @@ class PouetBoxAdmin extends PouetBox
     {
         global $currentUser;
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
         echo "<h2>i'm gonna wreck it !</h2>\n";
         echo "<ul class='boxlist'>\n";
-        $actions = array(
-          "recacheFrontPagePartial" => "flush front page cache",
-          "recacheFrontPage" => "flush entire front page cache",
-          "recacheTopDemos" => "recalculate top demo list",
-          "recacheBBS" => "recalculate latest 20 BBS caches",
-        );
+        $actions = [
+            "recacheFrontPagePartial" => "flush front page cache",
+            "recacheFrontPage" => "flush entire front page cache",
+            "recacheTopDemos" => "recalculate top demo list",
+            "recacheBBS" => "recalculate latest 20 BBS caches",
+        ];
         foreach ($actions as $k => $v) {
             echo "  <li>";
             echo "<form method='post'>";
@@ -47,13 +47,13 @@ class PouetBoxAdmin extends PouetBox
             $csrf = new CSRFProtect();
             $csrf->PrintToken();
 
-            echo _html($v).": ";
-            $func = "PouetAdmin_".$k."_Form";
+            echo _html($v) . ": ";
+            $func = "PouetAdmin_" . $k . "_Form";
             if (function_exists($func)) {
                 $func();
             }
 
-            echo "<input name='".$k."' type='submit' value='submit'>";
+            echo "<input name='" . $k . "' type='submit' value='submit'>";
             echo "</form>";
             echo "</li>\n";
         }
@@ -80,7 +80,7 @@ if ($_POST) {
     $csrf = new CSRFProtect();
     if ($csrf->ValidateToken()) {
         foreach ($_POST as $k => $v) {
-            $func = "pouetAdmin_".$k;
+            $func = "pouetAdmin_" . $k;
             if (function_exists($func)) {
                 $content .= $func();
             }

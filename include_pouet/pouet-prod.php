@@ -34,35 +34,33 @@ class PouetProd extends BM_Class
     public $group3;
 
     // non-db types
-    public $groups = array();
-    public $types = array();
-    public $placings = array();
-    public $platforms = array();
-    public $awards = array();
+    public $groups = [];
+    public $types = [];
+    public $placings = [];
+    public $platforms = [];
+    public $awards = [];
     public $party;
 
     public $cdc;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
     public static function getTable()
     {
         return "prods";
     }
     public static function getFields()
     {
-        return array("id","name","type","views","addedUser","addedDate","releaseDate",
-          "voteup","votepig","votedown","voteavg","download","party_compo","party_place","party_year");
+        return ["id","name","type","views","addedUser","addedDate","releaseDate",
+            "voteup","votepig","votedown","voteavg","download","party_compo","party_place","party_year"];
     }
     public static function getExtendedFields()
     {
-        return array("sceneorg","demozoo","csdb","zxdemo","latestip","invitation","invitationyear","boardID","rank");
+        return ["sceneorg","demozoo","csdb","zxdemo","latestip","invitation","invitationyear","boardID","rank"];
     }
 
     public function onFinishedPopulate()
     {
-        $this->groups = array();
+        $this->groups = [];
         if ($this->group1) {
             $this->groups[] = $this->group1;
         } unset($this->group1);
@@ -77,23 +75,23 @@ class PouetProd extends BM_Class
             $this->types = explode(",", $this->type);
         }
         if ($this->party && $this->party->id != NO_PARTY_ID) {
-            $this->placings[] = new PouetPlacing(array("party" => $this->party,"compo" => $this->party_compo,"ranking" => $this->party_place,"year" => $this->party_year));
+            $this->placings[] = new PouetPlacing(["party" => $this->party,"compo" => $this->party_compo,"ranking" => $this->party_place,"year" => $this->party_year]);
         }
     }
     public static function onAttach(&$node, &$query)
     {
-        $node->attach($query, "group1", array("groups as group1" => "id"));
-        $node->attach($query, "group2", array("groups as group2" => "id"));
-        $node->attach($query, "group3", array("groups as group3" => "id"));
-        $node->attach($query, "party", array("parties as party" => "id"));
-        $node->attach($query, "addedUser", array("users as addedUser" => "id"));
+        $node->attach($query, "group1", ["groups as group1" => "id"]);
+        $node->attach($query, "group2", ["groups as group2" => "id"]);
+        $node->attach($query, "group3", ["groups as group3" => "id"]);
+        $node->attach($query, "party", ["parties as party" => "id"]);
+        $node->attach($query, "addedUser", ["users as addedUser" => "id"]);
     }
 
     public function RenderTypeIcons()
     {
         $s = "<span class='typeiconlist'>";
         foreach ($this->types as $t) {
-            $s .= "<span class='typei type_".str_replace(" ", "_", $t)."' title='"._html($t)."'>".$t."</span>\n";
+            $s .= "<span class='typei type_" . str_replace(" ", "_", $t) . "' title='" . _html($t) . "'>" . $t . "</span>\n";
         }
         $s .= "</span>";
         return $s;
@@ -102,7 +100,7 @@ class PouetProd extends BM_Class
     {
         $s = "<span class='platformiconlist'>";
         foreach ($this->platforms as $t) {
-            $s .= "<span class='platformi os_".$t["slug"]."' title='"._html($t["name"])."'>"._html($t["name"])."</span>\n";
+            $s .= "<span class='platformi os_" . $t["slug"] . "' title='" . _html($t["name"]) . "'>" . _html($t["name"]) . "</span>\n";
         }
         $s .= "</span>";
         return $s;
@@ -111,7 +109,7 @@ class PouetProd extends BM_Class
     {
         $s = "<ul>";
         foreach ($this->types as $t) {
-            $s .= "<li><a href='prodlist.php?type%5B%5D=".rawurlencode($t)."'><span class='type type_".str_replace(" ", "_", $t)."'>".$t."</span> ".$t."</a></li>\n";
+            $s .= "<li><a href='prodlist.php?type%5B%5D=" . rawurlencode($t) . "'><span class='type type_" . str_replace(" ", "_", $t) . "'>" . $t . "</span> " . $t . "</a></li>\n";
         }
         $s .= "</ul>";
         return $s;
@@ -120,7 +118,7 @@ class PouetProd extends BM_Class
     {
         $s = "<ul>";
         foreach ($this->platforms as $t) {
-            $s .= "<li><a href='prodlist.php?platform%5B%5D=".rawurlencode($t["name"])."'><span class='platform os_".$t["slug"]."'>".$t["name"]."</span> ".$t["name"]."</a></li>\n";
+            $s .= "<li><a href='prodlist.php?platform%5B%5D=" . rawurlencode($t["name"]) . "'><span class='platform os_" . $t["slug"] . "'>" . $t["name"] . "</span> " . $t["name"] . "</a></li>\n";
         }
         $s .= "</ul>";
         return $s;
@@ -130,14 +128,14 @@ class PouetProd extends BM_Class
         $s = "";
         foreach ($this->groups as $g) {
             if ($g) {
-                $s .= ":: ".$g->RenderShort()."\n";
+                $s .= ":: " . $g->RenderShort() . "\n";
             }
         }
         return $s;
     }
     public function RenderGroupsShortProdlist()
     {
-        $s = array();
+        $s = [];
         foreach ($this->groups as $g) {
             if ($g) {
                 $s[] = $g->RenderShort();
@@ -147,7 +145,7 @@ class PouetProd extends BM_Class
     }
     public function RenderGroupsLong()
     {
-        $s = array();
+        $s = [];
         foreach ($this->groups as $g) {
             if ($g) {
                 $s[] = $g->RenderFull();
@@ -157,7 +155,7 @@ class PouetProd extends BM_Class
     }
     public function RenderGroupsPlain()
     {
-        $s = array();
+        $s = [];
         foreach ($this->groups as $g) {
             if ($g) {
                 $s[] = $g->name;
@@ -177,7 +175,7 @@ class PouetProd extends BM_Class
         foreach ($this->awards as $a) {
             $category = $AWARDS_CATEGORIES[$a->categoryID];
             $year = $category->year ? $category->year : ($this->releaseDate ? substr($this->releaseDate, 0, 4) : "");
-            $title = $category->series." - ".$category->category;
+            $title = $category->series . " - " . $category->category;
             if ($a->awardType == "nominee") {
                 $title .= " (Nominee)";
             }
@@ -186,9 +184,9 @@ class PouetProd extends BM_Class
                 "<li><a class='%s %s' href='awards.php#%s' title='%s'>%s</a></li>",
                 $category->cssClass,
                 $a->awardType,
-                hashify($category->series." ".$year." ".$category->category),
+                hashify($category->series . " " . $year . " " . $category->category),
                 _html($title),
-                _html($title)
+                _html($title),
             );
         }
         echo "</ul>";
@@ -214,7 +212,7 @@ class PouetProd extends BM_Class
         if ($this->voteavg > 0) {
             $rating = "rulez";
         }
-        return "<span class='".$rating."' title='".$rating."'>".$this->RenderAvgRaw()."</span>";
+        return "<span class='" . $rating . "' title='" . $rating . "'>" . $this->RenderAvgRaw() . "</span>";
     }
     public function GetLink($root = POUET_ROOT_URL)
     {
@@ -230,10 +228,10 @@ class PouetProd extends BM_Class
     }
     public function RenderSingleRow()
     {
-        $s = "<span class='prod'>".$this->RenderLink()."</span>";
+        $s = "<span class='prod'>" . $this->RenderLink() . "</span>";
         if ($this->groups) {
             $s .= " by ";
-            $a = array();
+            $a = [];
             foreach ($this->groups as $g) {
                 if ($g) {
                     $a[] = $g->RenderFull();
@@ -245,10 +243,10 @@ class PouetProd extends BM_Class
     }
     public function RenderSingleRowShort()
     {
-        $s = "<span class='prod'>".$this->RenderLink()."</span>";
+        $s = "<span class='prod'>" . $this->RenderLink() . "</span>";
         if ($this->groups) {
             $s .= " by ";
-            $a = array();
+            $a = [];
             foreach ($this->groups as $g) {
                 if ($g) {
                     $a[] = $g->RenderLong();
@@ -276,8 +274,8 @@ class PouetProd extends BM_Class
         if (get_setting("indexplatform")) {
             echo $this->RenderPlatformIcons();
         }
-        echo "<span class='prod'>".$this->RenderLinkTruncated()."</span>\n";
-        echo "<span class='group'>".$this->RenderGroupsShort()."</span>\n";
+        echo "<span class='prod'>" . $this->RenderLinkTruncated() . "</span>\n";
+        echo "<span class='group'>" . $this->RenderGroupsShort() . "</span>\n";
         echo "</span>";
     }
     public function Delete()
@@ -305,12 +303,12 @@ class PouetProd extends BM_Class
         SQLLib::Query(sprintf_esc("DELETE FROM modification_requests WHERE itemID=%d AND itemType='prod'", $this->id));
         SQLLib::Query(sprintf_esc("DELETE FROM prods WHERE id=%d LIMIT 1", $this->id));
 
-        @unlink(get_local_nfo_path((int)$this->id));
-        foreach (array( "jpg","gif","png" ) as $v) {
-            @unlink(get_local_screenshot_path((int)$this->id, $v));
+        @unlink(get_local_nfo_path((int) $this->id));
+        foreach ([ "jpg","gif","png" ] as $v) {
+            @unlink(get_local_screenshot_path((int) $this->id, $v));
         }
 
-        gloperator_log("prod", (int)$this->id, "prod_delete", get_object_vars($this));
+        gloperator_log("prod", (int) $this->id, "prod_delete", get_object_vars($this));
     }
     public static function RecalculateVoteCacheByID($prodID)
     {
@@ -318,9 +316,9 @@ class PouetProd extends BM_Class
         $piggie = 0;
         $sucks = 0;
         $total = 0;
-        $checktable = array();
+        $checktable = [];
 
-        $r = SQLLib::SelectRows("SELECT rating,who FROM comments WHERE which=".$prodID);
+        $r = SQLLib::SelectRows("SELECT rating,who FROM comments WHERE which=" . $prodID);
         foreach ($r as $t) {
             if (!array_key_exists($t->who, $checktable) || $t->rating != 0) {
                 $checktable[$t->who] = $t->rating;
@@ -340,15 +338,15 @@ class PouetProd extends BM_Class
 
         $avg = 0;
         if ($total != 0) {
-            $avg = (float)($rulez - $sucks) / (float)$total;
+            $avg = (float) ($rulez - $sucks) / (float) $total;
         }
 
-        $a = array();
+        $a = [];
         $a["voteup"] = $rulez;
         $a["votepig"] = $piggie;
         $a["votedown"] = $sucks;
         $a["voteavg"] = $avg;
-        SQLLib::UpdateRow("prods", $a, "id=".$prodID);
+        SQLLib::UpdateRow("prods", $a, "id=" . $prodID);
     }
     public function RecalculateVoteCache()
     {
@@ -387,7 +385,7 @@ class PouetProd extends BM_Class
 
 function PouetCollectPlatforms(&$prodArray)
 {
-    $ids = array();
+    $ids = [];
     foreach ($prodArray as $v) {
         if ($v->id) {
             $ids[] = $v->id;
@@ -396,7 +394,7 @@ function PouetCollectPlatforms(&$prodArray)
     if (!$ids) {
         return;
     }
-    $rows = SQLLib::selectRows("select * from prods_platforms where prods_platforms.prod in (".implode(",", $ids).")");
+    $rows = SQLLib::selectRows("select * from prods_platforms where prods_platforms.prod in (" . implode(",", $ids) . ")");
     foreach ($prodArray as &$v) {
         foreach ($rows as &$r) {
             if ($v->id == $r->prod) {
@@ -410,7 +408,7 @@ function PouetCollectPlatforms(&$prodArray)
 
 function PouetCollectAwards(&$prodArray)
 {
-    $ids = array();
+    $ids = [];
     foreach ($prodArray as $v) {
         if ($v->id) {
             $ids[] = $v->id;
@@ -420,7 +418,7 @@ function PouetCollectAwards(&$prodArray)
         return;
     }
 
-    $rows = SQLLib::selectRows("select * from awards where prodID in (".implode(",", $ids).") order by awardType, categoryID");
+    $rows = SQLLib::selectRows("select * from awards where prodID in (" . implode(",", $ids) . ") order by awardType, categoryID");
     foreach ($prodArray as &$v) {
         foreach ($rows as &$r) {
             if ($v->id == $r->prodID) {
@@ -434,7 +432,7 @@ function PouetCollectAwards(&$prodArray)
         $v->cdc = 0;
     }
 
-    $rows = SQLLib::selectRows("select which from cdc where which in (".implode(",", $ids).")");
+    $rows = SQLLib::selectRows("select which from cdc where which in (" . implode(",", $ids) . ")");
     foreach ($prodArray as &$v) {
         $v->cdc = 0;
         foreach ($rows as &$r) {
@@ -444,7 +442,7 @@ function PouetCollectAwards(&$prodArray)
         }
     }
 
-    $rows = SQLLib::selectRows("select count(*) as c,cdc from users_cdcs where cdc in (".implode(",", $ids).") group by cdc");
+    $rows = SQLLib::selectRows("select count(*) as c,cdc from users_cdcs where cdc in (" . implode(",", $ids) . ") group by cdc");
     foreach ($prodArray as &$v) {
         foreach ($rows as &$r) {
             if ($v->id == $r->cdc) {

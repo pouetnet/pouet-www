@@ -43,7 +43,7 @@ function pouet_footer_git_short_hash()
     return substr($head, 0, 7);
 }
 ?>
-  <li><a href="//<?=_html((POUET_MOBILE ? POUET_WEB_HOSTNAME : POUET_MOBILE_HOSTNAME).$_SERVER["REQUEST_URI"])?>">switch to <?=(POUET_MOBILE ? "desktop" : "mobile")?> version</a></li>
+  <li><a href="//<?=_html((POUET_MOBILE ? POUET_WEB_HOSTNAME : POUET_MOBILE_HOSTNAME) . $_SERVER["REQUEST_URI"])?>">switch to <?=(POUET_MOBILE ? "desktop" : "mobile")?> version</a></li>
   <li>
     <a href="index.php">pouët.net</a> v<a href="https://github.com/pouetnet/pouet-www">1.0-<?=pouet_footer_git_short_hash()?></a> &copy; 2000-<?=date("Y")?> <a href="groups.php?which=5">mandarine</a>
     - hosted on <a href="http://www.scene.org/">scene.org</a>
@@ -56,33 +56,33 @@ function pouet_footer_git_short_hash()
   </li>
 <?php
 $timer["html"]["end"] = microtime_float();
-  $timer["page"]["end"] = microtime_float();
-  if (SQLLib::$telemetry) {
-      printf("<li>page created in %f seconds with %d queries.</li>\n", $timer["page"]["end"] - $timer["page"]["start"], count(SQLLib::$queries));
-  } else {
-      printf("<li>page created in %f seconds.</li>\n", $timer["page"]["end"] - $timer["page"]["start"]);
-  }
+$timer["page"]["end"] = microtime_float();
+if (SQLLib::$telemetry) {
+    printf("<li>page created in %f seconds with %d queries.</li>\n", $timer["page"]["end"] - $timer["page"]["start"], count(SQLLib::$queries));
+} else {
+    printf("<li>page created in %f seconds.</li>\n", $timer["page"]["end"] - $timer["page"]["start"]);
+}
 
-  if (POUET_TEST) {
-      $data = @file_get_contents(POUET_ROOT_LOCAL . "/.git/HEAD");
-      if (preg_match("/ref: refs\/heads\/(.*)/", $data, $m)) {
-          printf("<li>current development branch: %s.</li>\n", $m[1]);
-      }
-  }
-  echo "</ul>\n";
-  echo "</footer>";
+if (POUET_TEST) {
+    $data = @file_get_contents(POUET_ROOT_LOCAL . "/.git/HEAD");
+    if (preg_match("/ref: refs\/heads\/(.*)/", $data, $m)) {
+        printf("<li>current development branch: %s.</li>\n", $m[1]);
+    }
+}
+echo "</ul>\n";
+echo "</footer>";
 
-  if (POUET_TEST) {
-      foreach ($timer as $k => $v) {
-          printf("<!-- %-40s took %f -->\n", $k, $v["end"] - $v["start"]);
-      }
-      echo "<!--\n";
-      echo "QUERIES:\n";
-      $n = 1;
-      foreach (SQLLib::$queries as $sql => $time) {
-          printf("%3d. [%8.2f] - %s\n", $n++, $time, _html($sql));
-      }
-      echo "-->";
-  }
-  require_once("footer.bare.php");
-  ?>
+if (POUET_TEST) {
+    foreach ($timer as $k => $v) {
+        printf("<!-- %-40s took %f -->\n", $k, $v["end"] - $v["start"]);
+    }
+    echo "<!--\n";
+    echo "QUERIES:\n";
+    $n = 1;
+    foreach (SQLLib::$queries as $sql => $time) {
+        printf("%3d. [%8.2f] - %s\n", $n++, $time, _html($sql));
+    }
+    echo "-->";
+}
+require_once("footer.bare.php");
+?>

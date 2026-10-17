@@ -15,14 +15,14 @@ class PouetBoxSearchBoxMain extends PouetBox
     {
         echo "<div class='content r1'>\n";
         echo "I'm looking for\n";
-        echo "<input type='text' name='what' size='25' value=\""._html(@$_GET["what"])."\">\n";
+        echo "<input type='text' name='what' size='25' value=\"" . _html(@$_GET["what"]) . "\">\n";
         echo "and this is a [\n";
 
-        $types = array("prod","group","party"/*,"board"*/,"user","bbs");
-        $a = array();
+        $types = ["prod","group","party"/*,"board"*/,"user","bbs"];
+        $a = [];
         $selected = @$_GET["type"] ? $_GET["type"] : "prod";
         foreach ($types as $t) {
-            $a[] = "<label><input type='radio' name='type' value='".$t."' ".($t == $selected ? " checked='checked'" : "").">&nbsp;".$t."</label>\n";
+            $a[] = "<label><input type='radio' name='type' value='" . $t . "' " . ($t == $selected ? " checked='checked'" : "") . ">&nbsp;" . $t . "</label>\n";
         }
 
         echo implode(" |\n", $a);
@@ -39,7 +39,7 @@ class PouetBoxSearchProd extends PouetBox
     public $page;
     public $data;
     public $count;
-    public function __construct($terms = array())
+    public function __construct($terms = [])
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_searchprod";
@@ -51,7 +51,7 @@ class PouetBoxSearchProd extends PouetBox
         $s = new SQLSelect();
 
         $perPage = get_setting("searchprods");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
+        $this->page = (int) max(1, (int) @$_GET["page"]);
 
         $s = new BM_Query("prods");
         $s->AddField("cmts.c as commentCount");
@@ -63,7 +63,7 @@ class PouetBoxSearchProd extends PouetBox
             $s->AddWhere(sprintf_esc("prods.name LIKE '%%%s%%'", _like($term)));
         }
 
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         //    echo "<!--".$s->GetQuery()."-->";
         $this->data = $s->performWithCalcRows($this->count);
@@ -74,18 +74,18 @@ class PouetBoxSearchProd extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "name" => "name",
-          "group" => "group",
-          "party" => "release party",
-          "release" => "release date",
-          "avg" => '<span class="rulez" title="rulez">rulez</span> '.
-                 '<span class="isok" title="piggie">piggie</span> '.
-                 '<span class="sucks" title="sucks">sucks</span> ',
-          "comments" => "#",
-          "views" => "popularity",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "name" => "name",
+            "group" => "group",
+            "party" => "release party",
+            "release" => "release date",
+            "avg" => '<span class="rulez" title="rulez">rulez</span> '
+                   . '<span class="isok" title="piggie">piggie</span> '
+                   . '<span class="sucks" title="sucks">sucks</span> ',
+            "comments" => "#",
+            "views" => "popularity",
+        ];
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             echo sprintf("<th>%s</th>\n", $text);
@@ -98,7 +98,7 @@ class PouetBoxSearchProd extends PouetBox
             echo "<td>\n";
             echo $p->RenderTypeIcons();
             echo $p->RenderPlatformIcons();
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo $p->RenderAccolades();
             echo "</td>\n";
 
@@ -112,13 +112,13 @@ class PouetBoxSearchProd extends PouetBox
             }
             echo "</td>\n";
 
-            echo "<td class='date'>".$p->RenderReleaseDate()."</td>\n";
-            echo "<td class='votesavg'>".$p->RenderAvg()."</td>\n";
+            echo "<td class='date'>" . $p->RenderReleaseDate() . "</td>\n";
+            echo "<td class='votesavg'>" . $p->RenderAvg() . "</td>\n";
 
-            echo "<td>".(int)$p->commentCount."</td>\n";
+            echo "<td>" . (int) $p->commentCount . "</td>\n";
 
-            $pop = (int)calculate_popularity($p->views);
-            echo "<td>".progress_bar_solo($pop, $pop."%")."</td>\n";
+            $pop = (int) calculate_popularity($p->views);
+            echo "<td>" . progress_bar_solo($pop, $pop . "%") . "</td>\n";
 
             echo "</tr>\n";
         }
@@ -126,13 +126,13 @@ class PouetBoxSearchProd extends PouetBox
         $perPage = get_setting("searchprods");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -157,7 +157,7 @@ class PouetBoxSearchGroup extends PouetBox
     public $page;
     public $data;
     public $count;
-    public function __construct($terms = array())
+    public function __construct($terms = [])
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_searchgroup";
@@ -169,7 +169,7 @@ class PouetBoxSearchGroup extends PouetBox
         $s = new SQLSelect();
 
         $perPage = get_setting("searchprods");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
+        $this->page = (int) max(1, (int) @$_GET["page"]);
 
         $s = new BM_Query("groups");
         $s->AddField("p1.c as p1c");
@@ -184,7 +184,7 @@ class PouetBoxSearchGroup extends PouetBox
             $s->AddWhere(sprintf_esc("(groups.name LIKE '%%%s%%' or groups.acronym LIKE '%%%s%%')", _like($term), _like($term)));
         }
 
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         //var_dump($s->GetQuery());
         $this->data = $s->performWithCalcRows($this->count);
@@ -193,12 +193,12 @@ class PouetBoxSearchGroup extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "group" => "groups",
-          "website" => "websites",
-          "prods" => "prods",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "group" => "groups",
+            "website" => "websites",
+            "prods" => "prods",
+        ];
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             echo sprintf("<th>%s</th>\n", $text);
@@ -229,13 +229,13 @@ class PouetBoxSearchGroup extends PouetBox
         $perPage = get_setting("searchprods");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -260,7 +260,7 @@ class PouetBoxSearchParty extends PouetBox
     public $page;
     public $data;
     public $count;
-    public function __construct($terms = array())
+    public function __construct($terms = [])
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_searchparty";
@@ -272,7 +272,7 @@ class PouetBoxSearchParty extends PouetBox
         $s = new SQLSelect();
 
         $perPage = get_setting("searchprods");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
+        $this->page = (int) max(1, (int) @$_GET["page"]);
 
         $s = new BM_Query("parties");
         $s->AddField("p.c as prods");
@@ -283,7 +283,7 @@ class PouetBoxSearchParty extends PouetBox
             $s->AddWhere(sprintf_esc("parties.name LIKE '%%%s%%'", _like($term)));
         }
 
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         //var_dump($s->GetQuery());
         $this->data = $s->performWithCalcRows($this->count);
@@ -292,12 +292,12 @@ class PouetBoxSearchParty extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "party" => "party name",
-          "website" => "websites",
-          "prods" => "prods",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "party" => "party name",
+            "website" => "websites",
+            "prods" => "prods",
+        ];
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             echo sprintf("<th>%s</th>\n", $text);
@@ -316,7 +316,7 @@ class PouetBoxSearchParty extends PouetBox
             echo "</td>\n";
 
             echo "<td>";
-            echo (int)$p->prods;
+            echo (int) $p->prods;
             echo "</td>\n";
 
             echo "</tr>\n";
@@ -325,13 +325,13 @@ class PouetBoxSearchParty extends PouetBox
         $perPage = get_setting("searchprods");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -356,7 +356,7 @@ class PouetBoxSearchUser extends PouetBox
     public $page;
     public $data;
     public $count;
-    public function __construct($terms = array())
+    public function __construct($terms = [])
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_searchuser";
@@ -368,7 +368,7 @@ class PouetBoxSearchUser extends PouetBox
         $s = new SQLSelect();
 
         $perPage = get_setting("searchprods");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
+        $this->page = (int) max(1, (int) @$_GET["page"]);
 
         $s = new BM_Query("users");
         //    $s->AddField("p.c as prods");
@@ -379,7 +379,7 @@ class PouetBoxSearchUser extends PouetBox
             $s->AddWhere(sprintf_esc("users.nickname LIKE '%%%s%%'", _like($term)));
         }
 
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         //var_dump($s->GetQuery());
         $this->data = $s->performWithCalcRows($this->count);
@@ -388,12 +388,12 @@ class PouetBoxSearchUser extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "party" => "nickname",
-          "glops" => "gl&ouml;ps",
-          "reg" => "registered",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "party" => "nickname",
+            "glops" => "gl&ouml;ps",
+            "reg" => "registered",
+        ];
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             echo sprintf("<th>%s</th>\n", $text);
@@ -404,7 +404,7 @@ class PouetBoxSearchUser extends PouetBox
             echo "<tr>\n";
 
             echo "<td class='name'>";
-            echo $u->PrintLinkedAvatar()." ";
+            echo $u->PrintLinkedAvatar() . " ";
             echo $u->PrintLinkedName();
             echo "</td>\n";
 
@@ -422,13 +422,13 @@ class PouetBoxSearchUser extends PouetBox
         $perPage = get_setting("searchprods");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -454,7 +454,7 @@ class PouetBoxSearchBBS extends PouetBox
     public $page;
     public $data;
     public $count;
-    public function __construct($terms = array())
+    public function __construct($terms = [])
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_searchbbs";
@@ -470,8 +470,8 @@ class PouetBoxSearchBBS extends PouetBox
     public function LoadFromDB()
     {
         $perPage = get_setting("searchprods");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
-        $this->data = array();
+        $this->page = (int) max(1, (int) @$_GET["page"]);
+        $this->data = [];
 
         if (!$this->terms) {
             return;
@@ -487,13 +487,13 @@ class PouetBoxSearchBBS extends PouetBox
         $s->AddField("bbs_posts.post as post");
         $s->AddField("bbs_posts.added as postDate");
         $s->AddJoin("left", "bbs_topics", "bbs_posts.topic = bbs_topics.id");
-        $s->attach(array("bbs_posts" => "author"), array("users as user" => "id"));
+        $s->attach(["bbs_posts" => "author"], ["users as user" => "id"]);
         $s->AddOrder("bbs_posts.added DESC");
         foreach ($this->terms as $term) {
             $s->AddWhere(sprintf_esc("(bbs_posts.post LIKE '%%%s%%'or bbs_topics.topic LIKE '%%%s%%')", _like($term), _like($term)));
         }
 
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         $this->data = $s->performWithCalcRows($this->count);
 
@@ -501,19 +501,19 @@ class PouetBoxSearchBBS extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "topic" => "topic",
-          "lastpost" => "post date",
-          "user" => "posted by",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "topic" => "topic",
+            "lastpost" => "post date",
+            "user" => "posted by",
+        ];
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             echo sprintf("<th>%s</th>\n", $text);
         }
         echo "</tr>\n";
 
-        $terms = array();
+        $terms = [];
         foreach ($this->terms as $v2) {
             $terms[] = preg_quote($v2, "/");
         }
@@ -524,15 +524,15 @@ class PouetBoxSearchBBS extends PouetBox
             echo "<td class='name'>";
 
             $s = _html($p->topic);
-            $s = preg_replace("/(".implode("|", $terms).")/i", "<span class='searchhighlight'>$1</span>", $s);
+            $s = preg_replace("/(" . implode("|", $terms) . ")/i", "<span class='searchhighlight'>$1</span>", $s);
 
-            echo "<a href='topic.php?post=".$p->postID."'>".$s."</a>";
+            echo "<a href='topic.php?post=" . $p->postID . "'>" . $s . "</a>";
             echo "</td>\n";
             echo "<td class='date'>";
             echo $p->postDate;
             echo "</td>\n";
             echo "<td>";
-            echo $p->user->PrintLinkedAvatar()." ";
+            echo $p->user->PrintLinkedAvatar() . " ";
             echo $p->user->PrintLinkedName();
             echo "</td>\n";
 
@@ -541,23 +541,23 @@ class PouetBoxSearchBBS extends PouetBox
             $s = strip_tags($p->post);
             $s = preg_replace("/(\s+)/", " ", $s);
             $s = _html(mb_strcut($s, max(0, mb_stripos($s, $this->terms[0]) - 50), 100, "utf-8"));
-            $s = preg_replace("/(".implode("|", $terms).")/i", "<span class='searchhighlight'>$1</span>", $s);
+            $s = preg_replace("/(" . implode("|", $terms) . ")/i", "<span class='searchhighlight'>$1</span>", $s);
 
             echo "<tr class='r1'>\n";
-            echo "  <td colspan='3'>...".$s."...</td>\n";
+            echo "  <td colspan='3'>..." . $s . "...</td>\n";
             echo "</tr>\n";
         }
 
         $perPage = get_setting("searchprods");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -580,7 +580,7 @@ class PouetBoxSearchBBS extends PouetBox
 $TITLE = "search";
 $results = null;
 if (@$_GET["what"]) {
-    $TITLE .= ": ".$_GET["what"];
+    $TITLE .= ": " . $_GET["what"];
     $terms = split_search_terms($_GET["what"]);
 
     switch (@$_GET["type"]) {
@@ -624,7 +624,7 @@ echo "</form>\n";
 echo "<form action='search.php' method='get'>\n";
 foreach ($_GET as $k => $v) {
     if ($k != "page") {
-        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
+        echo "<input type='hidden' name='" . _html($k) . "' value='" . _html($v) . "'>\n";
     }
 }
 

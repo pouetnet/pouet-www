@@ -19,10 +19,10 @@ class PouetBoxMirrors extends PouetBox
             return;
         }
 
-        $a = array(&$this->prod);
+        $a = [&$this->prod];
         PouetCollectPlatforms($a);
 
-        $this->title = "mirrors :: ".$this->prod->name;
+        $this->title = "mirrors :: " . $this->prod->name;
     }
 
     public function RenderContent()
@@ -41,16 +41,16 @@ class PouetBoxMirrors extends PouetBox
 
         $extensionless = rawurlencode($extensionless);
 
-        $links = array();
+        $links = [];
 
-        $links["https://files.scene.org/search/?q=".$extensionless.""] = $this->prod->name." on scene.org"; //(works now! [in theory])
-        $links["https://www.google.com/search?q=\"".$extensionless."\""] = $this->prod->name . " on google";
+        $links["https://files.scene.org/search/?q=" . $extensionless . ""] = $this->prod->name . " on scene.org"; //(works now! [in theory])
+        $links["https://www.google.com/search?q=\"" . $extensionless . "\""] = $this->prod->name . " on google";
         //    $links["http://www.filesearching.com/cgi-bin/s?q=".$extensionless.""] = $this->prod->name . " on filesearching.com";
         //    $links["http://www.filemirrors.com/search.src?file=".$extensionless.""] = $this->prod->name . " on filemirrors";
-        $links["https://hornet.org/cgi-bin/scene-search.cgi?search=".$extensionless.""] = $this->prod->name . " on the hornet archive";
-        $links["https://web.archive.org/web/*/".$this->prod->download] = $this->prod->name." on the wayback machine";
-        $links["http://pouet-mirror.sesse.net/*/".$this->prod->download] = $this->prod->name." on Sesse's pou\xC3\xABt.net mirror";
-        $links["https://discmaster.textfiles.com/search?q=".$extensionless."&mode=deep"] = $this->prod->name." on Discmaster";
+        $links["https://hornet.org/cgi-bin/scene-search.cgi?search=" . $extensionless . ""] = $this->prod->name . " on the hornet archive";
+        $links["https://web.archive.org/web/*/" . $this->prod->download] = $this->prod->name . " on the wayback machine";
+        $links["http://pouet-mirror.sesse.net/*/" . $this->prod->download] = $this->prod->name . " on Sesse's pou\xC3\xABt.net mirror";
+        $links["https://discmaster.textfiles.com/search?q=" . $extensionless . "&mode=deep"] = $this->prod->name . " on Discmaster";
 
         $hasAmiga = false;
         foreach ($this->prod->platforms as $v) {
@@ -60,14 +60,14 @@ class PouetBoxMirrors extends PouetBox
         }
 
         if ($hasAmiga) {
-            $links["http://aminet.net/search.php?query=".$extensionless.""] = $this->prod->name . " on aminet (new)";
+            $links["http://aminet.net/search.php?query=" . $extensionless . ""] = $this->prod->name . " on aminet (new)";
             //$links["http://uk.aminet.net/aminetbin/find?".$extensionless.""] = $this->prod->name . " on aminet (uk)";
             //$links["http://de.aminet.net/aminetbin/find?".$extensionless.""] = $this->prod->name . " on aminet (de)";
             //$links["http://no.aminet.net/aminetbin/find?".$extensionless.""] = $this->prod->name . " on aminet (no)";
-            $links["http://amigascne.org/cgi-bin/search.cgi?searchstr=".$extensionless.""] = $this->prod->name . " on amigascne.org";
+            $links["http://amigascne.org/cgi-bin/search.cgi?searchstr=" . $extensionless . ""] = $this->prod->name . " on amigascne.org";
         }
         if (array_search("cracktro", $this->prod->types) !== false) {
-            $links["https://defacto2.net/search/result?search=files&query=".$extensionless.""] = $this->prod->name . " on defacto2";
+            $links["https://defacto2.net/search/result?search=files&query=" . $extensionless . ""] = $this->prod->name . " on defacto2";
         }
         echo "<ul>\n";
         foreach ($links as $url => $desc) {
@@ -77,7 +77,7 @@ class PouetBoxMirrors extends PouetBox
     }
     public function RenderFooter()
     {
-        echo "  <div class='foot'><a href='prod.php?which=".$this->prod->id."'>back to "._html($this->prod->name)."</a></div>\n";
+        echo "  <div class='foot'><a href='prod.php?which=" . $this->prod->id . "'>back to " . _html($this->prod->name) . "</a></div>\n";
         echo "</div>\n";
     }
 

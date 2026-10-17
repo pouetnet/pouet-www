@@ -11,7 +11,7 @@ $sql->AddField("avatar");
 $sql->AddField("glops");
 $sql->AddTable("users");
 
-$r = array();
+$r = [];
 if (@$_POST["search"]) {
     $terms = split_search_terms($_POST["search"]);
     foreach ($terms as $term) {

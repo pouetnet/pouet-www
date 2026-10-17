@@ -10,9 +10,9 @@ if (@$_GET["post"]) { // setting-independent post lookup
     if ($topic && $topic->topic) {
         $topicID = $topic->topic;
         $inner = sprintf_esc("select id, @rowID:=@rowID+1 as rowID from bbs_posts, (SELECT @rowID:=0) as init where topic = %d", $topicID);
-        $row = SQLLib::SelectRow(sprintf_esc("select * from (".$inner.") as t where id = %d", $_GET["post"]));
+        $row = SQLLib::SelectRow(sprintf_esc("select * from (" . $inner . ") as t where id = %d", $_GET["post"]));
 
-        redirect(sprintf("topic.php?which=%d&page=%d#c%d", $topicID, (int)(($row->rowID - 1) / $POSTS_PER_PAGE) + 1, $_GET["post"]));
+        redirect(sprintf("topic.php?which=%d&page=%d#c%d", $topicID, (int) (($row->rowID - 1) / $POSTS_PER_PAGE) + 1, $_GET["post"]));
         exit();
     }
 }
@@ -30,7 +30,7 @@ class PouetBoxBBSView extends PouetBox
         parent::__construct();
         $this->uniqueID = "pouetbox_bbsview";
         $this->title = "comments";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
     }
 
     public function LoadFromDB()
@@ -39,7 +39,7 @@ class PouetBoxBBSView extends PouetBox
 
         $s = new SQLSelect();
         $s->AddTable("bbs_topics");
-        $s->AddWhere("bbs_topics.id=".$this->id);
+        $s->AddWhere("bbs_topics.id=" . $this->id);
         $this->topic = SQLLib::SelectRow($s->GetQuery());
         if (!$this->topic) {
             return false;
@@ -48,7 +48,7 @@ class PouetBoxBBSView extends PouetBox
         $s = new SQLSelect();
         $s->AddField("count(*) as c");
         $s->AddTable("bbs_posts");
-        $s->AddWhere("bbs_posts.topic=".$this->id);
+        $s->AddWhere("bbs_posts.topic=" . $this->id);
         $this->postcount = SQLLib::SelectRow($s->GetQuery())->c;
 
         $s = new BM_Query();
@@ -56,12 +56,12 @@ class PouetBoxBBSView extends PouetBox
         $s->AddField("bbs_posts.id as id");
         $s->AddField("bbs_posts.post as post");
         $s->AddField("bbs_posts.added as added");
-        $s->attach(array("bbs_posts" => "author"), array("users as user" => "id"));
-        $s->AddWhere("bbs_posts.topic=".$this->id);
+        $s->attach(["bbs_posts" => "author"], ["users as user" => "id"]);
+        $s->AddWhere("bbs_posts.topic=" . $this->id);
         //$s->SetLimit( $POSTS_PER_PAGE, (int)(($this->page - 1)*$POSTS_PER_PAGE) );
 
         $this->paginator = new PouetPaginator();
-        $this->paginator->SetData("topic.php?which=".$this->id, $this->postcount, $POSTS_PER_PAGE, @$_GET["page"]);
+        $this->paginator->SetData("topic.php?which=" . $this->id, $this->postcount, $POSTS_PER_PAGE, @$_GET["page"]);
         $this->paginator->SetLimitOnQuery($s);
 
         $this->posts = $s->perform();
@@ -76,7 +76,7 @@ class PouetBoxBBSView extends PouetBox
         global $currentUser;
 
         echo "<div class='threadcategory'>";
-        echo "<b>category:</b> "._html($this->topic->category);
+        echo "<b>category:</b> " . _html($this->topic->category);
         if ($currentUser && $currentUser->CanEditBBS()) {
             printf(" [<a href='admin_topic_edit.php?which=%d' class='adminlink'>edit</a>]\n", $this->id);
         }
@@ -94,10 +94,10 @@ class PouetBoxBBSView extends PouetBox
         foreach ($this->posts as $c) {
             $p = $c->post;
             $p = parse_message($p);
-            echo "<div class='bbspost cite-".$c->user->id."' id='c".$c->id."'>\n";
-            echo "  <div class='content'>".$p."</div>\n";
-            echo "  <div class='foot'><span class='tools' data-cid='".$c->id."'></span> added on the <a href='topic.php?post=".$c->id."'>".$c->added."</a> by ".
-              $c->user->PrintLinkedName()." ".$c->user->PrintLinkedAvatar()."</div>\n";
+            echo "<div class='bbspost cite-" . $c->user->id . "' id='c" . $c->id . "'>\n";
+            echo "  <div class='content'>" . $p . "</div>\n";
+            echo "  <div class='foot'><span class='tools' data-cid='" . $c->id . "'></span> added on the <a href='topic.php?post=" . $c->id . "'>" . $c->added . "</a> by "
+              . $c->user->PrintLinkedName() . " " . $c->user->PrintLinkedAvatar() . "</div>\n";
             echo "</div>\n\n";
         }
 
@@ -114,7 +114,7 @@ class PouetBoxBBSView extends PouetBox
 if (!@$_GET["which"]) {
     redirect("bbs.php");
 }
-$topicid = (int)$_GET["which"];
+$topicid = (int) $_GET["which"];
 $view = new PouetBoxBBSView($topicid);
 $view->Load();
 
@@ -122,7 +122,7 @@ $post = new PouetBoxBBSPost($topicid);
 
 if ($view->topic) {
     $TITLE = $view->topic->topic;
-    $RSS["export/lastbbstopicposts.rss.php?topic=".(int)$view->topic->id] = "latest posts in ".$view->topic->topic;
+    $RSS["export/lastbbstopicposts.rss.php?topic=" . (int) $view->topic->id] = "latest posts in " . $view->topic->topic;
 }
 
 require_once("include_pouet/header.php");

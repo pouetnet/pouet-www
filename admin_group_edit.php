@@ -5,7 +5,7 @@ require_once("include_pouet/box-group-submit.php");
 require_once("include_pouet/pouet-box-editbase.php");
 
 if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("groups.php?which=".(int)$_GET["which"]);
+    redirect("groups.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -18,29 +18,29 @@ class PouetBoxAdminEditGroup extends PouetBoxSubmitGroup
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->group = PouetGroup::Spawn($this->id);
 
-        $this->title = "edit this group: ". $this->group->RenderLong();
+        $this->title = "edit this group: " . $this->group->RenderLong();
     }
     public function Commit($data)
     {
         global $groupID;
 
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["acronym"] = $data["acronym"];
         $a["disambiguation"] = $data["disambiguation"];
         $a["web"] = $data["website"];
-        $a["csdb"] = (int)$data["csdbID"];
+        $a["csdb"] = (int) $data["csdbID"];
         //    $a["zxdemo"] = $data["zxdemoID"];
-        $a["demozoo"] = (int)$data["demozooID"];
-        SQLLib::UpdateRow("groups", $a, "id=".$this->id);
+        $a["demozoo"] = (int) $data["demozooID"];
+        SQLLib::UpdateRow("groups", $a, "id=" . $this->id);
 
         gloperator_log("group", $this->id, "group_edit");
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -76,7 +76,7 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
         $this->id = $group->id;
         $this->title = "board affiliations links";
 
-        $this->headers = array("board","type");
+        $this->headers = ["board","type"];
 
         $row = SQLLib::selectRow("DESC affiliatedboards type");
         $this->types = enum2array($row->Type);
@@ -85,7 +85,7 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
         $s->AddField("affiliatedboards.id");
         $s->AddField("affiliatedboards.type");
         $s->AddTable("affiliatedboards");
-        $s->attach(array("affiliatedboards" => "board"), array("boards as board" => "id"));
+        $s->attach(["affiliatedboards" => "board"], ["boards as board" => "id"]);
         $s->AddField("affiliatedboards_board.id as affiliatedboards_board_id");
         $s->AddWhere(sprintf_esc("`group`=%d", $this->group->id));
         $this->data = $s->perform();
@@ -93,22 +93,22 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
     public function Commit($data)
     {
         if (@$data["delBoardAffil"]) {
-            SQLLib::Query("delete from affiliatedboards where id=".(int)$data["delBoardAffil"]);
-            gloperator_log("group", (int)$this->group->id, "group_affil_del");
-            return array();
+            SQLLib::Query("delete from affiliatedboards where id=" . (int) $data["delBoardAffil"]);
+            gloperator_log("group", (int) $this->group->id, "group_affil_del");
+            return [];
         }
 
-        $a = array();
-        $a["board"] = (int)$data["board"];
+        $a = [];
+        $a["board"] = (int) $data["board"];
         $a["type"] = $data["type"];
         if (@$data["editBoardAffilID"]) {
-            SQLLib::UpdateRow("affiliatedboards", $a, "id=".(int)$data["editBoardAffilID"]);
+            SQLLib::UpdateRow("affiliatedboards", $a, "id=" . (int) $data["editBoardAffilID"]);
             $a["id"] = $data["editBoardAffilID"];
-            gloperator_log("group", (int)$this->group->id, "group_affil_edit", array("id" => $a["id"]));
+            gloperator_log("group", (int) $this->group->id, "group_affil_edit", ["id" => $a["id"]]);
         } else {
             $a["group"] = $this->group->id;
             $a["id"] = SQLLib::InsertRow("affiliatedboards", $a);
-            gloperator_log("group", (int)$this->group->id, "group_affil_add", array("id" => $a["id"]));
+            gloperator_log("group", (int) $this->group->id, "group_affil_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $o = toObject($a);
@@ -117,11 +117,11 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
             $this->RenderNormalRowEnd($o);
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='board' value='"._html($row ? $row->board->id : "")."'></td>\n";
+        echo "    <td><input name='board' value='" . _html($row ? $row->board->id : "") . "'></td>\n";
         //    echo "    <td><input name='type' value='"._html($row->type)."'></td>\n";
         echo "    <td><select name='type'>\n";
         foreach ($this->types as $v) {
@@ -131,8 +131,8 @@ class PouetBoxAdminEditGroupAffil extends PouetBoxEditConnectionsBase
     }
     public function RenderNormalRow($v)
     {
-        echo "    <td>"._html($v->board->name)."</td>\n";
-        echo "    <td>"._html($v->type)."</td>\n";
+        echo "    <td>" . _html($v->board->name) . "</td>\n";
+        echo "    <td>" . _html($v->type) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -173,28 +173,28 @@ class PouetBoxAdminDeleteGroup extends PouetBox
         global $verificationStrings;
         $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-        $this->title = "delete this group: ".$group->RenderLong();
+        $this->title = "delete this group: " . $group->RenderLong();
     }
     public function Validate($data)
     {
         if ($data["check"] != $data["checkOrig"]) {
-            return array("wrong verification string !");
+            return ["wrong verification string !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         $this->group->Delete();
 
-        gloperator_log("group", (int)$this->group->id, "group_delete", get_object_vars($this->group));
+        gloperator_log("group", (int) $this->group->id, "group_delete", get_object_vars($this->group));
 
-        return array();
+        return [];
     }
     public function RenderBody()
     {
         echo "<div class='content'>";
-        echo "  <p>To make sure you want to delete <b>this</b> group, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <p>To make sure you want to delete <b>this</b> group, type \"" . $this->checkString . "\" here:</p>";
+        echo "  <input name='checkOrig' type='hidden' value='" . _html($this->checkString) . "'>";
         echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
         echo "<div class='foot'>";
@@ -219,9 +219,9 @@ document.observe("dom:loaded",function(){
     }
 }
 
-$boxen = array(
-  "PouetBoxAdminEditGroupAffil",
-);
+$boxen = [
+    "PouetBoxAdminEditGroupAffil",
+];
 if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
     // ajax responses
     $group = new stdClass();
@@ -235,7 +235,7 @@ if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("groups.php?which=".(int)$_GET["which"], true);
+$form->SetSuccessURL("groups.php?which=" . (int) $_GET["which"], true);
 
 $box = new PouetBoxAdminEditGroup($_GET["which"]);
 if ($box->group) {
@@ -247,7 +247,7 @@ if ($box->group) {
         $form->Process();
     }
 
-    $TITLE = "edit a group: ".$box->group->name;
+    $TITLE = "edit a group: " . $box->group->name;
 }
 
 require_once("include_pouet/header.php");

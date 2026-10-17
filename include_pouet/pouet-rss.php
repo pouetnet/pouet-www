@@ -5,12 +5,12 @@ class PouetRSS
     private $xml;
     private $dtd;
     private $dom;
-    public function __construct($opt = array())
+    public function __construct($opt = [])
     {
         if (!class_exists("SimpleXMLElement")) {
             return;
         }
-        $this->xml = new SimpleXMLElement("<"."?xml version='1.0' encoding='UTF-8'?"."><rss/>");
+        $this->xml = new SimpleXMLElement("<" . "?xml version='1.0' encoding='UTF-8'?" . "><rss/>");
         $this->dtd = POUET_ROOT_URL . "faq.php#faq12";
 
         $this->dom = dom_import_simplexml($this->xml);
@@ -25,7 +25,7 @@ class PouetRSS
         $this->xml->channel->addChild("description", @$opt["description"] ?: "your online demoscene resource");
 
         $link = $this->xml->channel->addChild("atom:link", "", "http://www.w3.org/2005/Atom");
-        $link->addAttribute("href", (@$_SERVER["HTTPS"] == "on" ? "https" : "http")."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]);
+        $link->addAttribute("href", (@$_SERVER["HTTPS"] == "on" ? "https" : "http") . "://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
         $link->addAttribute("rel", "self");
         $link->addAttribute("type", "application/rss+xml");
     }

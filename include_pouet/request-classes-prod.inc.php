@@ -4,10 +4,10 @@
 
 class PouetRequest_Prod_AddLink extends PouetRequestBase
 {
-    public static $links = array(
-      "/https:\/\/(?:www\.)?demozoo\.org\/productions\/(\d+)/" => "demozoo",
-      "/https:\/\/(?:www\.)?csdb\.dk\/release\/\?id=(\d+)/" => "csdb",
-    );
+    public static $links = [
+        "/https:\/\/(?:www\.)?demozoo\.org\/productions\/(\d+)/" => "demozoo",
+        "/https:\/\/(?:www\.)?csdb\.dk\/release\/\?id=(\d+)/" => "csdb",
+    ];
 
     public static function GetItemType()
     {
@@ -20,20 +20,20 @@ class PouetRequest_Prod_AddLink extends PouetRequestBase
 
     public static function GetFields($data, &$fields, &$js)
     {
-        $fields = array(
-          "newLinkKey" => array(
-            "name" => "link description (youtube, source, linux port, etc)",
-          ),
-          "newLink" => array(
-            "name" => "link url",
-            "type" => "url",
-            "maxlength" => 256,
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+        $fields = [
+            "newLinkKey" => [
+                "name" => "link description (youtube, source, linux port, etc)",
+            ],
+            "newLink" => [
+                "name" => "link url",
+                "type" => "url",
+                "maxlength" => 256,
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
     }
 
     public static function ValidateRequest($input, &$output)
@@ -45,16 +45,16 @@ class PouetRequest_Prod_AddLink extends PouetRequestBase
 
         $output["newLink"] = trim($input["newLink"]);
         $output["newLinkKey"] = $input["newLinkKey"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
     {
-        $s =  _html($data["newLinkKey"])." - ";
-        $s .= "<a href='"._html($data["newLink"])."' rel='external'>"._html(shortify_cut($data["newLink"], 50))."</a>";
+        $s =  _html($data["newLinkKey"]) . " - ";
+        $s .= "<a href='" . _html($data["newLink"]) . "' rel='external'>" . _html(shortify_cut($data["newLink"], 50)) . "</a>";
         foreach (self::$links as $k => $v) {
             if (preg_match($k, $data["newLink"])) {
-                $s .= "<br><b>(will be stored as ".$v." ID instead of a link)</b>";
+                $s .= "<br><b>(will be stored as " . $v . " ID instead of a link)</b>";
             }
         }
         return $s;
@@ -64,18 +64,18 @@ class PouetRequest_Prod_AddLink extends PouetRequestBase
     {
         foreach (self::$links as $k => $v) {
             if (preg_match($k, $reqData["newLink"], $m)) {
-                $a = array();
+                $a = [];
                 $a[$v] = $m[1];
                 SQLLib::UpdateRow("prods", $a, sprintf_esc("id=%d", $itemID));
-                return array();
+                return [];
             }
         }
-        $a = array();
+        $a = [];
         $a["prod"] = $itemID;
         $a["type"] = $reqData["newLinkKey"];
         $a["link"] = $reqData["newLink"];
         SQLLib::InsertRow("downloadlinks", $a);
-        return array();
+        return [];
     }
 };
 
@@ -96,58 +96,58 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
     {
         if (@$data["linkID"]) {
             $l = SQLLib::SelectRow(sprintf_esc("select * from downloadlinks where id = %d", $data["linkID"]));
-            $fields = array(
-              "linkID" => array(
-                "type" => "hidden",
-                "value" => (int)$data["linkID"],
-              ),
-              "oldLinkKey" => array(
-                "type" => "hidden",
-                "value" => $l->type,
-              ),
-              "oldLink" => array(
-                "type" => "hidden",
-                "value" => $l->link,
-              ),
-              "newLinkKey" => array(
-                "name" => "link description (youtube, source, linux port, etc)",
-                "type" => "text",
-                "value" => $l->type,
-              ),
-              "newLink" => array(
-                "name" => "link url",
-                "type" => "url",
-                "value" => $l->link,
-                "maxlength" => 256,
-              ),
-              "reason" => array(
-                "name" => "why should this link be changed",
-                "type" => "textarea",
-                "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
-                "required" => true,
-              ),
-              "finalStep" => array(
-                "type" => "hidden",
-                "value" => 1,
-              ),
-            );
+            $fields = [
+                "linkID" => [
+                    "type" => "hidden",
+                    "value" => (int) $data["linkID"],
+                ],
+                "oldLinkKey" => [
+                    "type" => "hidden",
+                    "value" => $l->type,
+                ],
+                "oldLink" => [
+                    "type" => "hidden",
+                    "value" => $l->link,
+                ],
+                "newLinkKey" => [
+                    "name" => "link description (youtube, source, linux port, etc)",
+                    "type" => "text",
+                    "value" => $l->type,
+                ],
+                "newLink" => [
+                    "name" => "link url",
+                    "type" => "url",
+                    "value" => $l->link,
+                    "maxlength" => 256,
+                ],
+                "reason" => [
+                    "name" => "why should this link be changed",
+                    "type" => "textarea",
+                    "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
+                    "required" => true,
+                ],
+                "finalStep" => [
+                    "type" => "hidden",
+                    "value" => 1,
+                ],
+            ];
         } else {
             $l = SQLLib::SelectRows(sprintf_esc("select * from downloadlinks where prod = %d", $data["prod"]));
-            $links = array();
+            $links = [];
             foreach ($l as $v) {
                 $links[$v->id] = sprintf("[%s] %s", $v->type, $v->link);
             }
             if (!$links) {
                 return "this prod has no extra links to change !";
             }
-            $fields = array(
-              "linkID" => array(
-                "name" => "select link you want to edit",
-                "type" => "select",
-                "fields" => $links,
-                "assoc" => true,
-              ),
-            );
+            $fields = [
+                "linkID" => [
+                    "name" => "select link you want to edit",
+                    "type" => "select",
+                    "fields" => $links,
+                    "assoc" => true,
+                ],
+            ];
         }
     }
 
@@ -160,16 +160,16 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         }
 
         if (!$input["reason"]) {
-            return array("no changing without a good reason !");
+            return ["no changing without a good reason !"];
         }
 
         $row = SQLLib::selectRow(sprintf_esc("select * from downloadlinks where prod = %d and id = %d", $_REQUEST["prod"], $input["linkID"]));
         if (!$row) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (strcmp($row->link, $newLink) === 0 && strcasecmp($row->type, $input["newLinkKey"]) === 0) {
-            return array("you didn't change anything :|");
+            return ["you didn't change anything :|"];
         }
 
         $output["linkID"] = $input["linkID"];
@@ -178,7 +178,7 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         $output["newLink"] = $newLink;
         $output["newLinkKey"] = $input["newLinkKey"];
         $output["reason"] = $input["reason"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -189,21 +189,21 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
 
         if ($row) {
             $s .= "<b>current</b>: ";
-            $s .= _html($row->type)." - ";
-            $s .= "<a href='"._html($row->link)."' rel='external'>"._html(shortify_cut($row->link, 50))."</a>";
+            $s .= _html($row->type) . " - ";
+            $s .= "<a href='" . _html($row->link) . "' rel='external'>" . _html(shortify_cut($row->link, 50)) . "</a>";
         }
 
         if (@$data["oldLinkKey"] && (!$row || $row->link != $data["oldLink"])) {
             $s .= "<br>";
             $s .= "<b>old</b>: ";
-            $s .= _html($data["oldLinkKey"])." - ";
-            $s .= "<a href='"._html($data["oldLink"])."' rel='external'>"._html(shortify_cut($data["oldLink"], 50))."</a>";
+            $s .= _html($data["oldLinkKey"]) . " - ";
+            $s .= "<a href='" . _html($data["oldLink"]) . "' rel='external'>" . _html(shortify_cut($data["oldLink"], 50)) . "</a>";
         }
 
         $s .= "<br>";
         $s .= "<b>new</b>: ";
-        $s .= _html($data["newLinkKey"])." - ";
-        $s .= "<a href='"._html($data["newLink"])."' rel='external'>"._html(shortify_cut($data["newLink"], 50))."</a>";
+        $s .= _html($data["newLinkKey"]) . " - ";
+        $s .= "<a href='" . _html($data["newLink"]) . "' rel='external'>" . _html(shortify_cut($data["newLink"], 50)) . "</a>";
 
         if (@$data["reason"]) {
             $s .= "<br>";
@@ -215,11 +215,11 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
 
     public static function Process($itemID, $reqData)
     {
-        $a = array();
+        $a = [];
         $a["type"] = $reqData["newLinkKey"];
         $a["link"] = $reqData["newLink"];
-        SQLLib::UpdateRow("downloadlinks", $a, "id=".(int)$reqData["linkID"]);
-        return array();
+        SQLLib::UpdateRow("downloadlinks", $a, "id=" . (int) $reqData["linkID"]);
+        return [];
     }
 };
 
@@ -248,39 +248,39 @@ class PouetRequest_Prod_RemoveLink extends PouetRequestBase
             return "this prod has no extra links to remove !";
         }
 
-        $fields = array(
-          "linkID" => array(
-            "name" => "select link you want removed",
-            "type" => "select",
-            "fields" => $links,
-            "assoc" => true,
-          ),
-          "reason" => array(
-            "name" => "why should this link be deleted",
-            "type" => "textarea",
-            "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
-            "required" => true,
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+        $fields = [
+            "linkID" => [
+                "name" => "select link you want removed",
+                "type" => "select",
+                "fields" => $links,
+                "assoc" => true,
+            ],
+            "reason" => [
+                "name" => "why should this link be deleted",
+                "type" => "textarea",
+                "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
+                "required" => true,
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
     }
 
     public static function ValidateRequest($input, &$output)
     {
         if (!SQLLib::selectRow(sprintf_esc("select * from downloadlinks where prod = %d and id = %d", $_REQUEST["prod"], $input["linkID"]))) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (!$input["reason"]) {
-            return array("no deleting without a good reason !");
+            return ["no deleting without a good reason !"];
         }
 
         $output["linkID"] = $input["linkID"];
         $output["reason"] = $input["reason"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -288,8 +288,8 @@ class PouetRequest_Prod_RemoveLink extends PouetRequestBase
         $row = SQLLib::selectRow(sprintf_esc("select * from downloadlinks where id = %d", $data["linkID"]));
         $s = "";
         if ($row) {
-            $s .= _html($row->type)." - ";
-            $s .= "<a href='"._html($row->link)."' rel='external'>"._html(shortify_cut($row->link, 50))."</a>";
+            $s .= _html($row->type) . " - ";
+            $s .= "<a href='" . _html($row->link) . "' rel='external'>" . _html(shortify_cut($row->link, 50)) . "</a>";
         }
         $s .= "<br><b>reason</b>: ";
         $s .= _html($data["reason"]);
@@ -299,7 +299,7 @@ class PouetRequest_Prod_RemoveLink extends PouetRequestBase
     public static function Process($itemID, $reqData)
     {
         SQLLib::Query(sprintf_esc("delete from downloadlinks where id=%d", $reqData["linkID"]));
-        return array();
+        return [];
     }
 };
 
@@ -318,25 +318,25 @@ class PouetRequest_Prod_AddCredit extends PouetRequestBase
 
     public static function GetFields($data, &$fields, &$js)
     {
-        $fields = array(
-          "userID" => array(
-            "name" => "user",
-          ),
-          "userRole" => array(
-            "name" => "user's role",
-            "info" => "Please separate roles with commas, e.g. 'Code, graphics, music'",
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+        $fields = [
+            "userID" => [
+                "name" => "user",
+            ],
+            "userRole" => [
+                "name" => "user's role",
+                "info" => "Please separate roles with commas, e.g. 'Code, graphics, music'",
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
 
         $js  = "document.observe('dom:loaded',function(){";
         $js .= "  new Autocompleter($('userID'), {\n";
         $js .= "    'dataUrl':'./ajax_users.php',\n";
         $js .= "    'processRow': function(item) {\n";
-        $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
+        $js .= "      return \"<img class='avatar' src='" . POUET_CONTENT_URL . "avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
         $js .= "    }\n";
         $js .= "  });\n";
         $js .= "});\n";
@@ -345,22 +345,22 @@ class PouetRequest_Prod_AddCredit extends PouetRequestBase
     public static function ValidateRequest($input, &$output)
     {
         if (!SQLLib::selectRow(sprintf_esc("select * from users where id = %d", $input["userID"]))) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (SQLLib::selectRow(sprintf_esc("select * from credits where prodID = %d and userID = %d", $_REQUEST["prod"], $input["userID"]))) {
-            return array("there's already a credit for this user !");
+            return ["there's already a credit for this user !"];
         }
 
         if (!$input["userRole"]) {
-            return array("roles are important !");
+            return ["roles are important !"];
         }
 
         $output["userID"] = $input["userID"];
         $output["userRole"] = $input["userRole"];
         $output["oldUserID"] = @$input["oldUserID"];
         $output["oldUserRole"] = @$input["oldUserRole"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -368,21 +368,21 @@ class PouetRequest_Prod_AddCredit extends PouetRequestBase
         $user = PouetUser::Spawn($data["userID"]);
         $s = "";
         if ($user) {
-            $s .= $user->PrintLinkedAvatar()." ";
+            $s .= $user->PrintLinkedAvatar() . " ";
             $s .= $user->PrintLinkedName();
         }
-        $s .= " - "._html($data["userRole"]);
+        $s .= " - " . _html($data["userRole"]);
         return $s;
     }
 
     public static function Process($itemID, $reqData)
     {
-        $a = array();
+        $a = [];
         $a["prodID"] = $itemID;
         $a["userID"] = $reqData["userID"];
         $a["role"] = trim($reqData["userRole"]);
         SQLLib::InsertRow("credits", $a);
-        return array();
+        return [];
     }
 };
 
@@ -404,40 +404,40 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
     {
         if (@$data["creditID"]) {
             $l = SQLLib::SelectRow(sprintf_esc("select * from credits where id = %d", $data["creditID"]));
-            $fields = array(
-              "creditID" => array(
-                "type" => "hidden",
-                "value" => (int)$data["creditID"],
-              ),
-              "oldUserID" => array(
-                "type" => "hidden",
-                "value" => (int)$l->userID,
-              ),
-              "oldUserRole" => array(
-                "type" => "hidden",
-                "value" => $l->role,
-              ),
-              "userID" => array(
-                "name" => "user",
-                "type" => "text",
-                "value" => $l->userID,
-              ),
-              "userRole" => array(
-                "name" => "user's role",
-                "value" => $l->role,
-                "info" => "Please separate roles with commas, e.g. 'Code, graphics, music'",
-              ),
-              "finalStep" => array(
-                "type" => "hidden",
-                "value" => 1,
-              ),
-            );
+            $fields = [
+                "creditID" => [
+                    "type" => "hidden",
+                    "value" => (int) $data["creditID"],
+                ],
+                "oldUserID" => [
+                    "type" => "hidden",
+                    "value" => (int) $l->userID,
+                ],
+                "oldUserRole" => [
+                    "type" => "hidden",
+                    "value" => $l->role,
+                ],
+                "userID" => [
+                    "name" => "user",
+                    "type" => "text",
+                    "value" => $l->userID,
+                ],
+                "userRole" => [
+                    "name" => "user's role",
+                    "value" => $l->role,
+                    "info" => "Please separate roles with commas, e.g. 'Code, graphics, music'",
+                ],
+                "finalStep" => [
+                    "type" => "hidden",
+                    "value" => 1,
+                ],
+            ];
 
             $js  = "document.observe('dom:loaded',function(){";
             $js .= "  new Autocompleter($('userID'), {\n";
             $js .= "    'dataUrl':'./ajax_users.php',\n";
             $js .= "    'processRow': function(item) {\n";
-            $js .= "      return \"<img class='avatar' src='".POUET_CONTENT_URL."avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
+            $js .= "      return \"<img class='avatar' src='" . POUET_CONTENT_URL . "avatars/\" + item.avatar.escapeHTML() + \"'> \" + item.name.escapeHTML() + \" <span class='glops'>\"+item.glops+\" glöps</span>\";\n";
             $js .= "    }\n";
             $js .= "  });\n";
             $js .= "});\n";
@@ -446,7 +446,7 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
             $s->AddTable("credits");
             $s->AddField("credits.id");
             $s->AddField("credits.role");
-            $s->attach(array("credits" => "userID"), array("users as user" => "id"));
+            $s->attach(["credits" => "userID"], ["users as user" => "id"]);
             $s->AddWhere(sprintf_esc("prodID = %d", $data["prod"]));
             $l = $s->perform();
             foreach ($l as $v) {
@@ -455,14 +455,14 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
             if (!$links) {
                 return "this prod has no credits to change !";
             }
-            $fields = array(
-              "creditID" => array(
-                "name" => "select credit you want to edit",
-                "type" => "select",
-                "fields" => $links,
-                "assoc" => true,
-              ),
-            );
+            $fields = [
+                "creditID" => [
+                    "name" => "select credit you want to edit",
+                    "type" => "select",
+                    "fields" => $links,
+                    "assoc" => true,
+                ],
+            ];
         }
     }
 
@@ -470,25 +470,25 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
     {
         $row = SQLLib::selectRow(sprintf_esc("select * from credits where prodID = %d and id = %d", $_REQUEST["prod"], $input["creditID"]));
         if (!$row) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (strcmp($row->role, $input["userRole"]) === 0 && $row->userID == $input["userID"]) {
-            return array("you didn't change anything :|");
+            return ["you didn't change anything :|"];
         }
 
         if (!SQLLib::selectRow(sprintf_esc("select * from users where id = %d", $input["userID"]))) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (!$input["userRole"]) {
-            return array("roles are important !");
+            return ["roles are important !"];
         }
 
         $output["creditID"] = $input["creditID"];
         $output["userID"] = $input["userID"];
         $output["userRole"] = $input["userRole"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -497,7 +497,7 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
         $s->AddTable("credits");
         $s->AddField("credits.id");
         $s->AddField("credits.role");
-        $s->attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("credits.id = %d", $data["creditID"]));
         $s->SetLimit(1);
         $l = $s->perform();
@@ -506,16 +506,16 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
         //$l = SQLLib::SelectRows(sprintf_esc("select credits.id,users.nickname,credits.role from credits left join users on users.id = credits.id where prodID = %d",$data["prod"]));
         $out = "<b>current</b>: ";
         if ($row && $row->user) {
-            $out .= $row->user->PrintLinkedAvatar()." ";
+            $out .= $row->user->PrintLinkedAvatar() . " ";
             $out .= $row->user->PrintLinkedName();
         }
-        $out .= " - "._html($row ? $row->role : "");
+        $out .= " - " . _html($row ? $row->role : "");
 
         $s = new BM_Query();
         $s->AddTable("credits");
         $s->AddField("credits.id");
         $s->AddField("credits.role");
-        $s->attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("credits.id = %d", @$data["oldUserID"] ?: 0));
         $s->SetLimit(1);
         $l = $s->perform();
@@ -524,20 +524,20 @@ class PouetRequest_Prod_ChangeCredit extends PouetRequestBase
         $user = PouetUser::Spawn($data["userID"]);
         $out .= "<br><b>new</b>: ";
         if ($user) {
-            $out .= $user->PrintLinkedAvatar()." ";
+            $out .= $user->PrintLinkedAvatar() . " ";
             $out .= $user->PrintLinkedName();
         }
-        $out .= " - "._html($data["userRole"]);
+        $out .= " - " . _html($data["userRole"]);
         return $out;
     }
 
     public static function Process($itemID, $reqData)
     {
-        $a = array();
+        $a = [];
         $a["userID"] = $reqData["userID"];
         $a["role"] = trim($reqData["userRole"]);
-        SQLLib::UpdateRow("credits", $a, "id=".(int)$reqData["creditID"]);
-        return array();
+        SQLLib::UpdateRow("credits", $a, "id=" . (int) $reqData["creditID"]);
+        return [];
     }
 };
 
@@ -560,7 +560,7 @@ class PouetRequest_Prod_RemoveCredit extends PouetRequestBase
         $s->AddTable("credits");
         $s->AddField("credits.id");
         $s->AddField("credits.role");
-        $s->attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("prodID = %d", $data["prod"]));
         $l = $s->perform();
         foreach ($l as $v) {
@@ -571,39 +571,39 @@ class PouetRequest_Prod_RemoveCredit extends PouetRequestBase
             return "this prod has no credits to remove !";
         }
 
-        $fields = array(
-          "creditID" => array(
-            "name" => "select credit you want removed",
-            "type" => "select",
-            "fields" => $links,
-            "assoc" => true,
-          ),
-          "reason" => array(
-            "name" => "why should this credit be deleted",
-            "type" => "textarea",
-            "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
-            "required" => true,
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+        $fields = [
+            "creditID" => [
+                "name" => "select credit you want removed",
+                "type" => "select",
+                "fields" => $links,
+                "assoc" => true,
+            ],
+            "reason" => [
+                "name" => "why should this credit be deleted",
+                "type" => "textarea",
+                "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
+                "required" => true,
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
     }
 
     public static function ValidateRequest($input, &$output)
     {
         if (!SQLLib::selectRow(sprintf_esc("select * from credits where prodID = %d and id = %d", $_REQUEST["prod"], $input["creditID"]))) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (!$input["reason"]) {
-            return array("no deleting without a good reason !");
+            return ["no deleting without a good reason !"];
         }
 
         $output["creditID"] = $input["creditID"];
         $output["reason"] = $input["reason"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -612,7 +612,7 @@ class PouetRequest_Prod_RemoveCredit extends PouetRequestBase
         $s->AddTable("credits");
         $s->AddField("credits.id");
         $s->AddField("credits.role");
-        $s->attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("credits.id = %d", $data["creditID"]));
         $s->SetLimit(1);
         $l = $s->perform();
@@ -621,10 +621,10 @@ class PouetRequest_Prod_RemoveCredit extends PouetRequestBase
         //$l = SQLLib::SelectRows(sprintf_esc("select credits.id,users.nickname,credits.role from credits left join users on users.id = credits.id where prodID = %d",$data["prod"]));
         $s = "<b>old</b>: ";
         if (@$row->user) {
-            $s .= $row->user->PrintLinkedAvatar()." ";
+            $s .= $row->user->PrintLinkedAvatar() . " ";
             $s .= $row->user->PrintLinkedName();
         }
-        $s .= " - "._html(@$row->role);
+        $s .= " - " . _html(@$row->role);
 
         return $s;
     }
@@ -632,7 +632,7 @@ class PouetRequest_Prod_RemoveCredit extends PouetRequestBase
     public static function Process($itemID, $reqData)
     {
         SQLLib::Query(sprintf_esc("delete from credits where id=%d", $reqData["creditID"]));
-        return array();
+        return [];
     }
 };
 
@@ -652,28 +652,28 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
     public static function GetFields($data, &$fields, &$js)
     {
         $prod = PouetProd::Spawn($data["prod"]);
-        $fields = array(
-          "oldDownloadLink" => array(
-            "type" => "hidden",
-            "value" => $prod->download,
-          ),
-          "downloadLink" => array(
-            "name" => "enter new download link",
-            "type" => "url",
-            "value" => $prod->download,
-            "maxlength" => 256,
-          ),
-          "reason" => array(
-            "name" => "why should this link be changed",
-            "type" => "textarea",
-            "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
-            "required" => true,
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+        $fields = [
+            "oldDownloadLink" => [
+                "type" => "hidden",
+                "value" => $prod->download,
+            ],
+            "downloadLink" => [
+                "name" => "enter new download link",
+                "type" => "url",
+                "value" => $prod->download,
+                "maxlength" => 256,
+            ],
+            "reason" => [
+                "name" => "why should this link be changed",
+                "type" => "textarea",
+                "info" => "moderator's note: abuse of this feature will result in retaliation. have a nice day.",
+                "required" => true,
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
     }
 
     public static function ValidateRequest($input, &$output)
@@ -684,22 +684,22 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
         }
 
         if (!$input["reason"]) {
-            return array("no changing without a good reason !");
+            return ["no changing without a good reason !"];
         }
 
         $prod = PouetProd::Spawn($_REQUEST["prod"]);
         if (!$prod) {
-            return array("nice try :|");
+            return ["nice try :|"];
         }
 
         if (strcmp($prod->download, $input["downloadLink"]) === 0) {
-            return array("you didn't change anything :|");
+            return ["you didn't change anything :|"];
         }
 
         $output["oldDownloadLink"] = $input["oldDownloadLink"];
         $output["downloadLink"] = $input["downloadLink"];
         $output["reason"] = $input["reason"];
-        return array();
+        return [];
     }
 
     public static function Display($itemID, $data)
@@ -707,14 +707,14 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
         $prod = PouetProd::Spawn($itemID);
         if ($prod) {
             $s = "<b>current</b>: ";
-            $s .= "<a href='"._html($prod->download)."' rel='external'>"._html(shortify_cut($prod->download, 50))."</a>";
+            $s .= "<a href='" . _html($prod->download) . "' rel='external'>" . _html(shortify_cut($prod->download, 50)) . "</a>";
         }
         if (@$data["oldDownloadLink"] && $prod->download != $data["oldDownloadLink"]) {
             $s .= "<br><b>old</b>: ";
-            $s .= "<a href='"._html($data["oldDownloadLink"])."' rel='external'>"._html(shortify_cut($data["oldDownloadLink"], 50))."</a>";
+            $s .= "<a href='" . _html($data["oldDownloadLink"]) . "' rel='external'>" . _html(shortify_cut($data["oldDownloadLink"], 50)) . "</a>";
         }
         $s .= "<br><b>new</b>: ";
-        $s .= "<a href='"._html($data["downloadLink"])."' rel='external'>"._html(shortify_cut($data["downloadLink"], 50))."</a>";
+        $s .= "<a href='" . _html($data["downloadLink"]) . "' rel='external'>" . _html(shortify_cut($data["downloadLink"], 50)) . "</a>";
         if (@$data["reason"]) {
             $s .= "<br><b>reason</b>: ";
             $s .= _html($data["reason"]);
@@ -725,13 +725,13 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
 
     public static function Process($itemID, $reqData)
     {
-        $a = array();
+        $a = [];
         $a["download"] = $reqData["downloadLink"];
-        SQLLib::UpdateRow("prods", $a, "id=".(int)$itemID);
+        SQLLib::UpdateRow("prods", $a, "id=" . (int) $itemID);
 
         SQLLib::Query(sprintf_esc("delete from prods_linkcheck where prodID = %d", $itemID));
 
-        return array();
+        return [];
     }
 };
 
@@ -754,7 +754,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
 
         $n = 1;
         foreach ($prod->groups as $g) {
-            $fields["group".$n++] = $g->id;
+            $fields["group" . $n++] = $g->id;
         }
 
         $fields["releaseDate"] = $prod->releaseDate;
@@ -788,7 +788,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
         $compos[0] = "";
         asort($compos);
 
-        $ranks = array(0 => "");
+        $ranks = [0 => ""];
         $ranks[97] = "disqualified";
         $ranks[98] = "not applicable";
         $ranks[99] = "not shown";
@@ -796,109 +796,109 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
             $ranks[$x] = $x;
         }
 
-        $years = array("");
+        $years = [""];
         for ($x = date("Y"); $x >= POUET_EARLIEST_YEAR; $x--) {
             $years[$x] = $x;
         }
-        $yearsFuture = array("");
+        $yearsFuture = [""];
         for ($x = date("Y") + 2; $x >= POUET_EARLIEST_YEAR; $x--) {
             $yearsFuture[$x] = $x;
         }
 
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $fields = array(
-          "name" => array(
-            "name" => "prod name / title",
-            "info" => " ",
-            "required" => true,
-          ),
-          "group1" => array(
-            "name" => "group 1",
-          ),
-          "group2" => array(
-            "name" => "group 2",
-          ),
-          "group3" => array(
-            "name" => "group 3",
-            "infoAfter" => "if the group is missing from the list, add it <a href='submit_group.php' target='_blank'>here</a> !",
-          ),
-          "releaseDate" => array(
-            "name" => "release date",
-            "type" => "dateMonth",
-          ),
-          "type" => array(
-            "name" => "type",
-            "type" => "select",
-            "multiple" => true,
-            "fields" => $types,
-            "info" => "ctrl + click or cmd + click to select more than one !",
-            "required" => true,
-          ),
-          "platform" => array(
-            "name" => "platform",
-            "type" => "select",
-            "multiple" => true,
-            "assoc" => true,
-            "fields" => $plat,
-            "info" => "ctrl + click or cmd + click to select more than one !",
-            "required" => true,
-          ),
-          "csdbID" => array(
-            "name" => "csdb ID",
-          ),
-          /*
+        $fields = [
+            "name" => [
+                "name" => "prod name / title",
+                "info" => " ",
+                "required" => true,
+            ],
+            "group1" => [
+                "name" => "group 1",
+            ],
+            "group2" => [
+                "name" => "group 2",
+            ],
+            "group3" => [
+                "name" => "group 3",
+                "infoAfter" => "if the group is missing from the list, add it <a href='submit_group.php' target='_blank'>here</a> !",
+            ],
+            "releaseDate" => [
+                "name" => "release date",
+                "type" => "dateMonth",
+            ],
+            "type" => [
+                "name" => "type",
+                "type" => "select",
+                "multiple" => true,
+                "fields" => $types,
+                "info" => "ctrl + click or cmd + click to select more than one !",
+                "required" => true,
+            ],
+            "platform" => [
+                "name" => "platform",
+                "type" => "select",
+                "multiple" => true,
+                "assoc" => true,
+                "fields" => $plat,
+                "info" => "ctrl + click or cmd + click to select more than one !",
+                "required" => true,
+            ],
+            "csdbID" => [
+                "name" => "csdb ID",
+            ],
+            /*
           "sceneOrgID"=>array(
             "name"=>"scene.org ID",
           ),
           */
-          "demozooID" => array(
-            "name" => "demozoo ID",
-          ),
-          "partyID" => array(
-            "name" => "party",
-            "infoAfter" => "if the party is missing from the list, add it <a href='submit_party.php' target='_blank'>here</a> !",
-          ),
-          "partyYear" => array(
-            "name" => "party year",
-            "type" => "select",
-            "fields" => $years,
-          ),
-          "partyCompo" => array(
-            "name" => "party compo",
-            "type" => "select",
-            "fields" => $compos,
-            "assoc" => true,
-          ),
-          "partyRank" => array(
-            "name" => "party rank",
-            "type" => "select",
-            "assoc" => true,
-            "fields" => $ranks,
-          ),
-          "invitationParty" => array(
-            "name" => "invitation for party",
-          ),
-          "invitationYear" => array(
-            "name" => "invitation year",
-            "type" => "select",
-            "fields" => $yearsFuture,
-          ),
-          "boardID" => array(
-            "name" => "bbs affiliation",
-          ),
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+            "demozooID" => [
+                "name" => "demozoo ID",
+            ],
+            "partyID" => [
+                "name" => "party",
+                "infoAfter" => "if the party is missing from the list, add it <a href='submit_party.php' target='_blank'>here</a> !",
+            ],
+            "partyYear" => [
+                "name" => "party year",
+                "type" => "select",
+                "fields" => $years,
+            ],
+            "partyCompo" => [
+                "name" => "party compo",
+                "type" => "select",
+                "fields" => $compos,
+                "assoc" => true,
+            ],
+            "partyRank" => [
+                "name" => "party rank",
+                "type" => "select",
+                "assoc" => true,
+                "fields" => $ranks,
+            ],
+            "invitationParty" => [
+                "name" => "invitation for party",
+            ],
+            "invitationYear" => [
+                "name" => "invitation year",
+                "type" => "select",
+                "fields" => $yearsFuture,
+            ],
+            "boardID" => [
+                "name" => "bbs affiliation",
+            ],
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
         if (@$data["prod"] && $prod = PouetProd::Spawn($data["prod"])) {
-            $a = array(&$prod);
+            $a = [&$prod];
             PouetCollectPlatforms($a);
 
             $pa = static::ProdToArray($prod);
@@ -915,23 +915,23 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
     public static function ValidateRequest($input, &$output)
     {
         if (!trim($input["name"])) {
-            return array("prod name can't be empty !");
+            return ["prod name can't be empty !"];
         }
 
-        $fields = array();
+        $fields = [];
         $js = "";
-        static::GetFields(array(), $fields, $js);
+        static::GetFields([], $fields, $js);
         $prod = PouetProd::Spawn($_REQUEST["prod"]);
-        $a = array(&$prod);
+        $a = [&$prod];
         PouetCollectPlatforms($a);
         $pa = static::ProdToArray($prod);
 
-        $_in = array();
+        $_in = [];
         foreach ($fields as $k => $v) {
             $_in[$k] = @$input[$k];
         }
 
-        if ($input["releaseDate_year"] && $input["releaseDate_month"] && checkdate((int)$input["releaseDate_month"], 15, (int)$input["releaseDate_year"])) {
+        if ($input["releaseDate_year"] && $input["releaseDate_month"] && checkdate((int) $input["releaseDate_month"], 15, (int) $input["releaseDate_year"])) {
             $_in["releaseDate"] = sprintf("%04d-%02d-15", $input["releaseDate_year"], $input["releaseDate_month"]);
         } elseif ($input["releaseDate_year"]) {
             $_in["releaseDate"] = sprintf("%04d-00-15", $input["releaseDate_year"]);
@@ -944,17 +944,17 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
         }
         $output = array_diff_meaningful($_in, $pa);
 
-        if (array_diff($_in["type"] ?: array(), $pa["type"])) {
+        if (array_diff($_in["type"] ?: [], $pa["type"])) {
             $output["type"] = $_in["type"];
         }
 
-        if (array_diff($_in["platform"] ?: array(), $pa["platform"])) {
+        if (array_diff($_in["platform"] ?: [], $pa["platform"])) {
             $output["platform"] = $_in["platform"];
         }
 
         unset($output["finalStep"]);
 
-        return $output ? array() : array("you didn't change anything !");
+        return $output ? [] : ["you didn't change anything !"];
     }
 
     public static function Display($itemID, $data)
@@ -962,7 +962,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
         global $PLATFORMS;
         global $COMPOTYPES;
 
-        $ranks = array(0 => "");
+        $ranks = [0 => ""];
         $ranks[97] = "disqualified";
         $ranks[98] = "not applicable";
         $ranks[99] = "not shown";
@@ -974,32 +974,32 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
         if (!$prod) {
             return sprintf("prod %d missing.", $itemID);
         }
-        $a = array(&$prod);
+        $a = [&$prod];
         PouetCollectPlatforms($a);
 
-        $fields = array();
+        $fields = [];
         $js = "";
-        static::GetFields(array(), $fields, $js);
+        static::GetFields([], $fields, $js);
 
         $s = "";
         foreach ($data as $k => $v) {
             $groupIdx = 0;
             switch ($k) {
                 case "type":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $prod->RenderTypeIcons();
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
-                    $prod->types = $v ?: array();
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
+                    $prod->types = $v ?: [];
                     $s .= $prod->RenderTypeIcons();
                     $s .= "<br>";
                     break;
                 case "platform":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $prod->RenderPlatformIcons();
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
-                    $prod->platforms = array();
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
+                    $prod->platforms = [];
                     if (@$v) {
                         foreach ($v as $a) {
                             $prod->platforms[] = $PLATFORMS[$a];
@@ -1016,105 +1016,105 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                     // no break
                 case "group1":
                     $group = @$prod->groups[$groupIdx];
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $group ? $group->RenderLong() : "<i>none</i>";
                     $s .= "<br>";
                     $group = PouetGroup::Spawn($v);
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $group ? $group->RenderLong() : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 case "partyID":
                     $party = ($prod && $prod->party && $prod->party->id) ? PouetParty::Spawn($prod->party->id) : null;
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
                     $s .= "<br>";
                     $party = PouetParty::Spawn($v);
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 case "invitationParty":
                     $party = PouetParty::Spawn($prod->invitation);
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
                     $s .= "<br>";
                     $party = PouetParty::Spawn($v);
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $party ? $party->PrintLinked() : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 case "invitationYear":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($prod->invitationyear);
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($v);
                     $s .= "<br>";
                     break;
                 case "partyYear":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= @$prod->placings[0]->year;
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($v);
                     $s .= "<br>";
                     break;
                 case "partyCompo":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= @$COMPOTYPES[$prod->placings[0]->compo];
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= @$COMPOTYPES[$v];
                     $s .= "<br>";
                     break;
                 case "partyRank":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html(@$ranks[$prod->placings[0]->ranking]);
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html(@$ranks[$v]);
                     $s .= "<br>";
                     break;
                 case "releaseDate":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html(renderHalfDate($prod->releaseDate));
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html(renderHalfDate($v));
                     $s .= "<br>";
                     break;
                 case "boardID":
                     $board = PouetBoard::Spawn($prod->{$k});
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $board ? $board->RenderLink() : "<i>none</i>";
                     $s .= "<br>";
                     $board = PouetBoard::Spawn($v);
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $board ? $board->RenderLink() : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 case "demozooID":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $prod->demozoo ? sprintf("<a href='https://demozoo.org/productions/%d/'>%d</a>", $prod->demozoo, $prod->demozoo) : "<i>none</i>";
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $v ? sprintf("<a href='https://demozoo.org/productions/%d/'>%d</a>", $v, $v) : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 case "csdbID":
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= $prod->csdb ? sprintf("<a href='https://csdb.dk/release/?id=%d'>%d</a>", $prod->csdb, $prod->csdb) : "<i>none</i>";
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= $v ? sprintf("<a href='https://csdb.dk/release/?id=%d'>%d</a>", $v, $v) : "<i>none</i>";
                     $s .= "<br>";
                     break;
                 default:
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($prod->{$k});
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($v);
                     $s .= "<br>";
             }
@@ -1124,7 +1124,7 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
 
     public static function Process($itemID, $reqData)
     {
-        $sql = array();
+        $sql = [];
         foreach ($reqData as $k => $v) {
             switch ($k) {
                 case "partyID":    $sql["party"] = nullify($v);
@@ -1138,9 +1138,9 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
                 case "type":       $sql["type"] = implode(",", $v);
                     break;
                 case "platform":   break; // deal with this underneath
-                case "demozooID":  $sql["demozoo"] = (int)$v;
+                case "demozooID":  $sql["demozoo"] = (int) $v;
                     break;
-                case "csdbID":     $sql["csdb"] = (int)$v;
+                case "csdbID":     $sql["csdb"] = (int) $v;
                     break;
                 case "invitationParty": $sql["invitation"] = $v;
                     break;
@@ -1155,15 +1155,15 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
             }
         }
         if ($sql) {
-            SQLLib::UpdateRow("prods", $sql, "id=".(int)$itemID);
+            SQLLib::UpdateRow("prods", $sql, "id=" . (int) $itemID);
         }
 
         if (isset($reqData["platform"])) {
             $data["platform"] = array_unique($reqData["platform"]);
-            SQLLib::Query(sprintf_esc("delete from prods_platforms where prod = %d", (int)$itemID));
+            SQLLib::Query(sprintf_esc("delete from prods_platforms where prod = %d", (int) $itemID));
             foreach ($data["platform"] as $v) {
-                $a = array();
-                $a["prod"] = (int)$itemID;
+                $a = [];
+                $a["prod"] = (int) $itemID;
                 $a["platform"] = $v;
                 SQLLib::InsertRow("prods_platforms", $a);
             }

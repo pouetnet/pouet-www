@@ -17,13 +17,13 @@ function bbencode_parse_tag($message, $tag, $openCode, $closeCode)
     // First things first: If there aren't any "[quote]" strings in the message, we don't
     // need to process it at all.
 
-    if (stripos(strtolower($message), "[".$tag."]") === false) {
+    if (stripos(strtolower($message), "[" . $tag . "]") === false) {
         return $message;
     }
 
     $tagLen = strlen($tag);
 
-    $stack = array();
+    $stack = [];
     $curr_pos = 0;
     while ($curr_pos !== false && ($curr_pos < strlen($message))) {
         $curr_pos = stripos($message, "[", $curr_pos);
@@ -34,12 +34,12 @@ function bbencode_parse_tag($message, $tag, $openCode, $closeCode)
             // check if it's a starting or ending quote tag.
             $possible_start = substr($message, $curr_pos, 2 + $tagLen);
             $possible_end = substr($message, $curr_pos, 3 + $tagLen);
-            if (strcasecmp("[".$tag."]", $possible_start) == 0) {
+            if (strcasecmp("[" . $tag . "]", $possible_start) == 0) {
                 // We have a starting quote tag.
                 // Push its position on to the stack, and then keep going to the right.
                 array_push($stack, $curr_pos);
                 ++$curr_pos;
-            } elseif (strcasecmp("[/".$tag."]", $possible_end) == 0) {
+            } elseif (strcasecmp("[/" . $tag . "]", $possible_end) == 0) {
                 // We have an ending quote tag.
                 // Check if we've already found a matching starting tag.
                 if (sizeof($stack) > 0) {

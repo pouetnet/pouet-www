@@ -16,7 +16,7 @@ class PouetBoxSubmitProd extends PouetBox
         $this->uniqueID = "pouetbox_submitprod";
         $this->title = "submit a prod!";
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
 
         $row = SQLLib::selectRow("DESC prods type");
         $this->types = enum2array($row->Type);
@@ -26,7 +26,7 @@ class PouetBoxSubmitProd extends PouetBox
         $this->compos[0] = "";
         asort($this->compos);
 
-        $this->ranks = array(0 => "");
+        $this->ranks = [0 => ""];
         $this->ranks[97] = "disqualified";
         $this->ranks[98] = "not applicable";
         $this->ranks[99] = "not shown";
@@ -34,11 +34,11 @@ class PouetBoxSubmitProd extends PouetBox
             $this->ranks[$x] = $x;
         }
 
-        $this->years = array("");
+        $this->years = [""];
         for ($x = date("Y"); $x >= POUET_EARLIEST_YEAR; $x--) {
             $this->years[$x] = $x;
         }
-        $this->yearsFuture = array("");
+        $this->yearsFuture = [""];
         for ($x = date("Y") + 2; $x >= POUET_EARLIEST_YEAR; $x--) {
             $this->yearsFuture[$x] = $x;
         }
@@ -47,7 +47,7 @@ class PouetBoxSubmitProd extends PouetBox
     public function Validate($data)
     {
         global $currentUser;
-        $errormessage = array();
+        $errormessage = [];
 
         if (!$currentUser) {
             $errormessage[] = "you need to be logged in first.";
@@ -75,10 +75,10 @@ class PouetBoxSubmitProd extends PouetBox
             }
         }
 
-        if (!count(@$data["type"] ?: array())) {
+        if (!count(@$data["type"] ?: [])) {
             $errormessage[] = "you must select at least one type for this prod";
         }
-        if (!count(@$data["platform"] ?: array())) {
+        if (!count(@$data["platform"] ?: [])) {
             $errormessage[] = "you must select at least one platform";
         }
 
@@ -129,7 +129,7 @@ class PouetBoxSubmitProd extends PouetBox
         //////////////////////////////////////////////////////////////////
         // everything has been validated (..., the new album by BT!)
 
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
 
 
@@ -137,7 +137,7 @@ class PouetBoxSubmitProd extends PouetBox
         $parsedUrl = parse_url($url);
         if (strstr($parsedUrl["host"], "scene.org") !== false) {
             $sideload = new Sideload();
-            $response = $sideload->Request("https://files.scene.org/api/resolve/", "GET", array("url" => $url));
+            $response = $sideload->Request("https://files.scene.org/api/resolve/", "GET", ["url" => $url]);
             if ($response) {
                 $responseJSON = json_decode($response, true);
                 if ($responseJSON["success"] && $responseJSON["viewURL"]) {
@@ -151,7 +151,7 @@ class PouetBoxSubmitProd extends PouetBox
         $a["addedUser"] = get_login_id();
         $a["addedDate"] = date("Y-m-d H:i:s");
 
-        if ($data["releaseDate_year"] && $data["releaseDate_month"] && checkdate((int)$data["releaseDate_month"], 15, (int)$data["releaseDate_year"])) {
+        if ($data["releaseDate_year"] && $data["releaseDate_month"] && checkdate((int) $data["releaseDate_month"], 15, (int) $data["releaseDate_year"])) {
             $a["releaseDate"] = sprintf("%04d-%02d-15", $data["releaseDate_year"], $data["releaseDate_month"]);
         } elseif ($data["releaseDate_year"]) {
             $a["releaseDate"] = sprintf("%04d-00-15", $data["releaseDate_year"]);
@@ -159,38 +159,38 @@ class PouetBoxSubmitProd extends PouetBox
 
         $a["type"] = implode(",", $data["type"]);
 
-        $groups = array();
+        $groups = [];
         if ($data["group1"]) {
-            $groups[] = (int)$data["group1"];
+            $groups[] = (int) $data["group1"];
         }
         if ($data["group2"]) {
-            $groups[] = (int)$data["group2"];
+            $groups[] = (int) $data["group2"];
         }
         if ($data["group3"]) {
-            $groups[] = (int)$data["group3"];
+            $groups[] = (int) $data["group3"];
         }
         $groups = array_unique($groups);
         $a["group1"] = nullify(array_shift($groups));
         $a["group2"] = nullify(array_shift($groups));
         $a["group3"] = nullify(array_shift($groups));
 
-        $a["csdb"] = (int)$data["csdbID"];
+        $a["csdb"] = (int) $data["csdbID"];
         //$a["sceneorg"] = $data["sceneOrgID"];
         //$a["zxdemo"] = $data["zxdemoID"];
-        $a["demozoo"] = (int)$data["demozooID"];
+        $a["demozoo"] = (int) $data["demozooID"];
         $a["party"] = nullify($data["partyID"]);
-        $a["party_year"] = (int)$data["partyYear"];
+        $a["party_year"] = (int) $data["partyYear"];
         $a["party_compo"] = nullify($data["partyCompo"]);
-        $a["party_place"] = (int)$data["partyRank"];
+        $a["party_place"] = (int) $data["partyRank"];
         $a["invitation"] = nullify($data["invitationParty"]);
-        $a["invitationyear"] = (int)$data["invitationYear"];
+        $a["invitationyear"] = (int) $data["invitationYear"];
         $a["boardID"] = nullify($data["boardID"]);
 
         $this->prodID = SQLLib::InsertRow("prods", $a);
 
         $data["platform"] = array_unique($data["platform"]);
         foreach ($data["platform"] as $k => $v) {
-            $a = array();
+            $a = [];
             $a["prod"] = $this->prodID;
             $a["platform"] = $v;
             SQLLib::InsertRow("prods_platforms", $a);
@@ -209,7 +209,7 @@ class PouetBoxSubmitProd extends PouetBox
             }
             move_uploaded_file_fake($_FILES["screenshot"]["tmp_name"], get_local_screenshot_path($this->prodID, $extension));
 
-            $a = array();
+            $a = [];
             $a["prod"] = $this->prodID;
             $a["user"] = get_login_id();
             $a["added"] = date("Y-m-d H:i:s");
@@ -218,7 +218,7 @@ class PouetBoxSubmitProd extends PouetBox
         if (is_uploaded_file($_FILES["nfofile"]["tmp_name"])) {
             move_uploaded_file_fake($_FILES["nfofile"]["tmp_name"], get_local_nfo_path($this->prodID));
 
-            $a = array();
+            $a = [];
             $a["prod"] = $this->prodID;
             $a["user"] = get_login_id();
             $a["added"] = date("Y-m-d H:i:s");
@@ -229,7 +229,7 @@ class PouetBoxSubmitProd extends PouetBox
         flush_cache("pouetbox_latestreleased.cache");
         flush_cache("pouetbox_latestparties.cache");
 
-        return array();
+        return [];
     }
 
     public function GetInsertionID()
@@ -240,117 +240,117 @@ class PouetBoxSubmitProd extends PouetBox
     public function LoadFromDB()
     {
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $this->fields = array(
-          "name" => array(
-            "name" => "prod name / title",
-            "info" => " ",
-            "required" => true,
-          ),
-          "group1" => array(
-            "name" => "group 1",
-          ),
-          "group2" => array(
-            "name" => "group 2",
-          ),
-          "group3" => array(
-            "name" => "group 3",
-            "infoAfter" => "if the group is missing from the list, add it <a href='submit_group.php' target='_blank'>here</a> !",
-          ),
-          "download" => array(
-            "type" => "url",
-            "name" => "download url",
-            "infoAfter" => "<b>important !</b><br>this has to be a link to a downloadable file, not to a website or a video version !".
-                " ad-ridden \"one-click\" hosting links will be dealt with extreme prejudice -".
-                " if it's not a direct link to the file on the first click, it will get deleted !".
-                " (scene.org links are an exception - <a href='http://www.pouet.net/faq.php#faq37'>read the faq</a> if you're confused)",
-            "info" => " ",
-            "required" => true,
-            "maxlength" => 256,
-          ),
-          "releaseDate" => array(
-            "name" => "release date",
-            "type" => "dateMonth",
-          ),
-          "type" => array(
-            "name" => "type",
-            "type" => "select",
-            "multiple" => true,
-            "fields" => $this->types,
-            "info" => "ctrl + click or cmd + click to select more than one !",
-            "required" => true,
-          ),
-          "platform" => array(
-            "name" => "platform",
-            "type" => "select",
-            "multiple" => true,
-            "assoc" => true,
-            "fields" => $plat,
-            "info" => "ctrl + click or cmd + click to select more than one !",
-            "required" => true,
-          ),
-          "csdbID" => array(
-            "name" => "csdb ID",
-            "type" => "number",
-          ),
-          /*
+        $this->fields = [
+            "name" => [
+                "name" => "prod name / title",
+                "info" => " ",
+                "required" => true,
+            ],
+            "group1" => [
+                "name" => "group 1",
+            ],
+            "group2" => [
+                "name" => "group 2",
+            ],
+            "group3" => [
+                "name" => "group 3",
+                "infoAfter" => "if the group is missing from the list, add it <a href='submit_group.php' target='_blank'>here</a> !",
+            ],
+            "download" => [
+                "type" => "url",
+                "name" => "download url",
+                "infoAfter" => "<b>important !</b><br>this has to be a link to a downloadable file, not to a website or a video version !"
+                    . " ad-ridden \"one-click\" hosting links will be dealt with extreme prejudice -"
+                    . " if it's not a direct link to the file on the first click, it will get deleted !"
+                    . " (scene.org links are an exception - <a href='http://www.pouet.net/faq.php#faq37'>read the faq</a> if you're confused)",
+                "info" => " ",
+                "required" => true,
+                "maxlength" => 256,
+            ],
+            "releaseDate" => [
+                "name" => "release date",
+                "type" => "dateMonth",
+            ],
+            "type" => [
+                "name" => "type",
+                "type" => "select",
+                "multiple" => true,
+                "fields" => $this->types,
+                "info" => "ctrl + click or cmd + click to select more than one !",
+                "required" => true,
+            ],
+            "platform" => [
+                "name" => "platform",
+                "type" => "select",
+                "multiple" => true,
+                "assoc" => true,
+                "fields" => $plat,
+                "info" => "ctrl + click or cmd + click to select more than one !",
+                "required" => true,
+            ],
+            "csdbID" => [
+                "name" => "csdb ID",
+                "type" => "number",
+            ],
+            /*
           "sceneOrgID"=>array(
             "name"=>"scene.org ID",
           ),
           */
-          "demozooID" => array(
-            "name" => "demozoo ID",
-            "type" => "number",
-          ),
-          "partyID" => array(
-            "name" => "party",
-            "infoAfter" => "if the party is missing from the list, add it <a href='submit_party.php' target='_blank'>here</a> !",
-          ),
-          "partyYear" => array(
-            "name" => "party year",
-            "type" => "select",
-            "fields" => $this->years,
-          ),
-          "partyCompo" => array(
-            "name" => "party compo",
-            "type" => "select",
-            "fields" => $this->compos,
-            "assoc" => true,
-          ),
-          "partyRank" => array(
-            "name" => "party rank",
-            "type" => "select",
-            "assoc" => true,
-            "fields" => $this->ranks,
-          ),
-          "invitationParty" => array(
-            "name" => "invitation for party",
-          ),
-          "invitationYear" => array(
-            "name" => "invitation year",
-            "type" => "select",
-            "fields" => $this->yearsFuture,
-          ),
-          "boardID" => array(
-            "name" => "bbs affiliation",
-          ),
-          "nfofile" => array(
-            "name" => "infofile / file_id.diz",
-            "type" => "file",
-            "info" => "(maximum 32kb)",
-          ),
-          "screenshot" => array(
-            "name" => "screenshot",
-            "type" => "file",
-            "accept" => "image/*",
-            "info" => "(maximum 400x300 pixels, and 64kb)",
-          ),
-        );
+            "demozooID" => [
+                "name" => "demozoo ID",
+                "type" => "number",
+            ],
+            "partyID" => [
+                "name" => "party",
+                "infoAfter" => "if the party is missing from the list, add it <a href='submit_party.php' target='_blank'>here</a> !",
+            ],
+            "partyYear" => [
+                "name" => "party year",
+                "type" => "select",
+                "fields" => $this->years,
+            ],
+            "partyCompo" => [
+                "name" => "party compo",
+                "type" => "select",
+                "fields" => $this->compos,
+                "assoc" => true,
+            ],
+            "partyRank" => [
+                "name" => "party rank",
+                "type" => "select",
+                "assoc" => true,
+                "fields" => $this->ranks,
+            ],
+            "invitationParty" => [
+                "name" => "invitation for party",
+            ],
+            "invitationYear" => [
+                "name" => "invitation year",
+                "type" => "select",
+                "fields" => $this->yearsFuture,
+            ],
+            "boardID" => [
+                "name" => "bbs affiliation",
+            ],
+            "nfofile" => [
+                "name" => "infofile / file_id.diz",
+                "type" => "file",
+                "info" => "(maximum 32kb)",
+            ],
+            "screenshot" => [
+                "name" => "screenshot",
+                "type" => "file",
+                "accept" => "image/*",
+                "info" => "(maximum 400x300 pixels, and 64kb)",
+            ],
+        ];
         if ($_POST) {
             foreach ($_POST as $k => $v) {
                 if (@$this->fields[$k]) {
@@ -374,17 +374,17 @@ class PouetBoxSubmitProd extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
-        $fields = array_select($this->fields, array("name"));
+        echo "  <h2>" . $this->title . "</h2>\n";
+        $fields = array_select($this->fields, ["name"]);
         if ($fields) {
             echo "  <div class='content'>\n";
             $this->formifier->RenderForm($fields);
             echo "  </div>\n";
         }
 
-        $fields = array_select($this->fields, array("group1","group2","group3"));
+        $fields = array_select($this->fields, ["group1","group2","group3"]);
         if ($fields) {
             echo "  <h2 id='groups'>groups</h2>\n";
             echo "  <div class='content'>\n";
@@ -392,7 +392,7 @@ class PouetBoxSubmitProd extends PouetBox
             echo "  </div>\n";
         }
 
-        $fields = array_select($this->fields, array("download","releaseDate","platform","type"));
+        $fields = array_select($this->fields, ["download","releaseDate","platform","type"]);
         if ($fields) {
             echo "  <h2 id='basicinfo'>basic info</h2>\n";
             echo "  <div class='content'>\n";
@@ -400,7 +400,7 @@ class PouetBoxSubmitProd extends PouetBox
             echo "  </div>\n";
         }
 
-        $fields = array_select($this->fields, array("partyID","partyYear","partyCompo","partyRank","invitationParty","invitationYear"));
+        $fields = array_select($this->fields, ["partyID","partyYear","partyCompo","partyRank","invitationParty","invitationYear"]);
         if ($fields) {
             echo "  <h2 id='partyinfo'>party info</h2>\n";
             echo "  <div class='content'>\n";
@@ -408,7 +408,7 @@ class PouetBoxSubmitProd extends PouetBox
             echo "  </div>\n";
         }
 
-        $fields = array_select($this->fields, array("csdbID","demozooID","boardID"));
+        $fields = array_select($this->fields, ["csdbID","demozooID","boardID"]);
         if ($fields) {
             echo "  <h2 id='othersites'>other sites</h2>\n";
             echo "  <div class='content'>\n";
@@ -416,7 +416,7 @@ class PouetBoxSubmitProd extends PouetBox
             echo "  </div>\n";
         }
 
-        $fields = array_select($this->fields, array("nfofile","screenshot"));
+        $fields = array_select($this->fields, ["nfofile","screenshot"]);
         if ($fields) {
             echo "  <h2 id='files'>files</h2>\n";
             echo "  <div class='content'>\n";

@@ -32,9 +32,9 @@ class PouetBoxIndexTopAlltime extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of prods visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit" => ["name" => "number of prods visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function LoadFromDB()

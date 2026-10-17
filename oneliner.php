@@ -32,14 +32,14 @@ class PouetBoxOnelinerView extends PouetBox
         $s->AddTable("oneliner");
         $s->AddField("oneliner.message");
         $s->AddField("oneliner.addedDate");
-        $s->attach(array("oneliner" => "who"), array("users as user" => "id"));
+        $s->attach(["oneliner" => "who"], ["users as user" => "id"]);
         if (@$_GET["who"]) {
             $s->AddWhere(sprintf_esc("oneliner.who = %d", $_GET["who"]));
         }
         //$s->SetLimit( $POSTS_PER_PAGE, (int)(($this->page - 1)*$POSTS_PER_PAGE) );
 
         $this->paginator = new PouetPaginator();
-        $this->paginator->SetData((@$_GET["who"] ? "oneliner.php?who=".(int)$_GET["who"] : "oneliner.php"), $this->postcount, $POSTS_PER_PAGE, @$_GET["page"]);
+        $this->paginator->SetData((@$_GET["who"] ? "oneliner.php?who=" . (int) $_GET["who"] : "oneliner.php"), $this->postcount, $POSTS_PER_PAGE, @$_GET["page"]);
         $this->paginator->SetLimitOnQuery($s);
 
         $this->oneliner = $s->perform();
@@ -54,7 +54,7 @@ class PouetBoxOnelinerView extends PouetBox
         foreach ($this->oneliner as $c) {
             $day = substr($c->addedDate, 0, 10);
             if ($day != $lastDate) {
-                echo "<li class='day'>".$day."</li>\n";
+                echo "<li class='day'>" . $day . "</li>\n";
                 $lastDate = $day;
             }
             $p = $c->message;
@@ -63,9 +63,9 @@ class PouetBoxOnelinerView extends PouetBox
             $p = preg_replace("/([a-z]+:\/\/\S+)/", "<a href='$1' rel='external'>$1</a>", $p);
             $p = nl2br($p, false);
             $p = better_wordwrap($p, 80, " ");
-            echo "<li class='cite-".$c->user->id."'>";
-            echo "<time datetime='".$c->addedDate."' title='".$c->addedDate."'>".date("H:i", strtotime($c->addedDate))."</time> ";
-            echo $c->user->PrintLinkedAvatar()." ".$p;
+            echo "<li class='cite-" . $c->user->id . "'>";
+            echo "<time datetime='" . $c->addedDate . "' title='" . $c->addedDate . "'>" . date("H:i", strtotime($c->addedDate)) . "</time> ";
+            echo $c->user->PrintLinkedAvatar() . " " . $p;
             echo "</li>\n";
         }
         echo "</ul>";

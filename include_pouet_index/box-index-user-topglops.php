@@ -32,9 +32,9 @@ class PouetBoxIndexTopGlops extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of users visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit" => ["name" => "number of users visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function LoadFromDB()
@@ -51,9 +51,9 @@ class PouetBoxIndexTopGlops extends PouetBoxCachable
         $n = 0;
         foreach ($this->data as $p) {
             echo "<li>\n";
-            echo $p->PrintLinkedAvatar()." ";
-            echo "<span class='prod'>".$p->PrintLinkedName()."</span>\n";
-            echo "<span class='group'>:: ".$p->glops." glöps</span>\n";
+            echo $p->PrintLinkedAvatar() . " ";
+            echo "<span class='prod'>" . $p->PrintLinkedName() . "</span>\n";
+            echo "<span class='group'>:: " . $p->glops . " glöps</span>\n";
             echo "</li>\n";
             if (++$n == $this->limit) {
                 break;

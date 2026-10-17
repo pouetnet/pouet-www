@@ -24,17 +24,17 @@ class PouetBoxAdminModificationRequests extends PouetBox
 
         $req = SQLLib::SelectRow(sprintf_esc("select itemID,requestType,requestBlob,approved from modification_requests where id = %d", $data["requestID"]));
         if ($req->approved !== null) {
-            return array("this request was already processed");
+            return ["this request was already processed"];
         }
 
         if (@$data["requestDeny"]) {
-            $a = array();
+            $a = [];
             $a["gloperatorID"] = $currentUser->id;
             $a["approved"] = 0;
             $a["comment"] = $data["comment"];
             $a["approveDate"] = date("Y-m-d H:i:s");
-            SQLLib::UpdateRow("modification_requests", $a, "id=".(int)$data["requestID"]);
-            return array();
+            SQLLib::UpdateRow("modification_requests", $a, "id=" . (int) $data["requestID"]);
+            return [];
         }
 
         $reqData = json_decode($req->requestBlob, true);
@@ -44,7 +44,7 @@ class PouetBoxAdminModificationRequests extends PouetBox
             try {
                 $errors = $REQUESTTYPES[$req->requestType]::Process($req->itemID, $reqData);
             } catch (Exception $e) {
-                $errors = array((string)$e);
+                $errors = [(string) $e];
             }
             if ($errors) {
                 return $errors;
@@ -52,16 +52,16 @@ class PouetBoxAdminModificationRequests extends PouetBox
 
             gloperator_log($REQUESTTYPES[$req->requestType]::GetItemType(), $req->itemID, $req->requestType, $reqData);
         } else {
-            return array("no such request type!");
+            return ["no such request type!"];
         }
 
-        $a = array();
+        $a = [];
         $a["gloperatorID"] = $currentUser->id;
         $a["approved"] = 1;
         $a["approveDate"] = date("Y-m-d H:i:s");
-        SQLLib::UpdateRow("modification_requests", $a, "id=".(int)$data["requestID"]);
+        SQLLib::UpdateRow("modification_requests", $a, "id=" . (int) $data["requestID"]);
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -73,9 +73,9 @@ class PouetBoxAdminModificationRequests extends PouetBox
         $s->AddField("modification_requests.itemType");
         $s->AddField("modification_requests.requestBlob");
         $s->AddField("modification_requests.requestDate");
-        $s->Attach(array("modification_requests" => "userID"), array("users as user" => "id"));
-        $s->Attach(array("modification_requests" => "itemID"), array("prods as prod" => "id"), "modification_requests.itemType = 'prod'");
-        $s->Attach(array("modification_requests" => "itemID"), array("groups as group" => "id"), "modification_requests.itemType = 'group'");
+        $s->Attach(["modification_requests" => "userID"], ["users as user" => "id"]);
+        $s->Attach(["modification_requests" => "itemID"], ["prods as prod" => "id"], "modification_requests.itemType = 'prod'");
+        $s->Attach(["modification_requests" => "itemID"], ["groups as group" => "id"], "modification_requests.itemType = 'group'");
         $s->AddWhere("approved is null");
         $s->AddOrder("requestDate desc");
         $this->requests = $s->perform();
@@ -83,9 +83,9 @@ class PouetBoxAdminModificationRequests extends PouetBox
     public function Render()
     {
         global $REQUESTTYPES;
-        echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+        echo "<table id='" . $this->uniqueID . "' class='boxtable'>\n";
         echo "  <tr>\n";
-        echo "    <th colspan='6'>".$this->title."</th>\n";
+        echo "    <th colspan='6'>" . $this->title . "</th>\n";
         echo "  </tr>\n";
         echo "  <tr>\n";
         echo "    <th>date</th>\n";
@@ -97,9 +97,9 @@ class PouetBoxAdminModificationRequests extends PouetBox
         echo "  </tr>\n";
         foreach ($this->requests as $r) {
             echo "  <tr>\n";
-            echo "    <td>".$r->requestDate."</td>\n";
-            echo "    <td>".$r->user->PrintLinkedAvatar()." ".$r->user->PrintLinkedName()."</td>\n";
-            echo "    <td>".$r->itemType.": ";
+            echo "    <td>" . $r->requestDate . "</td>\n";
+            echo "    <td>" . $r->user->PrintLinkedAvatar() . " " . $r->user->PrintLinkedName() . "</td>\n";
+            echo "    <td>" . $r->itemType . ": ";
             switch ($r->itemType) {
                 case "prod": if ($r->prod) {
                     echo $r->prod->RenderSingleRowShort();
@@ -109,7 +109,7 @@ class PouetBoxAdminModificationRequests extends PouetBox
                 } break;
             }
             echo "</td>\n";
-            echo "    <td>".$REQUESTTYPES[$r->requestType]::Describe()."</td>\n";
+            echo "    <td>" . $REQUESTTYPES[$r->requestType]::Describe() . "</td>\n";
             echo "    <td>";
             $data = json_decode($r->requestBlob, true);
 
@@ -320,7 +320,7 @@ if ($currentUser && $currentUser->CanEditItems()) {
     if (@$_POST["partial"]) {
         $form->SetSuccessURL("", false);
         $form->Process();
-        $response = array();
+        $response = [];
         if ($form->GetErrors()) {
             $response["errors"] = $form->GetErrors();
         } else {

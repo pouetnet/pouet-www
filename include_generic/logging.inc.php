@@ -5,9 +5,9 @@ class LOG
 {
     public static function Write($string)
     {
-        $entry = "==[ ".date("Y-m-d H:i:s")." ]".str_repeat("=", 50) . "\n" .
-                 "URL:" . ($_SERVER["REQUEST_URI"] ?? "") . "\n" .
-                 $string . "\n";
+        $entry = "==[ " . date("Y-m-d H:i:s") . " ]" . str_repeat("=", 50) . "\n"
+                 . "URL:" . ($_SERVER["REQUEST_URI"] ?? "") . "\n"
+                 . $string . "\n";
         // an undefined constant is a fatal since PHP 8: don't let a missing
         // config line turn every logged warning into a crash
         if (!defined("POUET_EXCEPTION_LOG")) {

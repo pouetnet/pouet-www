@@ -29,24 +29,24 @@ class PouetBoxAdminEditFAQ extends PouetBox
         $row = SQLLib::selectRow("DESC faq category");
         $this->categories = enum2array($row->Type);
 
-        $this->fields = array(
-          "category" => array(
-            "name" => "category",
-            "type" => "select",
-            "fields" => $this->categories,
-          ),
-          "question" => array(
-            "name" => "question",
-          ),
-          "answer" => array(
-            "name" => "answer",
-            "type" => "textarea",
-          ),
-          "deprecated" => array(
-            "name" => "is hidden?",
-            "type" => "checkbox",
-          ),
-        );
+        $this->fields = [
+            "category" => [
+                "name" => "category",
+                "type" => "select",
+                "fields" => $this->categories,
+            ],
+            "question" => [
+                "name" => "question",
+            ],
+            "answer" => [
+                "name" => "answer",
+                "type" => "textarea",
+            ],
+            "deprecated" => [
+                "name" => "is hidden?",
+                "type" => "checkbox",
+            ],
+        ];
 
         if ($_POST) {
             foreach ($_POST as $k => $v) {
@@ -60,20 +60,20 @@ class PouetBoxAdminEditFAQ extends PouetBox
     {
         global $currentUser;
 
-        $a = array();
+        $a = [];
         $a["category"] = $data["category"];
         $a["question"] = $data["question"];
         $a["answer"] = $data["answer"];
-        $a["deprecated"] = (int)($data["deprecated"] == "on");
+        $a["deprecated"] = (int) ($data["deprecated"] == "on");
         if ($data["faqID"]) {
             //gloperator_log( "faq", $data["faqID"], "faq_edit" );
-            SQLLib::UpdateRow("faq", $a, "id=".(int)$data["faqID"]);
+            SQLLib::UpdateRow("faq", $a, "id=" . (int) $data["faqID"]);
         } else {
             //gloperator_log( "faq", 0, "faq_add" );
             SQLLib::InsertRow("faq", $a);
         }
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -93,8 +93,8 @@ class PouetBoxAdminEditFAQ extends PouetBox
     public function Render()
     {
         global $REQUESTTYPES;
-        echo "<div id='".$this->uniqueID."' class='pouettbl'>\n";
-        echo "  <h2>".$this->title;
+        echo "<div id='" . $this->uniqueID . "' class='pouettbl'>\n";
+        echo "  <h2>" . $this->title;
         if ($this->id) {
             printf(": #%d", $this->id);
             printf("<input type='hidden' name='faqID' value='%d'>", $this->id);
@@ -130,9 +130,9 @@ class PouetBoxAdminEditFAQList extends PouetBox
     public function Render()
     {
         global $REQUESTTYPES;
-        echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+        echo "<table id='" . $this->uniqueID . "' class='boxtable'>\n";
         echo "  <tr>\n";
-        echo "    <th colspan='6'>".$this->title."</th>\n";
+        echo "    <th colspan='6'>" . $this->title . "</th>\n";
         echo "  </tr>\n";
         echo "  <tr>\n";
         echo "    <th>id</th>\n";
@@ -142,10 +142,10 @@ class PouetBoxAdminEditFAQList extends PouetBox
         echo "  </tr>\n";
         foreach ($this->items as $r) {
             echo "  <tr>\n";
-            echo "    <td>".(int)$r->id."</td>\n";
-            echo "    <td>"._html($r->category)."</td>\n";
-            echo "    <td><a href='admin_faq.php?id=".(int)$r->id."'>"._html($r->question)."</a></td>\n";
-            echo "    <td>".($r->deprecated ? "yes" : "&nbsp;")."</td>\n";
+            echo "    <td>" . (int) $r->id . "</td>\n";
+            echo "    <td>" . _html($r->category) . "</td>\n";
+            echo "    <td><a href='admin_faq.php?id=" . (int) $r->id . "'>" . _html($r->question) . "</a></td>\n";
+            echo "    <td>" . ($r->deprecated ? "yes" : "&nbsp;") . "</td>\n";
             echo "  </tr>\n";
         }
         echo "  <tr>\n";

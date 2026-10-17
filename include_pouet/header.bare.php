@@ -10,13 +10,13 @@ $REQUEST_SCHEME = (@$_SERVER['HTTPS'] == "on" ? "https" : "http");
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-  <title><?=_html($TITLE ? $TITLE." :: pouët.net" : "pouët.net :: your online demoscene resource")?></title>
+  <title><?=_html($TITLE ? $TITLE . " :: pouët.net" : "pouët.net :: your online demoscene resource")?></title>
 
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="alternate icon" href="/favicon.ico" type="image/x-icon">
   <link rel="search" type="application/opensearchdescription+xml" href="opensearch_prod.xml" title="pouët.net: prod search">
-  <link rel="canonical" href="<?=rtrim($REQUEST_SCHEME.'://'.POUET_WEB_HOSTNAME, '/')._html($_SERVER["REQUEST_URI"])?>">
-  <link rel="alternate" media="only screen and (max-width: 640px)" href="<?=rtrim($REQUEST_SCHEME.'://'.POUET_MOBILE_HOSTNAME, '/')._html($_SERVER["REQUEST_URI"])?>">
+  <link rel="canonical" href="<?=rtrim($REQUEST_SCHEME . '://' . POUET_WEB_HOSTNAME, '/') . _html($_SERVER["REQUEST_URI"])?>">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="<?=rtrim($REQUEST_SCHEME . '://' . POUET_MOBILE_HOSTNAME, '/') . _html($_SERVER["REQUEST_URI"])?>">
 <?php foreach ($RSS as $url => $title) {?>
   <link rel="alternate" href="<?=_html($url)?>" type="application/rss+xml" title="pouët.net: <?=_html($title)?>">
 <?php }?>
@@ -43,7 +43,7 @@ if ($linkedData) {
 $newsTickers = handle_db_cache(POUET_ROOT_LOCAL . "/cache/newstickers.cache", function () {
     $rows = SQLLib::selectRows("SELECT * FROM newstickers WHERE expires > CURDATE()");
 
-    $tickers = array();
+    $tickers = [];
     foreach ($rows as $v) {
         $v->expires = strtotime($v->expires);
         $tickers[$v->tickerCode] = $v;

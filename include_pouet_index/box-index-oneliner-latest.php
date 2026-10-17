@@ -22,17 +22,17 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
         $message = trim($post["message"]);
 
         if (!is_string_meaningful($message)) {
-            return array("not too meaningful, is it...");
+            return ["not too meaningful, is it..."];
         }
 
         if (!$currentUser || !$currentUser->CanPostInOneliner()) {
-            return array("just no.");
+            return ["just no."];
         }
 
         $r = SQLLib::SelectRow("SELECT who FROM oneliner ORDER BY addedDate DESC LIMIT 1");
 
         if ($r->who == $currentUser->id) {
-            return array("ERROR! DOUBLEPOST == ROB IS JARIG!");
+            return ["ERROR! DOUBLEPOST == ROB IS JARIG!"];
         }
     }
 
@@ -41,7 +41,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
         global $currentUser;
         $message = trim($post["message"]);
 
-        $a = array();
+        $a = [];
         $a["who"] = $currentUser->id;
         $a["addedDate"] = date("Y-m-d H:i:s");
         $a["message"] = $message;
@@ -50,7 +50,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
 
         $this->ForceCacheUpdate();
 
-        return array();
+        return [];
     }
     public function LoadFromCachedData($data)
     {
@@ -71,10 +71,10 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of oneliners visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX),
-          "showTimestamps" => array("name" => "show timestamps","type" => "checkbox"),
-        );
+        return [
+            "limit" => ["name" => "number of oneliners visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX],
+            "showTimestamps" => ["name" => "show timestamps","type" => "checkbox"],
+        ];
     }
 
     public function LoadFromDB()
@@ -83,7 +83,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
         $s->AddField("message");
         $s->AddField("addedDate");
         $s->AddTable("oneliner");
-        $s->attach(array("oneliner" => "who"), array("users as user" => "id"));
+        $s->attach(["oneliner" => "who"], ["users as user" => "id"]);
         //$s->AddOrder("oneliner.addedDate desc, oneliner.id desc");
         $s->AddOrder("oneliner.id desc");
         $s->SetLimit(POUET_CACHE_MAX);
@@ -99,11 +99,11 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
             if (!$r->user) {
                 continue;
             }
-            echo "<li class='cite-".$r->user->id."'>\n";
+            echo "<li class='cite-" . $r->user->id . "'>\n";
             if ($this->showTimestamps) {
-                echo "<time datetime='".$r->addedDate."' title='".$r->addedDate."'>".date("H:i", strtotime($r->addedDate))."</time> ";
+                echo "<time datetime='" . $r->addedDate . "' title='" . $r->addedDate . "'>" . date("H:i", strtotime($r->addedDate)) . "</time> ";
             }
-            echo $r->user->PrintLinkedAvatar()."\n";
+            echo $r->user->PrintLinkedAvatar() . "\n";
 
             $p = $r->message;
             $p = _html($p);
@@ -163,7 +163,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
             echo "    <input type='hidden' name='type' value='oneliner'>\n";
 
             // we dont use placeholder="" because we want people to be able to post the default nonsense
-            echo "    <input type='text' name='message' value='"._html($funnytext)."' id='onelinermsg' maxlength='300'>\n";
+            echo "    <input type='text' name='message' value='" . _html($funnytext) . "' id='onelinermsg' maxlength='300'>\n";
             echo "    <input type='submit' value='Submit'>\n";
             echo "   </form>\n";
             echo "  </div>\n";

@@ -31,7 +31,7 @@ class PouetBoxBBSOpen extends PouetBox
         }
 
         if ($currentUser->glops == 0 && strstr($message, "://") !== false) {
-            return array("you need at least 1 glöp to post links !");
+            return ["you need at least 1 glöp to post links !"];
         }
 
         $title = trim($post["topic"]);
@@ -44,7 +44,7 @@ class PouetBoxBBSOpen extends PouetBox
             return "DOUBLEPOST == ROB IS JARIG";
         }
 
-        $a = array();
+        $a = [];
         $a["topic"] = $title;
         $a["category"] = $post["category"];
         $a["userfirstpost"] = $a["userlastpost"] = get_login_id();
@@ -52,7 +52,7 @@ class PouetBoxBBSOpen extends PouetBox
 
         $id = SQLLib::InsertRow("bbs_topics", $a);
 
-        $a = array();
+        $a = [];
         $a["added"] = date("Y-m-d H:i:s");
         $a["author"] = get_login_id();
         $a["post"] = $message;

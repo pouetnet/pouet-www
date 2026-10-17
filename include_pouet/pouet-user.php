@@ -28,7 +28,7 @@ class PouetUser extends BM_Class
     public $lasthost;
 
     // non-db fields
-    public $stats = array();
+    public $stats = [];
 
     public static function getTable()
     {
@@ -36,16 +36,16 @@ class PouetUser extends BM_Class
     }
     public static function getFields()
     {
-        return array("id","nickname","level","permissionSubmitItems","permissionPostBBS","permissionOpenBBS","permissionPostOneliner","avatar","glops","registerDate","lastLogin","thumbups","thumbdowns");
+        return ["id","nickname","level","permissionSubmitItems","permissionPostBBS","permissionOpenBBS","permissionPostOneliner","avatar","glops","registerDate","lastLogin","thumbups","thumbdowns"];
     }
     public static function getExtendedFields()
     {
-        return array("udlogin","sceneIDLastRefresh","sceneIDData","ojuice","slengpung","csdb","zxdemo","demozoo","lastip","lasthost");
+        return ["udlogin","sceneIDLastRefresh","sceneIDData","ojuice","slengpung","csdb","zxdemo","demozoo","lastip","lasthost"];
     }
 
     public function PrintAvatar()
     {
-        return sprintf("<img src='".POUET_CONTENT_URL."avatars/%s' alt=\"%s\" loading='lazy' class='avatar'>", rawurlencode($this->avatar), _html($this->nickname));
+        return sprintf("<img src='" . POUET_CONTENT_URL . "avatars/%s' alt=\"%s\" loading='lazy' class='avatar'>", rawurlencode($this->avatar), _html($this->nickname));
     }
     public function PrintLinkedAvatar()
     {
@@ -53,7 +53,7 @@ class PouetUser extends BM_Class
     }
     public function PrintLinkedName()
     {
-        $classes = array("user");
+        $classes = ["user"];
         if ($this->lastLogin && (time() - strtotime($this->lastLogin)) < 5 * 60) {
             $classes[] = "online";
         }
@@ -78,7 +78,7 @@ class PouetUser extends BM_Class
     }
     public function Create()
     {
-        $a = array();
+        $a = [];
         $a["id"] = $this->id;
         $a["nickname"] = $this->nickname;
         $a["avatar"] = $this->avatar;
@@ -105,7 +105,7 @@ class PouetUser extends BM_Class
         $this->stats["lists"]       = SQLLib::SelectRow(sprintf_esc("SELECT count(0) AS c FROM lists WHERE owner=%d", $this->id))->c;
         if ($this->udlogin) {
             $ud = SQLLib::SelectRow(sprintf_esc("SELECT points FROM ud WHERE login='%s'", $this->udlogin));
-            $this->stats["ud"] = $ud ? (int)round($ud->points / 1000) : 0;
+            $this->stats["ud"] = $ud ? (int) round($ud->points / 1000) : 0;
         } else {
             $this->stats["ud"] = 0;
         }
@@ -128,7 +128,7 @@ class PouetUser extends BM_Class
         $s->AddTable("credits");
         $s->AddField("sum(voteup) as up");
         $s->AddField("sum(votedown) as down");
-        $s->Attach(array("credits" => "prodID"), array("prods as prod" => "id"));
+        $s->Attach(["credits" => "prodID"], ["prods as prod" => "id"]);
         $s->AddWhere(sprintf("credits.userID = %d", $this->id));
         $s->AddOrder("credits_prod.addedDate desc");
         $data = $s->perform();
@@ -138,16 +138,16 @@ class PouetUser extends BM_Class
     public function UpdateGlops()
     {
         $this->glops = $this->CalculateGlops();
-        SQLLib::UpdateRow("users", array("glops" => $this->glops), sprintf_esc("id=%d", $this->id));
+        SQLLib::UpdateRow("users", ["glops" => $this->glops], sprintf_esc("id=%d", $this->id));
     }
     public function UpdateThumbs()
     {
         $thumbs = $this->CalculateThumbs();
 
-        $this->thumbups = (int)$thumbs->up;
-        $this->thumbdowns = (int)$thumbs->down;
+        $this->thumbups = (int) $thumbs->up;
+        $this->thumbdowns = (int) $thumbs->down;
 
-        SQLLib::UpdateRow("users", array("thumbups" => $this->thumbups,"thumbdowns" => $this->thumbdowns), sprintf_esc("id=%d", $this->id));
+        SQLLib::UpdateRow("users", ["thumbups" => $this->thumbups,"thumbdowns" => $this->thumbdowns], sprintf_esc("id=%d", $this->id));
     }
     public function GetSceneIDData($cached = true)
     {
@@ -164,14 +164,14 @@ class PouetUser extends BM_Class
             $sceneID->GetClientCredentialsToken();
             $data = $sceneID->User($this->id);
             if ($data && @$data["user"]) {
-                SQLLib::UpdateRow("users", array(
-                  "sceneIDLastRefresh" => date("Y-m-d H:i:s"),
-                  "sceneIDData" => serialize($data["user"])
-                ), sprintf_esc("id=%d", $this->id));
+                SQLLib::UpdateRow("users", [
+                    "sceneIDLastRefresh" => date("Y-m-d H:i:s"),
+                    "sceneIDData" => serialize($data["user"]),
+                ], sprintf_esc("id=%d", $this->id));
                 return $data["user"];
             }
 
-            return array();
+            return [];
         } catch (SceneID3Exception $e) {
             // If there's a failure, just return cached data
             LOG::Warning($e->getMessage());

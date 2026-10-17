@@ -14,46 +14,46 @@ class PouetBoxASCIIViewer extends PouetBox
 
     public function LoadFromDB()
     {
-        $this->fonts = array(
-          "none" => array(
-            "name" => "html",
-            "class" => "",
-          ),
-          "1" => array(
-            "name" => "dos 80*25",
-            "class" => "dos-80x25",
-            "encoding" => "cp437",
-          ),
-          "2" => array(
-            "name" => "dos 80*50",
-            "class" => "dos-80x50",
-            "encoding" => "cp437",
-          ),
-          "3" => array(
-            "name" => "rez's ascii",
-            "class" => "rez-ascii",
-            "encoding" => "cp437",
-          ),
-          "4" => array(
-            "name" => "amiga medres",
-            "class" => "amiga-medres",
-            "encoding" => "iso-8859-1",
-          ),
-          "5" => array(
-            "name" => "amiga hires",
-            "class" => "amiga-hires",
-            "encoding" => "iso-8859-1",
-          ),
-        );
+        $this->fonts = [
+            "none" => [
+                "name" => "html",
+                "class" => "",
+            ],
+            "1" => [
+                "name" => "dos 80*25",
+                "class" => "dos-80x25",
+                "encoding" => "cp437",
+            ],
+            "2" => [
+                "name" => "dos 80*50",
+                "class" => "dos-80x50",
+                "encoding" => "cp437",
+            ],
+            "3" => [
+                "name" => "rez's ascii",
+                "class" => "rez-ascii",
+                "encoding" => "cp437",
+            ],
+            "4" => [
+                "name" => "amiga medres",
+                "class" => "amiga-medres",
+                "encoding" => "iso-8859-1",
+            ],
+            "5" => [
+                "name" => "amiga hires",
+                "class" => "amiga-hires",
+                "encoding" => "iso-8859-1",
+            ],
+        ];
     }
     public function RenderHeader()
     {
         echo "\n\n";
-        echo "<div class='pouettbl asciiviewer' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl asciiviewer' id='" . $this->uniqueID . "'>\n";
     }
     public function RenderBody()
     {
-        echo "<div class='content' title='".$this->bodyTitle."'>\n";
+        echo "<div class='content' title='" . $this->bodyTitle . "'>\n";
         $font = @$this->fonts[$_GET["font"]] ?: $this->fonts["none"];
 
         printf("<pre class='%s'>", _html($font["class"]));
@@ -66,11 +66,11 @@ class PouetBoxASCIIViewer extends PouetBox
     public function RenderFooter()
     {
         echo "  <div class='content' id='fontlist'>";
-        $a = array();
+        $a = [];
         foreach ($this->fonts as $k => $v) {
-            $a[] = sprintf("<a href='%s'>%s</a>\n", adjust_query_header(array("font" => $k)), $v["name"]);
+            $a[] = sprintf("<a href='%s'>%s</a>\n", adjust_query_header(["font" => $k]), $v["name"]);
         }
-        echo "[ ".implode(" | \n", $a)." ]";
+        echo "[ " . implode(" | \n", $a) . " ]";
         echo "  </div>";
     }
 };

@@ -31,7 +31,7 @@ class PouetBoxIndexRandom extends PouetBox
         $data = $s->perform();
         $this->data = reset($data);
 
-        $a = array(&$this->data);
+        $a = [&$this->data];
         PouetCollectPlatforms($a);
     }
 

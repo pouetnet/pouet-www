@@ -25,11 +25,11 @@ class PouetBoxFAQ extends PouetBox
                 if ($lastType) {
                     echo "</ul>\n";
                 }
-                echo "<h3>"._html($e->category)."</h3>\n";
+                echo "<h3>" . _html($e->category) . "</h3>\n";
                 $lastType = $e->category;
                 echo "<ul>\n";
             }
-            echo "<li><a href='#faq"._html($e->id)."'>".$e->question."</a></li>\n";
+            echo "<li><a href='#faq" . _html($e->id) . "'>" . $e->question . "</a></li>\n";
         }
         echo "</ul>\n";
         echo "</div>\n";
@@ -40,12 +40,12 @@ class PouetBoxFAQ extends PouetBox
                 if ($lastType) {
                     echo "</dl>\n";
                 }
-                echo "<h2>:: "._html($e->category)."</h2>\n";
+                echo "<h2>:: " . _html($e->category) . "</h2>\n";
                 $lastType = $e->category;
                 echo "<dl class='faq'>\n";
             }
-            echo "<dt id='faq"._html($e->id)."'>:: "._html($e->category)." :: ".$e->question."</dt>\n";
-            echo "<dd>".$e->answer."</dd>\n";
+            echo "<dt id='faq" . _html($e->id) . "'>:: " . _html($e->category) . " :: " . $e->question . "</dt>\n";
+            echo "<dd>" . $e->answer . "</dd>\n";
         }
         echo "</dl>\n";
     }

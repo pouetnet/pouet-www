@@ -20,39 +20,39 @@ class PouetBoxSubmitList extends PouetBox
         $this->uniqueID = "pouetbox_submitlist";
         $this->title = "create a new list!";
         $this->formifier = new Formifier();
-        $this->fields = array(
-          "name" => array(
-            "name" => "list name",
-            "info" => " ",
-            "required" => true,
-          ),
-          "desc" => array(
-            "name" => "short description",
-            "type" => "textarea",
-            "info" => "be concise."
-          ),
-        );
+        $this->fields = [
+            "name" => [
+                "name" => "list name",
+                "info" => " ",
+                "required" => true,
+            ],
+            "desc" => [
+                "name" => "short description",
+                "type" => "textarea",
+                "info" => "be concise.",
+            ],
+        ];
     }
     public function Validate($data)
     {
         global $partyID,$currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!trim($data["name"])) {
-            return array("oh come on you're more creative than that !");
+            return ["oh come on you're more creative than that !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["desc"] = $data["desc"];
         $a["owner"] = get_login_id();
@@ -62,16 +62,14 @@ class PouetBoxSubmitList extends PouetBox
 
         @unlink("cache/pouetbox_latestlists.cache");
 
-        return array();
+        return [];
     }
     public function GetInsertionID()
     {
         return $this->listID;
     }
 
-    public function LoadFromDB()
-    {
-    }
+    public function LoadFromDB() {}
 
     public function Render()
     {
@@ -86,9 +84,9 @@ class PouetBoxSubmitList extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";

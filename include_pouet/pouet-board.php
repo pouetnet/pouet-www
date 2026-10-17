@@ -19,15 +19,15 @@ class PouetBoard extends BM_Class
     }
     public static function getFields()
     {
-        return array("id","name","addedDate","addedUser");
+        return ["id","name","addedDate","addedUser"];
     }
     public static function getExtendedFields()
     {
-        return array("sysop","phonenumber");
+        return ["sysop","phonenumber"];
     }
     public static function onAttach(&$node, &$query)
     {
-        $node->attach($query, "addedUser", array("users as addedUser" => "id"));
+        $node->attach($query, "addedUser", ["users as addedUser" => "id"]);
     }
     public function RenderLink()
     {
