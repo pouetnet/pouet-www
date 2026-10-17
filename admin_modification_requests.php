@@ -164,7 +164,7 @@ if (defined("YOUTUBE_FRONTEND_KEY")) {
       var pouetID = element.href.match(/pouet\.net\/prod\.php.*which=([0-9]+)/);
       if (pouetID)
       {
-        new Ajax.JSONRequest("https://api.pouet.net/v1/prod/?id="+pouetID[1],{
+        new Ajax.JSONRequest(<?=json_encode(POUET_API_URL . "v1/prod/?id=", JSON_HEX_TAG)?>+pouetID[1],{
           method: "get",
           onSuccess: function(transport) {
             if (transport.responseJSON.success)

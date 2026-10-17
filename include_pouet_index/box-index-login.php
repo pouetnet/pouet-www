@@ -46,7 +46,7 @@ class PouetBoxIndexLogin extends PouetBoxLogin
         ));
         if ($broken->c) {
             echo "<div class='content notifications'>\n";
-            printf("[ <a href='http://cardboard.pouet.net/broken_links.php?userID=me'>you have %d broken links !</a> ]", $broken->c);
+            printf("[ <a href='%sbroken_links.php?userID=me'>you have %d broken links !</a> ]", POUET_CARDBOARD_URL, $broken->c);
             echo "</div>\n";
         }
 

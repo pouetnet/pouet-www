@@ -29,7 +29,7 @@ if (get_setting("logos")) {
     $random_quotes = [
         'send your logos to <a href="submit_logo.php">us</a> and be a popstar !',
         '<a href="logo_vote.php">vote</a> for the logos you like and be a lamah !',
-        'pouët.net is brought to you by <a href="http://www.pouet.net/groups.php?which=5">mandarine</a>',
+        'pouët.net is brought to you by <a href="groups.php?which=5">mandarine</a>',
         'pouët.net is hosted on the huge <a href="http://www.scene.org/">scene.org</a> servers',
         /*
       'pou?t != scene && scene != pou?t',
