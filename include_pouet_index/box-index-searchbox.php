@@ -19,10 +19,10 @@ class PouetBoxIndexSearchBox extends PouetBoxCachable
         echo "</div>\n";
         echo "<div class='content center buttons'>\n";
 
-        $types = array("prod","group","party"/*,"board"*/,"user","bbs");
-        $a = array();
+        $types = ["prod","group","party"/*,"board"*/,"user","bbs"];
+        $a = [];
         foreach ($types as $t) {
-            $a[] = "<li><label><input type='radio' name='type' value='".$t."' ".($t == "prod" ? " checked='checked'" : "").">&nbsp;".$t."</label></li>\n";
+            $a[] = "<li><label><input type='radio' name='type' value='" . $t . "' " . ($t == "prod" ? " checked='checked'" : "") . ">&nbsp;" . $t . "</label></li>\n";
         }
 
         echo "<ul id='searchType'>";

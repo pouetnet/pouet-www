@@ -15,8 +15,8 @@ class PouetFormProcessor
 
     public function __construct()
     {
-        $this->objects = array();
-        $this->errors = array();
+        $this->objects = [];
+        $this->errors = [];
         $this->successURL = null;
         $this->redirectOnSuccess = false;
     }
@@ -38,11 +38,11 @@ class PouetFormProcessor
     }
     public function Process()
     {
-        $this->errors = array();
+        $this->errors = [];
         if (@$_POST[ self::fieldName ] && $this->objects[$_POST[ self::fieldName ]]) {
             $csrf = new CSRFProtect();
             if (!$csrf->ValidateToken()) {
-                $this->errors = array("who are you and where did you come from ?");
+                $this->errors = ["who are you and where did you come from ?"];
                 return;
             }
 
@@ -50,7 +50,7 @@ class PouetFormProcessor
             if (!$this->errors) {
                 $this->successURL = str_replace("{%NEWID%}", rawurlencode($this->objects[$_POST[ self::fieldName ]]->GetInsertionID()), $this->successURL);
                 if ($this->redirectOnSuccess) {
-                    redirect($this->successURL."#success");
+                    redirect($this->successURL . "#success");
                     exit();
                 }
             }
@@ -63,7 +63,7 @@ class PouetFormProcessor
             $msg = new PouetBoxModalMessage(true);
             $msg->classes[] = "errorbox";
             $msg->title = "An error has occurred:";
-            $msg->message = "<ul><li>".implode("</li><li>", $this->errors)."</li></ul>";
+            $msg->message = "<ul><li>" . implode("</li><li>", $this->errors) . "</li></ul>";
             $msg->Render();
         } else {
             if (@$_POST[ self::fieldName ] && $this->objects[$_POST[ self::fieldName ]]) {
@@ -71,9 +71,9 @@ class PouetFormProcessor
                 $msg->classes[] = "successbox";
                 $msg->title = "Success!";
                 if ($this->successURL) {
-                    $msg->message = "<a href='"._html($this->successURL)."'>".$this->successMessage."</a>";
+                    $msg->message = "<a href='" . _html($this->successURL) . "'>" . $this->successMessage . "</a>";
                 } else {
-                    $msg->message = "<a href='".POUET_ROOT_URL."'>go back to the front page</a>";
+                    $msg->message = "<a href='" . POUET_ROOT_URL . "'>go back to the front page</a>";
                 }
                 $msg->Render();
                 $showBox = false;

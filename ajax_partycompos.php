@@ -13,4 +13,6 @@ $sql->AddWhere(sprintf_esc("party_year=%d", $_GET["year"]));
 
 $r = SQLLib::selectRows($sql->GetQuery());
 
-echo json_encode(array("compos" => array_map(function ($i) { return (int)$i->party_compo; }, $r)));
+echo json_encode(["compos" => array_map(function ($i) {
+    return (int) $i->party_compo;
+}, $r)]);

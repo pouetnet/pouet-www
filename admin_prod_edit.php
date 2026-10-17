@@ -5,7 +5,7 @@ require_once("include_pouet/box-prod-submit.php");
 require_once("include_pouet/pouet-box-editbase.php");
 
 if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("prod.php?which=".(int)$_GET["which"]);
+    redirect("prod.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -20,27 +20,27 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->prod = PouetProd::Spawn($this->id);
         if (!$this->prod) {
             return;
         }
-        $a = array(&$this->prod);
+        $a = [&$this->prod];
         PouetCollectPlatforms($a);
 
         $this->formifier->canDeleteFiles = true;
 
-        $this->title = "edit this prod: ".$this->prod->RenderLink();
+        $this->title = "edit this prod: " . $this->prod->RenderLink();
     }
     public function Commit($data)
     {
         //die("almost there");
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["download"] = trim($data["download"]);
 
-        if ($data["releaseDate_month"] && $data["releaseDate_year"] && checkdate((int)$data["releaseDate_month"], 15, (int)$data["releaseDate_year"])) {
+        if ($data["releaseDate_month"] && $data["releaseDate_year"] && checkdate((int) $data["releaseDate_month"], 15, (int) $data["releaseDate_year"])) {
             $a["releaseDate"] = sprintf("%04d-%02d-15", $data["releaseDate_year"], $data["releaseDate_month"]);
         } elseif ($data["releaseDate_year"]) {
             $a["releaseDate"] = sprintf("%04d-00-15", $data["releaseDate_year"]);
@@ -50,15 +50,15 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
 
         $a["type"] = implode(",", $data["type"]);
 
-        $groups = array();
+        $groups = [];
         if ($data["group1"]) {
-            $groups[] = (int)$data["group1"];
+            $groups[] = (int) $data["group1"];
         }
         if ($data["group2"]) {
-            $groups[] = (int)$data["group2"];
+            $groups[] = (int) $data["group2"];
         }
         if ($data["group3"]) {
-            $groups[] = (int)$data["group3"];
+            $groups[] = (int) $data["group3"];
         }
         $groups = array_unique($groups);
         if (count($groups)) {
@@ -77,38 +77,38 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
             $a["group3"] = null;
         }
 
-        $a["csdb"] = (int)$data["csdbID"];
+        $a["csdb"] = (int) $data["csdbID"];
         //$a["sceneorg"] = $data["sceneOrgID"];
         //$a["zxdemo"] = $data["zxdemoID"];
-        $a["demozoo"] = (int)$data["demozooID"];
+        $a["demozoo"] = (int) $data["demozooID"];
         $a["party"] = nullify($data["partyID"]);
-        $a["party_year"] = (int)$data["partyYear"];
+        $a["party_year"] = (int) $data["partyYear"];
         $a["party_compo"] = nullify($data["partyCompo"]);
-        $a["party_place"] = (int)$data["partyRank"];
+        $a["party_place"] = (int) $data["partyRank"];
         $a["invitation"] = nullify($data["invitationParty"]);
-        $a["invitationyear"] = (int)$data["invitationYear"];
+        $a["invitationyear"] = (int) $data["invitationYear"];
         $a["boardID"] = nullify($data["boardID"]);
         global $prodID;
-        SQLLib::UpdateRow("prods", $a, "id=".(int)$this->id);
+        SQLLib::UpdateRow("prods", $a, "id=" . (int) $this->id);
 
         $data["platform"] = array_unique($data["platform"]);
-        SQLLib::Query(sprintf_esc("delete from prods_platforms where prod = %d", (int)$this->id));
+        SQLLib::Query(sprintf_esc("delete from prods_platforms where prod = %d", (int) $this->id));
         foreach ($data["platform"] as $v) {
-            $a = array();
-            $a["prod"] = (int)$this->id;
+            $a = [];
+            $a["prod"] = (int) $this->id;
             $a["platform"] = $v;
             SQLLib::InsertRow("prods_platforms", $a);
         }
 
         if (@$data["screenshot_delete"]) {
             SQLLib::Query(sprintf_esc("delete from screenshots where prod = %d", $this->id));
-            foreach (array( "jpg","gif","png" ) as $v) {
-                @unlink(get_local_screenshot_path((int)$this->id, $v));
+            foreach ([ "jpg","gif","png" ] as $v) {
+                @unlink(get_local_screenshot_path((int) $this->id, $v));
             }
         } else {
             if (is_uploaded_file($_FILES["screenshot"]["tmp_name"])) {
-                foreach (array( "jpg","gif","png" ) as $v) {
-                    @unlink(get_local_screenshot_path((int)$this->id, $v));
+                foreach ([ "jpg","gif","png" ] as $v) {
+                    @unlink(get_local_screenshot_path((int) $this->id, $v));
                 }
 
                 list($width, $height, $type) = GetImageSize($_FILES["screenshot"]["tmp_name"]);
@@ -122,31 +122,37 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
                         break;
                 }
                 if ($extension != "_") {
-                    move_uploaded_file_fake($_FILES["screenshot"]["tmp_name"], get_local_screenshot_path((int)$this->id, $extension));
+                    move_uploaded_file_fake($_FILES["screenshot"]["tmp_name"], get_local_screenshot_path((int) $this->id, $extension));
                 }
             }
         }
 
         if (@$data["nfofile_delete"]) {
             SQLLib::Query(sprintf_esc("delete from nfos where prod = %d", $this->id));
-            unlink(get_local_nfo_path((int)$this->id));
+            unlink(get_local_nfo_path((int) $this->id));
         } else {
             if (is_uploaded_file($_FILES["nfofile"]["tmp_name"])) {
-                move_uploaded_file_fake($_FILES["nfofile"]["tmp_name"], get_local_nfo_path((int)$this->id));
+                move_uploaded_file_fake($_FILES["nfofile"]["tmp_name"], get_local_nfo_path((int) $this->id));
             }
         }
 
-        gloperator_log("prod", (int)$this->id, "prod_edit");
+        gloperator_log("prod", (int) $this->id, "prod_edit");
 
         SQLLib::Query(sprintf_esc("delete from prods_linkcheck where prodID = %d", $this->id));
 
         $prodID = $this->id;
         $partyID = $a["party"];
-        flush_cache("pouetbox_latestadded.cache", function ($i) use ($prodID) { return $i->id == $prodID; });
-        flush_cache("pouetbox_latestreleased.cache", function ($i) use ($prodID) { return $i->id == $prodID; });
-        flush_cache("pouetbox_latestparties.cache", function ($i) use ($partyID) { return $i->id == $partyID; });
+        flush_cache("pouetbox_latestadded.cache", function ($i) use ($prodID) {
+            return $i->id == $prodID;
+        });
+        flush_cache("pouetbox_latestreleased.cache", function ($i) use ($prodID) {
+            return $i->id == $prodID;
+        });
+        flush_cache("pouetbox_latestparties.cache", function ($i) use ($partyID) {
+            return $i->id == $partyID;
+        });
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -154,13 +160,13 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
 
         $prod = $this->prod;
 
-        $a = array();
+        $a = [];
         $this->fields["name"]["value"] = $prod->name;
         $this->fields["download"]["value"] = $prod->download;
 
         $n = 1;
         foreach ($prod->groups as $g) {
-            $this->fields["group".$n++]["value"] = $g->id;
+            $this->fields["group" . $n++]["value"] = $g->id;
         }
 
         $this->fields["releaseDate"]["value"] = $prod->releaseDate;
@@ -205,25 +211,25 @@ class PouetBoxAdminDeleteProd extends PouetBox
         global $verificationStrings;
         $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-        $this->title = "delete this prod: ".$this->prod->RenderLink();
+        $this->title = "delete this prod: " . $this->prod->RenderLink();
     }
     public function Validate($data)
     {
         if ($data["check"] != $data["checkOrig"]) {
-            return array("wrong verification string !");
+            return ["wrong verification string !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         $this->prod->Delete();
-        return array();
+        return [];
     }
     public function RenderBody()
     {
         echo "<div class='content'>";
-        echo "  <p>To make sure you want to delete <b>this</b> prod, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <p>To make sure you want to delete <b>this</b> prod, type \"" . $this->checkString . "\" here:</p>";
+        echo "  <input name='checkOrig' type='hidden' value='" . _html($this->checkString) . "'>";
         echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
         echo "<div class='foot'>";
@@ -268,13 +274,13 @@ class PouetBoxAdminEditProdAwards extends PouetBoxEditConnectionsBase
         $this->title = "prod awards";
 
         $this->data = SQLLib::SelectRows(sprintf_esc("select * from awards where prodID = %d", $this->prod->id));
-        $this->headers = array("series / category","result");
+        $this->headers = ["series / category","result"];
 
         $row = SQLLib::selectRow("DESC awards awardType");
         $this->types = enum2array($row->Type);
 
         global $AWARDS_CATEGORIES;
-        $this->categories = array();
+        $this->categories = [];
         foreach ($AWARDS_CATEGORIES as $k => $v) {
             $this->categories[$k] = sprintf("%s - %s", $v->series, $v->category);
         }
@@ -282,37 +288,37 @@ class PouetBoxAdminEditProdAwards extends PouetBoxEditConnectionsBase
     public function Commit($data)
     {
         if (@$data["delAwards"]) {
-            SQLLib::Query("delete from awards where id=".(int)$data["delAwards"]);
-            gloperator_log("prod", (int)$this->prod->id, "prod_awards_delete");
-            return array();
+            SQLLib::Query("delete from awards where id=" . (int) $data["delAwards"]);
+            gloperator_log("prod", (int) $this->prod->id, "prod_awards_delete");
+            return [];
         }
 
-        $a = array();
+        $a = [];
         $a["awardType"] = $data["awardType"];
         if (!in_array($a["awardType"], $this->types, true)) {
-            return array("invalid award type");
+            return ["invalid award type"];
         }
-        $a["categoryID"] = (int)$data["awardCategory"];
+        $a["categoryID"] = (int) $data["awardCategory"];
         if (!isset($this->categories[$a["categoryID"]])) {
-            return array("invalid award category");
+            return ["invalid award category"];
         }
         if (@$data["editAwardsID"]) {
-            SQLLib::UpdateRow("awards", $a, "id=".(int)$data["editAwardsID"]);
+            SQLLib::UpdateRow("awards", $a, "id=" . (int) $data["editAwardsID"]);
             $a["id"] = $data["editAwardsID"];
 
-            gloperator_log("prod", (int)$this->prod->id, "prod_awards_edit", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_awards_edit", ["id" => $a["id"]]);
         } else {
             $a["prodid"] = $this->prod->id;
             $a["id"] = SQLLib::InsertRow("awards", $a);
 
-            gloperator_log("prod", (int)$this->prod->id, "prod_awards_add", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_awards_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $this->RenderNormalRow(toObject($a));
             $this->RenderNormalRowEnd(toObject($a));
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
@@ -332,8 +338,8 @@ class PouetBoxAdminEditProdAwards extends PouetBoxEditConnectionsBase
         global $AWARDS_CATEGORIES;
 
         $category = $AWARDS_CATEGORIES[$v->categoryID];
-        echo "    <td>"._html($category->series." - ".$category->category)."</td>\n";
-        echo "    <td>"._html($v->awardType)."</td>\n";
+        echo "    <td>" . _html($category->series . " - " . $category->category) . "</td>\n";
+        echo "    <td>" . _html($v->awardType) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -367,48 +373,48 @@ class PouetBoxAdminEditProdLinks extends PouetBoxEditConnectionsBase
         $this->id = $prod->id;
         $this->title = "additional links";
 
-        $this->headers = array("type","link");
+        $this->headers = ["type","link"];
         $this->data = SQLLib::SelectRows(sprintf_esc("select * from downloadlinks where prod = %d", $this->prod->id));
     }
     public function Commit($data)
     {
         if (@$data["delLink"]) {
-            SQLLib::Query("delete from downloadlinks where id=".(int)$data["delLink"]);
-            gloperator_log("prod", (int)$this->prod->id, "prod_link_del");
-            return array();
+            SQLLib::Query("delete from downloadlinks where id=" . (int) $data["delLink"]);
+            gloperator_log("prod", (int) $this->prod->id, "prod_link_del");
+            return [];
         }
 
-        $a = array();
+        $a = [];
         $a["type"] = $data["type"];
         $a["link"] = $data["link"];
         if (!filter_var($a["link"], FILTER_VALIDATE_URL)) {
-            return array("invalid URL");
+            return ["invalid URL"];
         }
         if (@$data["editLinkID"]) {
-            SQLLib::UpdateRow("downloadlinks", $a, "id=".(int)$data["editLinkID"]);
+            SQLLib::UpdateRow("downloadlinks", $a, "id=" . (int) $data["editLinkID"]);
             $a["id"] = $data["editLinkID"];
-            gloperator_log("prod", (int)$this->prod->id, "prod_link_edit", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_link_edit", ["id" => $a["id"]]);
         } else {
             $a["prod"] = $this->prod->id;
             $a["id"] = SQLLib::InsertRow("downloadlinks", $a);
-            gloperator_log("prod", (int)$this->prod->id, "prod_link_add", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_link_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $this->RenderNormalRow(toObject($a));
             $this->RenderNormalRowEnd(toObject($a));
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='type' value='"._html($row ? $row->type : "")."'></td>\n";
-        echo "    <td><input name='link' value='"._html($row ? $row->link : "")."' type='url'></td>\n";
+        echo "    <td><input name='type' value='" . _html($row ? $row->type : "") . "'></td>\n";
+        echo "    <td><input name='link' value='" . _html($row ? $row->link : "") . "' type='url'></td>\n";
     }
     public function RenderNormalRow($v)
     {
-        echo "    <td>"._html($v->type)."</td>\n";
-        echo "    <td>"._html($v->link)."</td>\n";
+        echo "    <td>" . _html($v->type) . "</td>\n";
+        echo "    <td>" . _html($v->link) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -444,7 +450,7 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
         $this->id = $prod->id;
         $this->title = "additional parties";
 
-        $this->headers = array("party","year","compo","place");
+        $this->headers = ["party","year","compo","place"];
 
         $s = new BM_Query();
         $s->AddField("prodotherparty.id");
@@ -452,7 +458,7 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
         $s->AddField("prodotherparty.party_place");
         $s->AddField("prodotherparty.party_year");
         $s->AddTable("prodotherparty");
-        $s->attach(array("prodotherparty" => "party"), array("parties as party" => "id"));
+        $s->attach(["prodotherparty" => "party"], ["parties as party" => "id"]);
         $s->AddWhere(sprintf_esc("prod=%d", $this->prod->id));
         $this->data = $s->perform();
 
@@ -461,7 +467,7 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
         $this->compos[0] = "";
         asort($this->compos);
 
-        $this->ranks = array(0 => "");
+        $this->ranks = [0 => ""];
         $this->ranks[97] = "disqualified";
         $this->ranks[98] = "not applicable";
         $this->ranks[99] = "not shown";
@@ -469,7 +475,7 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
             $this->ranks[$x] = $x;
         }
 
-        $this->years = array("");
+        $this->years = [""];
         for ($x = date("Y"); $x >= POUET_EARLIEST_YEAR; $x--) {
             $this->years[$x] = $x;
         }
@@ -478,27 +484,27 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
     public function Commit($data)
     {
         if (@$data["delParty"]) {
-            SQLLib::Query("delete from prodotherparty where id=".(int)$data["delParty"]);
-            gloperator_log("prod", (int)$this->prod->id, "prod_party_del");
-            return array();
+            SQLLib::Query("delete from prodotherparty where id=" . (int) $data["delParty"]);
+            gloperator_log("prod", (int) $this->prod->id, "prod_party_del");
+            return [];
         }
 
-        $a = array();
-        $a["party"] = (int)$data["partyID"];
+        $a = [];
+        $a["party"] = (int) $data["partyID"];
         if (!PouetParty::Spawn($a["party"])) {
-            return array("invalid party");
+            return ["invalid party"];
         }
-        $a["party_year"] = (int)$data["partyYear"];
-        $a["party_place"] = (int)$data["partyPlace"];
-        $a["party_compo"] = nullify($data["partyCompo"]) ? (int)$data["partyCompo"] : null;
+        $a["party_year"] = (int) $data["partyYear"];
+        $a["party_place"] = (int) $data["partyPlace"];
+        $a["party_compo"] = nullify($data["partyCompo"]) ? (int) $data["partyCompo"] : null;
         if (@$data["editPartyID"]) {
-            SQLLib::UpdateRow("prodotherparty", $a, "id=".(int)$data["editPartyID"]);
+            SQLLib::UpdateRow("prodotherparty", $a, "id=" . (int) $data["editPartyID"]);
             $a["id"] = $data["editPartyID"];
-            gloperator_log("prod", (int)$this->prod->id, "prod_party_edit", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_party_edit", ["id" => $a["id"]]);
         } else {
             $a["prod"] = $this->prod->id;
             $a["id"] = SQLLib::InsertRow("prodotherparty", $a);
-            gloperator_log("prod", (int)$this->prod->id, "prod_party_add", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_party_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $o = toObject($a);
@@ -507,11 +513,11 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
             $this->RenderNormalRowEnd($o);
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='partyID' value='"._html($row && $row->party ? $row->party->id : "")."' class='partyID'></td>\n";
+        echo "    <td><input name='partyID' value='" . _html($row && $row->party ? $row->party->id : "") . "' class='partyID'></td>\n";
 
         echo "    <td><select name='partyYear'>";
         foreach ($this->years as $k => $v) {
@@ -535,10 +541,10 @@ class PouetBoxAdminEditProdParties extends PouetBoxEditConnectionsBase
     public function RenderNormalRow($v)
     {
         global $COMPOTYPES;
-        echo "    <td>"._html($v->party->name)."</td>\n";
-        echo "    <td>"._html($v->party_year)."</td>\n";
-        echo "    <td>"._html($COMPOTYPES[$v->party_compo])."</td>\n";
-        echo "    <td>"._html($v->party_place)."</td>\n";
+        echo "    <td>" . _html($v->party->name) . "</td>\n";
+        echo "    <td>" . _html($v->party_year) . "</td>\n";
+        echo "    <td>" . _html($COMPOTYPES[$v->party_compo]) . "</td>\n";
+        echo "    <td>" . _html($v->party_place) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -576,38 +582,38 @@ class PouetBoxAdminEditProdCredits extends PouetBoxEditConnectionsBase
         $this->id = $prod->id;
         $this->title = "credits";
 
-        $this->headers = array("user","role");
+        $this->headers = ["user","role"];
 
         $s = new BM_Query();
         $s->AddTable("credits");
         $s->AddField("credits.id");
         $s->AddField("credits.role");
         $s->AddWhere(sprintf("credits.prodID = %d", $this->prod->id));
-        $s->Attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->Attach(["credits" => "userID"], ["users as user" => "id"]);
         $this->data = $s->perform();
     }
     public function Commit($data)
     {
         if (@$data["delCredit"]) {
-            SQLLib::Query("delete from credits where id=".(int)$data["delCredit"]);
-            gloperator_log("prod", (int)$this->prod->id, "prod_credits_del");
-            return array();
+            SQLLib::Query("delete from credits where id=" . (int) $data["delCredit"]);
+            gloperator_log("prod", (int) $this->prod->id, "prod_credits_del");
+            return [];
         }
 
-        $a = array();
-        $a["userID"] = (int)$data["userID"];
+        $a = [];
+        $a["userID"] = (int) $data["userID"];
         if (!PouetUser::Spawn($a["userID"])) {
-            return array("invalid user");
+            return ["invalid user"];
         }
         $a["role"] = $data["role"];
         if (@$data["editCreditID"]) {
-            SQLLib::UpdateRow("credits", $a, "id=".(int)$data["editCreditID"]);
+            SQLLib::UpdateRow("credits", $a, "id=" . (int) $data["editCreditID"]);
             $a["id"] = $data["editCreditID"];
-            gloperator_log("prod", (int)$this->prod->id, "prod_credits_edit", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_credits_edit", ["id" => $a["id"]]);
         } else {
             $a["prodID"] = $this->prod->id;
             $a["id"] = SQLLib::InsertRow("credits", $a);
-            gloperator_log("prod", (int)$this->prod->id, "prod_credits_add", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_credits_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $o = toObject($a);
@@ -616,17 +622,17 @@ class PouetBoxAdminEditProdCredits extends PouetBoxEditConnectionsBase
             $this->RenderNormalRowEnd($o);
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td><input name='userID' value='"._html($row && $row->user ? $row->user->id : "")."' class='userID'></td>\n";
-        echo "    <td><input name='role' value='"._html($row ? $row->role : "")."' class='role'></td>\n";
+        echo "    <td><input name='userID' value='" . _html($row && $row->user ? $row->user->id : "") . "' class='userID'></td>\n";
+        echo "    <td><input name='role' value='" . _html($row ? $row->role : "") . "' class='role'></td>\n";
     }
     public function RenderNormalRow($v)
     {
-        echo "    <td>".($v->user ? $v->user->PrintLinkedAvatar()." ".$v->user->PrintLinkedName() : "")."</td>\n";
-        echo "    <td>"._html($v->role)."</td>\n";
+        echo "    <td>" . ($v->user ? $v->user->PrintLinkedAvatar() . " " . $v->user->PrintLinkedName() : "") . "</td>\n";
+        echo "    <td>" . _html($v->role) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -669,41 +675,41 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
         $this->id = $prod->id;
         $this->title = "related prods";
 
-        $this->headers = array("relation","prod");
+        $this->headers = ["relation","prod"];
 
         $s = new BM_Query();
         $s->AddField("affiliatedprods.id");
         $s->AddField("affiliatedprods.type");
         $s->AddTable("affiliatedprods");
-        $s->attach(array("affiliatedprods" => "original"), array("prods as prodOriginal" => "id"));
-        $s->attach(array("affiliatedprods" => "derivative"), array("prods as prodDerivative" => "id"));
+        $s->attach(["affiliatedprods" => "original"], ["prods as prodOriginal" => "id"]);
+        $s->attach(["affiliatedprods" => "derivative"], ["prods as prodDerivative" => "id"]);
         $s->AddWhere(sprintf_esc("original=%d or derivative=%d", $this->prod->id, $this->prod->id));
         $this->data = $s->perform();
     }
     public function Commit($data)
     {
         if (@$data["delAffil"]) {
-            SQLLib::Query("delete from affiliatedprods where id=".(int)$data["delAffil"]);
-            gloperator_log("prod", (int)$this->prod->id, "prod_rel_del");
-            return array();
+            SQLLib::Query("delete from affiliatedprods where id=" . (int) $data["delAffil"]);
+            gloperator_log("prod", (int) $this->prod->id, "prod_rel_del");
+            return [];
         }
 
         list($direction, $type) = explode(":", $data["type"], 2);
-        $relatedProdId = (int)$data["prod"];
+        $relatedProdId = (int) $data["prod"];
         if (!PouetProd::Spawn($relatedProdId)) {
-            return array("invalid prod");
+            return ["invalid prod"];
         }
-        $a = array();
+        $a = [];
         $a["type"] = $type;
         $a["original"]   = $direction == "o" ? $this->prod->id : $relatedProdId;
         $a["derivative"] = $direction == "d" ? $this->prod->id : $relatedProdId;
         if (@$data["editAffilID"]) {
-            SQLLib::UpdateRow("affiliatedprods", $a, "id=".(int)$data["editAffilID"]);
+            SQLLib::UpdateRow("affiliatedprods", $a, "id=" . (int) $data["editAffilID"]);
             $a["id"] = $data["editAffilID"];
-            gloperator_log("prod", (int)$this->prod->id, "prod_rel_edit", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_rel_edit", ["id" => $a["id"]]);
         } else {
             $a["id"] = SQLLib::InsertRow("affiliatedprods", $a);
-            gloperator_log("prod", (int)$this->prod->id, "prod_rel_add", array("id" => $a["id"]));
+            gloperator_log("prod", (int) $this->prod->id, "prod_rel_add", ["id" => $a["id"]]);
         }
         if (@$data["partial"]) {
             $o = toObject($a);
@@ -714,7 +720,7 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
             exit();
         }
 
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
@@ -733,7 +739,7 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
         }
         echo "</select></td>\n";
 
-        echo "    <td><input name='prod' value='"._html($row && $row->prodOriginal && $row->prodDerivative ? ($this->prod->id == $row->prodOriginal->id ? $row->prodDerivative->id : $row->prodOriginal->id) : "")."' class='prodID'></td>\n";
+        echo "    <td><input name='prod' value='" . _html($row && $row->prodOriginal && $row->prodDerivative ? ($this->prod->id == $row->prodOriginal->id ? $row->prodDerivative->id : $row->prodOriginal->id) : "") . "' class='prodID'></td>\n";
     }
     public function RenderNormalRow($v)
     {
@@ -742,8 +748,8 @@ class PouetBoxAdminEditProdAffil extends PouetBoxEditConnectionsBase
 
         $a = ($this->prod->id == $v->prodOriginal->id ? $AFFILIATIONS_ORIGINAL : $AFFILIATIONS_INVERSE);
         $prod = ($this->prod->id == $v->prodOriginal->id ? $v->prodDerivative : $v->prodOriginal);
-        echo "    <td>"._html($a[$v->type])."</td>\n";
-        echo "    <td>".($prod ? $prod->RenderLink() : "")."</td>\n";
+        echo "    <td>" . _html($a[$v->type]) . "</td>\n";
+        echo "    <td>" . ($prod ? $prod->RenderLink() : "") . "</td>\n";
     }
     public function RenderBody()
     {
@@ -774,13 +780,13 @@ document.observe("dom:loaded",function(){
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-$boxen = array(
-  "PouetBoxAdminEditProdLinks",
-  "PouetBoxAdminEditProdCredits",
-  "PouetBoxAdminEditProdParties",
-  "PouetBoxAdminEditProdAwards",
-  "PouetBoxAdminEditProdAffil",
-);
+$boxen = [
+    "PouetBoxAdminEditProdLinks",
+    "PouetBoxAdminEditProdCredits",
+    "PouetBoxAdminEditProdParties",
+    "PouetBoxAdminEditProdAwards",
+    "PouetBoxAdminEditProdAffil",
+];
 if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
     // ajax responses
     $prod = new stdClass();
@@ -794,7 +800,7 @@ if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("prod.php?which=".(int)$_GET["which"], true);
+$form->SetSuccessURL("prod.php?which=" . (int) $_GET["which"], true);
 
 $box = new PouetBoxAdminEditProd($_GET["which"]);
 if ($box->prod) {
@@ -810,7 +816,7 @@ if ($currentUser && $currentUser->CanEditItems()) {
     $form->Process();
 }
 
-$TITLE = "edit a prod: ".$box->prod->name;
+$TITLE = "edit a prod: " . $box->prod->name;
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");

@@ -5,7 +5,7 @@ require_once("include_pouet/pouet-user.php");
 
 //$csrf = new CSRFProtect();
 if (@$_GET["error"]) {
-    redirect("error.php?e=".rawurlencode($_GET["error_description"]));
+    redirect("error.php?e=" . rawurlencode($_GET["error_description"]));
 }
 
 if (!@$_GET["code"]) {
@@ -32,18 +32,18 @@ try {
     $SceneIDuser = $sceneID->Me();
 
     if (!@$SceneIDuser["success"] || !@$SceneIDuser["user"]["id"]) {
-        redirect("error.php?e=".rawurlencode("User not found."));
+        redirect("error.php?e=" . rawurlencode("User not found."));
     }
 
-    $user = PouetUser::Spawn((int)$SceneIDuser["user"]["id"]);
+    $user = PouetUser::Spawn((int) $SceneIDuser["user"]["id"]);
     $welcome = false;
     if (!$user || !$user->id) {
-        $entry = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
+        $entry = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
         $r = $entry[array_rand($entry)];
         $a = basename($r);
 
         $user = new PouetUser();
-        $user->id = (int)$SceneIDuser["user"]["id"];
+        $user->id = (int) $SceneIDuser["user"]["id"];
         $user->nickname = substr($SceneIDuser["user"]["display_name"], 0, 16);
         $user->avatar = $a;
 
@@ -55,12 +55,12 @@ try {
     }
 
     if ($user->IsBanned()) {
-        redirect("error.php?e=".rawurlencode("We dun like yer type 'round these parts."));
+        redirect("error.php?e=" . rawurlencode("We dun like yer type 'round these parts."));
     }
 
-    $email = trim((string)@$SceneIDuser["user"]["email"]);
+    $email = trim((string) @$SceneIDuser["user"]["email"]);
     if (!$email && !empty($SceneIDuser["user"]["mail"])) {
-        $email = trim((string)$SceneIDuser["user"]["mail"]);
+        $email = trim((string) $SceneIDuser["user"]["mail"]);
     }
     if (!$email && !empty($SceneIDuser["user"]["emails"]) && is_array($SceneIDuser["user"]["emails"])) {
         foreach ($SceneIDuser["user"]["emails"] as $entry) {
@@ -69,7 +69,7 @@ try {
                 break;
             }
             if (is_array($entry)) {
-                foreach (array("email","value","address") as $key) {
+                foreach (["email","value","address"] as $key) {
                     if (!empty($entry[$key]) && filter_var(trim($entry[$key]), FILTER_VALIDATE_EMAIL)) {
                         $email = trim($entry[$key]);
                         break 2;
@@ -82,17 +82,17 @@ try {
         $email = null;
     }
 
-    SQLLib::UpdateRow("users", array(
-      "sceneIDLastRefresh" => date("Y-m-d H:i:s"),
-      "sceneIDData" => serialize($SceneIDuser["user"]),
-      "email" => $email
-    ), sprintf_esc("id=%d", $user->id));
+    SQLLib::UpdateRow("users", [
+        "sceneIDLastRefresh" => date("Y-m-d H:i:s"),
+        "sceneIDData" => serialize($SceneIDuser["user"]),
+        "email" => $email,
+    ], sprintf_esc("id=%d", $user->id));
 
     $_SESSION["user"] = $user;
 
     $currentUserSettings = SQLLib::SelectRow(sprintf_esc("select * from usersettings where id=%d", $user->id));
     if ($currentUserSettings) {
-        $ephemeralStorage->set("settings:".$user->id, $currentUserSettings);
+        $ephemeralStorage->set("settings:" . $user->id, $currentUserSettings);
     }
 
     if ($welcome) {
@@ -102,5 +102,5 @@ try {
     }
 
 } catch (SceneID3Exception $e) {
-    redirect("error.php?e=".rawurlencode($e->GetMessage()));
+    redirect("error.php?e=" . rawurlencode($e->GetMessage()));
 }

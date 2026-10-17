@@ -13,18 +13,18 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
         $this->title = "upcoming parties";
         $this->cacheTime = 60 * 60 * 6; // update every 6 hours (4 times a day should be reasonable)
 
-        $this->rss = class_exists("DomDocument") ? new lastRSS(array(
-          "cacheTime" => 5 * 60, // in seconds
-          "dateFormat" => "Y-m-d",
-          "stripHtml" => false,
-        )) : null;
+        $this->rss = class_exists("DomDocument") ? new lastRSS([
+            "cacheTime" => 5 * 60, // in seconds
+            "dateFormat" => "Y-m-d",
+            "stripHtml" => false,
+        ]) : null;
         if ($this->rss) {
-            $this->rss->setItemTags(array(
-              "link",
-              "demopartynet:title",
-              "demopartynet:startDate",
-              "demopartynet:endDate",
-            ));
+            $this->rss->setItemTags([
+                "link",
+                "demopartynet:title",
+                "demopartynet:startDate",
+                "demopartynet:endDate",
+            ]);
         }
 
         $this->limit = 5;
@@ -37,9 +37,9 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of parties visible","default" => 5,"min" => 1,"max" => 10),
-        );
+        return [
+            "limit" => ["name" => "number of parties visible","default" => 5,"min" => 1,"max" => 10],
+        ];
     }
 
     public function LoadFromCachedData($data)
@@ -54,7 +54,7 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
 
     public function LoadFromDB()
     {
-        $this->rssData = $this->rss ? $this->rss->get('https://www.demoparty.net/demoparties.xml') : array();
+        $this->rssData = $this->rss ? $this->rss->get('https://www.demoparty.net/demoparties.xml') : [];
     }
 
     public function RenderBody()
@@ -76,10 +76,10 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
             } else {
                 $form = $sd . " - " . $ed;
             }
-            $dist = (int)ceil(($st - time()) / 60 / 60 / 24);
+            $dist = (int) ceil(($st - time()) / 60 / 60 / 24);
 
             echo "<li>\n";
-            echo "<a href='".$this->rssData['items'][$i]['link']."'>".$this->rssData['items'][$i]['demopartynet:title']."</a> ";
+            echo "<a href='" . $this->rssData['items'][$i]['link'] . "'>" . $this->rssData['items'][$i]['demopartynet:title'] . "</a> ";
             echo " <span class='timeleft'>";
             echo $form;
             if ($dist <= 0) {
@@ -87,7 +87,7 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
             } elseif ($dist == 1) {
                 echo " (tomorrow)";
             } else {
-                echo " (".$dist." days)";
+                echo " (" . $dist . " days)";
             }
             echo "</span>";
             echo "</li>\n";

@@ -21,25 +21,25 @@ class PouetBoxPartyList extends PouetBox
             $this->letter = "#";
         }
 
-        $a = array();
+        $a = [];
         $a[] = "<a href='parties.php?pattern=%23'>#</a>";
         for ($x = ord("a");$x <= ord("z");$x++) {
             $a[] = sprintf("<a href='parties.php?pattern=%s'>%s</a>", chr($x), chr($x));
         }
 
-        $this->letterselect = "[ ".implode(" |\n", $a)." ]";
+        $this->letterselect = "[ " . implode(" |\n", $a) . " ]";
     }
 
     public function RenderHeader()
     {
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
     }
 
     public function RenderFooter()
     {
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
         echo "</div>\n";
     }
 
@@ -55,14 +55,14 @@ class PouetBoxPartyList extends PouetBox
         $this->parties = $s->perform();
 
         if ($this->parties) {
-            $ids = array();
+            $ids = [];
             foreach ($this->parties as $group) {
                 $ids[] = $group->id;
             }
             $idstr = implode(",", $ids);
 
             $rows = SQLLib::selectRows(sprintf("SELECT count(*) as c, party, party_year FROM `prods` WHERE party in (%s) GROUP by party, party_year order by party_year", $idstr));
-            $this->partyyears = array();
+            $this->partyyears = [];
             foreach ($rows as $row) {
                 if ($row->party) {
                     $this->partyyears[$row->party][$row->party_year] = $row->c;
@@ -70,7 +70,7 @@ class PouetBoxPartyList extends PouetBox
             }
 
             $rows = SQLLib::selectRows(sprintf("SELECT * FROM `partylinks` WHERE party in (%s)", $idstr));
-            $this->partylinks = array();
+            $this->partylinks = [];
             foreach ($rows as $row) {
                 if ($row->party) {
                     $this->partylinks[$row->party][$row->year] = $row;
@@ -96,34 +96,34 @@ class PouetBoxPartyList extends PouetBox
             foreach ($this->partyyears[$party->id] as $year => $count) {
                 echo "<tr>\n";
                 if ($p == 0) {
-                    echo "  <td class='partyname'>".$party->RenderFull()."</td>\n";
+                    echo "  <td class='partyname'>" . $party->RenderFull() . "</td>\n";
                 } else {
                     echo "  <td></td>\n";
                 }
                 echo "  <td>\n";
                 if ($year) {
-                    echo "<a href='party.php?which=".$party->id."&amp;when=".$year."'>".$year."</a> ";
+                    echo "<a href='party.php?which=" . $party->id . "&amp;when=" . $year . "'>" . $year . "</a> ";
                 }
                 if (@$this->partylinks[$party->id][$year]) {
                     if ($this->partylinks[$party->id][$year]->slengpung) {
-                        echo " [<a href='http://www.slengpung.com/?eventid=".(int)$this->partylinks[$party->id][$year]->slengpung."'>slengpung</a>]";
+                        echo " [<a href='http://www.slengpung.com/?eventid=" . (int) $this->partylinks[$party->id][$year]->slengpung . "'>slengpung</a>]";
                     }
                     if ($this->partylinks[$party->id][$year]->csdb) {
-                        echo " [<a href='https://csdb.dk/event/?id=".(int)$this->partylinks[$party->id][$year]->csdb."'>csdb</a>]";
+                        echo " [<a href='https://csdb.dk/event/?id=" . (int) $this->partylinks[$party->id][$year]->csdb . "'>csdb</a>]";
                     }
                     if ($this->partylinks[$party->id][$year]->zxdemo) {
-                        echo " [<a href='http://zxdemo.org/party.php?id=".(int)$this->partylinks[$party->id][$year]->zxdemo."'>zxdemo</a>]";
+                        echo " [<a href='http://zxdemo.org/party.php?id=" . (int) $this->partylinks[$party->id][$year]->zxdemo . "'>zxdemo</a>]";
                     }
                     if ($this->partylinks[$party->id][$year]->artcity) {
-                        echo " [<a href='http://artcity.bitfellas.org/index.php?a=search&type=tag&text=".rawurlencode($this->partylinks[$party->id][$year]->artcity)."'>artcity</a>]";
+                        echo " [<a href='http://artcity.bitfellas.org/index.php?a=search&type=tag&text=" . rawurlencode($this->partylinks[$party->id][$year]->artcity) . "'>artcity</a>]";
                     }
                 }
                 echo "</td>\n";
-                echo "  <td>".$count."</td>\n";
+                echo "  <td>" . $count . "</td>\n";
                 echo "  <td>";
 
                 if (@$this->partylinks[$party->id][$year]->download) {
-                    echo "[<a href='".$this->partylinks[$party->id][$year]->download."'>prods</a>] ";
+                    echo "[<a href='" . $this->partylinks[$party->id][$year]->download . "'>prods</a>] ";
                 }
 
                 if (file_exists($party->GetResultsLocalFileName($year))) {
@@ -143,7 +143,7 @@ class PouetBoxPartyList extends PouetBox
 $pattern = @$_GET["pattern"] ? @$_GET["pattern"] : chr(rand(ord("a"), ord("z")));
 $p = new PouetBoxPartyList($pattern);
 $p->Load();
-$TITLE = "parties: ".$p->letter;
+$TITLE = "parties: " . $p->letter;
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");

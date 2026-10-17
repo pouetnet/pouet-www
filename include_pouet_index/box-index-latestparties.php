@@ -32,9 +32,9 @@ class PouetBoxIndexLatestParties extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of parties visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit" => ["name" => "number of parties visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function LoadFromDB()
@@ -59,10 +59,10 @@ class PouetBoxIndexLatestParties extends PouetBoxCachable
             echo " <span>";
             echo $p->PrintShort($p->party_year);
             if (file_exists($p->GetResultsLocalFileName($p->party_year))) {
-                echo " ".$p->RenderResultsLink($p->party_year);
+                echo " " . $p->RenderResultsLink($p->party_year);
             }
             echo " </span>";
-            echo " <span class='releasecount'>".$p->prod_count."</span>";
+            echo " <span class='releasecount'>" . $p->prod_count . "</span>";
             echo "</li>\n";
             if (++$n == $this->limit) {
                 break;

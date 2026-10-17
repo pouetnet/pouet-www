@@ -32,9 +32,9 @@ class PouetBoxIndexTopMonth extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of prods visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit" => ["name" => "number of prods visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function LoadFromDB()
@@ -63,7 +63,7 @@ class PouetBoxIndexTopMonth extends PouetBoxCachable
     }
     public function RenderFooter()
     {
-        echo "  <div class='foot'><a href='toplist.php?dateFrom=".date("Y")."-01-01'>top of the year</a> :: <a href='toplist.php?days=30'>more</a>...</div>\n";
+        echo "  <div class='foot'><a href='toplist.php?dateFrom=" . date("Y") . "-01-01'>top of the year</a> :: <a href='toplist.php?days=30'>more</a>...</div>\n";
         echo "</div>\n";
     }
 };

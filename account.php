@@ -3,59 +3,59 @@ require_once("bootstrap.inc.php");
 require_once("include_generic/countries.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
-$COUNTRIES = array_merge(array(""), $COUNTRIES);
+$COUNTRIES = array_merge([""], $COUNTRIES);
 
-$avatars = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
+$avatars = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
 
 $success = null;
 
-$namesNumeric = array(
-  // numbers
-  "indextopglops" => "front page - top glops",
-  "indextopprods" => "front page - top prods (recent)",
-  "indextopkeops" => "front page - top prods (all-time)",
-  "indexoneliner" => "front page - oneliner",
-  "indexlatestadded" => "front page - latest added",
-  "indexlatestreleased" => "front page - latest released",
-  "indexojnews" => "front page - news",
-  "indexlatestcomments" => "front page - latest comments",
-  "indexlatestparties" => "front page - latest parties",
-  "indexbbstopics" => "front page - bbs topics",
-  "indexwatchlist" => "front page - watchlist",
-  "bbsbbstopics" => "bbs page - bbs topics",
-  "prodlistprods" => "prodlist page - prods",
-  "userlistusers" => "userlist page - users",
-  "searchprods" => "search page - prods",
-  "userlogos" => "user page - logos",
-  "userprods" => "user page - prods",
-  "usergroups" => "user page - groups",
-  "userparties" => "user page - parties",
-  "userscreenshots" => "user page - screenshots",
-  "usernfos" => "user page - nfos",
-  "usercomments" => "user page - comments",
-  "userrulez" => "user page - rulez",
-  "usersucks" => "user page - sucks",
-  "commentshours" => "comments page - hours",
-  "topicposts" => "topic page - posts",
-);
-$namesSwitch = array(
-  //select
-  "logos" => "logos",
-  "topbar" => "top bar",
-  "bottombar" => "bottom bar",
-  "indexcdc" => "front page - cdc",
-  "indexsearch" => "front page - search",
-  "indexstats" => "front page - stats",
-  "indexlinks" => "front page - links",
-  "indexplatform" => "front page - show platform icons",
-  "indextype" => "front page - show type icons",
-  "indexwhoaddedprods" => "front page - who added prods",
-  "indexwhocommentedprods" => "front page - who commented prods",
-  "topichidefakeuser" => "bbs page - hide fakeuser",
-  "prodhidefakeuser" => "prod page - hide fakeuser",
-  "displayimages" => "[img][/img] tags should be displayed as...",
-  "indexbbsnoresidue" => "residue threads on the front page are...",
-);
+$namesNumeric = [
+    // numbers
+    "indextopglops" => "front page - top glops",
+    "indextopprods" => "front page - top prods (recent)",
+    "indextopkeops" => "front page - top prods (all-time)",
+    "indexoneliner" => "front page - oneliner",
+    "indexlatestadded" => "front page - latest added",
+    "indexlatestreleased" => "front page - latest released",
+    "indexojnews" => "front page - news",
+    "indexlatestcomments" => "front page - latest comments",
+    "indexlatestparties" => "front page - latest parties",
+    "indexbbstopics" => "front page - bbs topics",
+    "indexwatchlist" => "front page - watchlist",
+    "bbsbbstopics" => "bbs page - bbs topics",
+    "prodlistprods" => "prodlist page - prods",
+    "userlistusers" => "userlist page - users",
+    "searchprods" => "search page - prods",
+    "userlogos" => "user page - logos",
+    "userprods" => "user page - prods",
+    "usergroups" => "user page - groups",
+    "userparties" => "user page - parties",
+    "userscreenshots" => "user page - screenshots",
+    "usernfos" => "user page - nfos",
+    "usercomments" => "user page - comments",
+    "userrulez" => "user page - rulez",
+    "usersucks" => "user page - sucks",
+    "commentshours" => "comments page - hours",
+    "topicposts" => "topic page - posts",
+];
+$namesSwitch = [
+    //select
+    "logos" => "logos",
+    "topbar" => "top bar",
+    "bottombar" => "bottom bar",
+    "indexcdc" => "front page - cdc",
+    "indexsearch" => "front page - search",
+    "indexstats" => "front page - stats",
+    "indexlinks" => "front page - links",
+    "indexplatform" => "front page - show platform icons",
+    "indextype" => "front page - show type icons",
+    "indexwhoaddedprods" => "front page - who added prods",
+    "indexwhocommentedprods" => "front page - who commented prods",
+    "topichidefakeuser" => "bbs page - hide fakeuser",
+    "prodhidefakeuser" => "prod page - hide fakeuser",
+    "displayimages" => "[img][/img] tags should be displayed as...",
+    "indexbbsnoresidue" => "residue threads on the front page are...",
+];
 
 class PouetBoxAccount extends PouetBox
 {
@@ -83,7 +83,7 @@ class PouetBoxAccount extends PouetBox
     public function LoadFromDB()
     {
         global $COUNTRIES;
-        $this->cdcs = array();
+        $this->cdcs = [];
 
         $query = new BM_Query("users");
         $query->AddExtendedFields();
@@ -105,45 +105,45 @@ class PouetBoxAccount extends PouetBox
             $this->cdcs[] = $r->cdc;
         }
 
-        $this->fieldsPouet = array(
-          "nickname" => array(
-            "info" => "how do you look on IRC ?",
-            "required" => true,
-            "value" => $this->user->nickname,
-            "maxlength" => 16,
-          ),
-          "avatar" => array(
-            "info" => "your faaaaaaace is like a song",
-            "required" => true,
-            "value" => $this->user->avatar,
-            "type" => "avatar",
-            "infoAfter" => "<span id='avatarCount'></span> (<a href='submit_avatar.php'>upload new</a>) <span id='randomAvatar'></span> <span id='avatarPicker'></span>",
-          )
-        );
-        $this->fieldsOtherSites = array(
-          "slengpung" => array(
-            "info" => "your slengpung id, if you have one",
-            "value" => $this->user->slengpung,
-            "type" => "number",
-          ),
-          "csdb" => array(
-            "info" => "your csdb id, if you have one",
-            "value" => $this->user->csdb,
-            "type" => "number",
-          ),
-          "zxdemo" => array(
-            "info" => "your zxdemo id, if you have one",
-            "value" => $this->user->zxdemo,
-            "type" => "number",
-          ),
-          "demozoo" => array(
-            "info" => "your demozoo id, if you have one",
-            "value" => $this->user->demozoo,
-            "type" => "number",
-          ),
-        );
+        $this->fieldsPouet = [
+            "nickname" => [
+                "info" => "how do you look on IRC ?",
+                "required" => true,
+                "value" => $this->user->nickname,
+                "maxlength" => 16,
+            ],
+            "avatar" => [
+                "info" => "your faaaaaaace is like a song",
+                "required" => true,
+                "value" => $this->user->avatar,
+                "type" => "avatar",
+                "infoAfter" => "<span id='avatarCount'></span> (<a href='submit_avatar.php'>upload new</a>) <span id='randomAvatar'></span> <span id='avatarPicker'></span>",
+            ],
+        ];
+        $this->fieldsOtherSites = [
+            "slengpung" => [
+                "info" => "your slengpung id, if you have one",
+                "value" => $this->user->slengpung,
+                "type" => "number",
+            ],
+            "csdb" => [
+                "info" => "your csdb id, if you have one",
+                "value" => $this->user->csdb,
+                "type" => "number",
+            ],
+            "zxdemo" => [
+                "info" => "your zxdemo id, if you have one",
+                "value" => $this->user->zxdemo,
+                "type" => "number",
+            ],
+            "demozoo" => [
+                "info" => "your demozoo id, if you have one",
+                "value" => $this->user->demozoo,
+                "type" => "number",
+            ],
+        ];
 
-        $this->fieldsCDC = array();
+        $this->fieldsCDC = [];
         $glop = POUET_CDC_MINGLOP;
         for ($x = 1; $x < $this->maxCDCs; $x++) {
             /*
@@ -162,38 +162,38 @@ class PouetBoxAccount extends PouetBox
             */
 
             if ($this->user->glops >= $glop) {
-                $this->fieldsCDC["cdc".$x] = array(
-                  "value" => @$this->cdcs[$x - 1],
-                  "name" => "coup de coeur ".$x." (".$glop." glöps)",
-                  //"info" => $cdcText[$x], // is this cool?
-                );
+                $this->fieldsCDC["cdc" . $x] = [
+                    "value" => @$this->cdcs[$x - 1],
+                    "name" => "coup de coeur " . $x . " (" . $glop . " glöps)",
+                    //"info" => $cdcText[$x], // is this cool?
+                ];
                 $glop *= 2;
             } else {
                 break;
             }
         }
-        $this->fieldsCDC["cdc".($x - 1)]["infoAfter"] = sprintf("you currently have %d glöps and need %d more for the next cdc !", $this->user->glops, $glop - $this->user->glops);
+        $this->fieldsCDC["cdc" . ($x - 1)]["infoAfter"] = sprintf("you currently have %d glöps and need %d more for the next cdc !", $this->user->glops, $glop - $this->user->glops);
 
         $row = SQLLib::SelectRow("DESC users_im im_type");
         $this->imTypes = enum2array($row->Type);
 
         $this->ims[] = new stdClass();
-        $this->fieldsIM = array();
+        $this->fieldsIM = [];
         $n = 0;
         foreach ($this->ims as $im) {
-            $this->fieldsIM["im_type".$n] = array(
-              //"info"=>"the one you really use",
-              "name" => "contact type",
-              "type" => "select",
-              "value" => @$im->im_type,
-              "fields" => $this->imTypes,
-            );
-            $this->fieldsIM["im_id".$n] = array(
-              //"info"=>"buuuuuuuuuuuuuuuu .... hiho !",
-              "name" => "contact address",
-              "value" => @$im->im_id,
-              "maxlength" => 255,
-            );
+            $this->fieldsIM["im_type" . $n] = [
+                //"info"=>"the one you really use",
+                "name" => "contact type",
+                "type" => "select",
+                "value" => @$im->im_type,
+                "fields" => $this->imTypes,
+            ];
+            $this->fieldsIM["im_id" . $n] = [
+                //"info"=>"buuuuuuuuuuuuuuuu .... hiho !",
+                "name" => "contact address",
+                "value" => @$im->im_id,
+                "maxlength" => 255,
+            ];
             $n++;
         }
 
@@ -221,22 +221,22 @@ class PouetBoxAccount extends PouetBox
     {
         global $currentUser;
 
-        $errors = array();
+        $errors = [];
 
         // cdc bit
 
-        $cdcUnique = array();
+        $cdcUnique = [];
         $glop = POUET_CDC_MINGLOP;
         for ($x = 1; $x < $this->maxCDCs; $x++) {
-            if ($this->user->glops >= $glop && $data["cdc".$x]) {
-                $cdcUnique[] = $data["cdc".$x];
+            if ($this->user->glops >= $glop && $data["cdc" . $x]) {
+                $cdcUnique[] = $data["cdc" . $x];
             }
             $glop *= 2;
         }
         $cdcUnique = array_unique($cdcUnique);
         SQLLib::Query(sprintf_esc("delete from users_cdcs where user = %d", get_login_id()));
         foreach ($cdcUnique as $c) {
-            $a = array();
+            $a = [];
             $a["user"] = get_login_id();
             $a["cdc"] = $c;
             SQLLib::InsertRow("users_cdcs", $a);
@@ -247,12 +247,12 @@ class PouetBoxAccount extends PouetBox
         global $IM_TYPES;
         SQLLib::Query(sprintf_esc("delete from users_im where userID = %d", get_login_id()));
         for ($n = 0; $n < count($this->imTypes); $n++) {
-            $a = array();
+            $a = [];
             $a["userID"] = get_login_id();
-            $a["im_type"] = @$data["im_type".$n];
-            $imUser = @$data["im_id".$n];
+            $a["im_type"] = @$data["im_type" . $n];
+            $imUser = @$data["im_id" . $n];
             if (@$IM_TYPES[$a["im_type"]]) {
-                if (preg_match("/".$IM_TYPES[$a["im_type"]]["capture"]."/", $imUser, $m)) {
+                if (preg_match("/" . $IM_TYPES[$a["im_type"]]["capture"] . "/", $imUser, $m)) {
                     $imUser = $m[1];
                 } else {
                     continue;
@@ -268,7 +268,7 @@ class PouetBoxAccount extends PouetBox
 
         global $avatars;
 
-        $sql = array();
+        $sql = [];
         foreach ($this->fieldsPouet as $k => $v) {
             if ($k == "nickname" && !trim($data[$k])) {
                 continue;
@@ -277,17 +277,17 @@ class PouetBoxAccount extends PouetBox
             $sql[$k] = trim($data[$k]);
         }
         foreach ($this->fieldsOtherSites as $k => $v) {
-            $sql[$k] = (int)trim($data[$k]);
+            $sql[$k] = (int) trim($data[$k]);
         }
 
-        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/".$sql["avatar"])) {
+        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/" . $sql["avatar"])) {
             $sql["avatar"] = basename($avatars[ array_rand($avatars) ]);
         }
 
-        SQLLib::UpdateRow("users", $sql, "id=".(int)get_login_id());
+        SQLLib::UpdateRow("users", $sql, "id=" . (int) get_login_id());
 
         if ($currentUser->nickname != $data["nickname"]) {
-            $a = array();
+            $a = [];
             $a["user"] = $currentUser->id;
             $a["nick"] = $currentUser->nickname;
             SQLLib::InsertRow("oldnicks", $a);
@@ -307,10 +307,10 @@ class PouetBoxAccount extends PouetBox
     public function ParsePostMessage($data)
     {
         if (!get_login_id()) {
-            return array("You have to be logged in!");
+            return ["You have to be logged in!"];
         }
 
-        $errors = array();
+        $errors = [];
 
         $data["nickname"] = strip_tags($data["nickname"]);
         $data["nickname"] = trim($data["nickname"]);
@@ -333,23 +333,23 @@ class PouetBoxAccount extends PouetBox
     {
         global $currentUser;
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
 
         // sceneid
         echo "  <div class='accountsection content'>\n";
         echo "    <div class='formifier'>\n";
         echo "      <div class=\"row\">\n";
         echo "        <label>your current profile:</label>\n";
-        echo "        <p>".$currentUser->PrintLinkedAvatar()." ".$currentUser->PrintLinkedName()."</p>\n";
+        echo "        <p>" . $currentUser->PrintLinkedAvatar() . " " . $currentUser->PrintLinkedName() . "</p>\n";
         echo "      </div>\n";
         echo "      <div class=\"row\">\n";
         echo "        <label>first name:</label>\n";
-        echo "        <p><b>"._html(@$this->sceneID["first_name"])."</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
+        echo "        <p><b>" . _html(@$this->sceneID["first_name"]) . "</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
         echo "      </div>\n";
         echo "      <div class=\"row\">\n";
         echo "        <label>last name:</label>\n";
-        echo "        <p><b>"._html(@$this->sceneID["last_name"])."</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
+        echo "        <p><b>" . _html(@$this->sceneID["last_name"]) . "</b> (<a href='https://id.scene.org/profile/'>edit</a>)</p>\n";
         echo "      </div>\n";
         echo "      <div class=\"row\">\n";
         echo "        <label>password:</label>\n";
@@ -412,8 +412,8 @@ class PouetBoxAccountModificationRequests extends PouetBox
         $s->AddField("modification_requests.approved");
         $s->AddField("modification_requests.comment");
         //$s->Attach(array("modification_requests"=>"gloperatorID"),array("users as gloperator"=>"id"));
-        $s->Attach(array("modification_requests" => "itemID"), array("prods as prod" => "id"));
-        $s->Attach(array("modification_requests" => "itemID"), array("groups as group" => "id"));
+        $s->Attach(["modification_requests" => "itemID"], ["prods as prod" => "id"]);
+        $s->Attach(["modification_requests" => "itemID"], ["groups as group" => "id"]);
         $s->AddWhere(sprintf_esc("userID = %d", $currentUser->id));
         $s->AddOrder("requestDate desc");
         $s->SetLimit(@$_GET["limit"] ?: 10);
@@ -422,9 +422,9 @@ class PouetBoxAccountModificationRequests extends PouetBox
     public function Render()
     {
         global $REQUESTTYPES;
-        echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+        echo "<table id='" . $this->uniqueID . "' class='boxtable'>\n";
         echo "  <tr>\n";
-        echo "    <th colspan='4'>".$this->title."</th>\n";
+        echo "    <th colspan='4'>" . $this->title . "</th>\n";
         echo "  </tr>\n";
         echo "  <tr>\n";
         echo "    <th>date</th>\n";
@@ -434,8 +434,8 @@ class PouetBoxAccountModificationRequests extends PouetBox
         echo "  </tr>\n";
         foreach ($this->requests as $r) {
             echo "  <tr>\n";
-            echo "    <td>".$r->requestDate."</td>\n";
-            echo "    <td>".$r->itemType.": ";
+            echo "    <td>" . $r->requestDate . "</td>\n";
+            echo "    <td>" . $r->itemType . ": ";
             switch ($r->itemType) {
                 case "prod": if ($r->prod) {
                     echo $r->prod->RenderSingleRowShort();
@@ -446,7 +446,7 @@ class PouetBoxAccountModificationRequests extends PouetBox
             }
             echo "</td>\n";
             if ($REQUESTTYPES[$r->requestType]) {
-                echo "    <td>".$REQUESTTYPES[$r->requestType]::Describe()."</td>\n";
+                echo "    <td>" . $REQUESTTYPES[$r->requestType]::Describe() . "</td>\n";
             } else {
                 echo "    <td>unknown request type</td>";
             }
@@ -454,7 +454,7 @@ class PouetBoxAccountModificationRequests extends PouetBox
             if ($r->approved === null) {
                 echo "<b>pending</b>";
             } elseif ($r->approved == 0) {
-                echo "<b>no</b> :: "._html($r->comment);
+                echo "<b>no</b> :: " . _html($r->comment);
             } elseif ($r->approved == 1) {
                 echo "<b>yes</b>";
             }
@@ -480,13 +480,13 @@ class PouetBoxAccountProdAwardSuggestions extends PouetBox
         global $AWARDSSUGGESTIONS_EVENTS;
         global $AWARDSSUGGESTIONS_CATEGORIES;
 
-        $cats = array();
+        $cats = [];
         $date = date("Y-m-d");
 
         foreach ($AWARDSSUGGESTIONS_CATEGORIES as $category) {
             $event = $AWARDSSUGGESTIONS_EVENTS[$category->eventID];
             if ($event->votingStartDate <= $date && $date <= $event->votingEndDate) {
-                $cats[] = (int)$category->id;
+                $cats[] = (int) $category->id;
             }
         }
 
@@ -497,7 +497,7 @@ class PouetBoxAccountProdAwardSuggestions extends PouetBox
             $s->AddTable("awardssuggestions_votes");
             $s->AddField("awardssuggestions_votes.categoryID");
             $s->AddWhere(sprintf("userID = %d and categoryID in (%s)", $currentUser->id, implode(",", $cats)));
-            $s->Attach(array("awardssuggestions_votes" => "prodID"), array("prods as prod" => "id"));
+            $s->Attach(["awardssuggestions_votes" => "prodID"], ["prods as prod" => "id"]);
             $this->votes = $s->perform();
         }
     }
@@ -508,9 +508,9 @@ class PouetBoxAccountProdAwardSuggestions extends PouetBox
         if (!$this->votes) {
             return;
         }
-        echo "<table id='".$this->uniqueID."' class='boxtable'>\n";
+        echo "<table id='" . $this->uniqueID . "' class='boxtable'>\n";
         echo "  <tr>\n";
-        echo "    <th colspan='4'>".$this->title."</th>\n";
+        echo "    <th colspan='4'>" . $this->title . "</th>\n";
         echo "  </tr>\n";
         echo "  <tr>\n";
         echo "    <th>category</th>\n";
@@ -521,8 +521,8 @@ class PouetBoxAccountProdAwardSuggestions extends PouetBox
             $event = $AWARDSSUGGESTIONS_EVENTS[$category->eventID];
 
             echo "  <tr>\n";
-            echo "    <td>"._html($event->name)." - "._html($category->name)."</td>\n";
-            echo "    <td>".$v->prod->RenderSingleRowShort(). "</td>\n";
+            echo "    <td>" . _html($event->name) . " - " . _html($category->name) . "</td>\n";
+            echo "    <td>" . $v->prod->RenderSingleRowShort() . "</td>\n";
             echo "  </tr>\n";
         }
         echo "</table>\n";
@@ -547,7 +547,7 @@ if (!get_login_id()) {
     //if (!get_login_id())
     //  $form->successMessage = "registration complete! a confirmation mail will be sent to your address soon - you can't login until you confirmed your email address!";
 
-    $form->SetSuccessURL("user.php?who=".$currentUser->id, true);
+    $form->SetSuccessURL("user.php?who=" . $currentUser->id, true);
 
     $account = new PouetBoxAccount();
     $form->Add("account", $account);

@@ -18,10 +18,10 @@ $boxes = $customizer["frontpage"];
 echo "<div id='content' class='frontpage'>\n";
 
 foreach ($boxes as $bar => $boxlist) {
-    $timer["bar_".$bar]["start"] = microtime_float();
-    echo "  <div id='"._html($bar)."' class='column'>\n";
+    $timer["bar_" . $bar]["start"] = microtime_float();
+    echo "  <div id='" . _html($bar) . "' class='column'>\n";
     foreach ($boxlist as $box) {
-        $class = "PouetBoxIndex".$box["box"];
+        $class = "PouetBoxIndex" . $box["box"];
         if (!class_exists($class)) {
             continue;
         }
@@ -37,7 +37,7 @@ foreach ($boxes as $bar => $boxlist) {
         $p->Render();
     }
     echo "  </div>\n";
-    $timer["bar_".$bar]["end"] = microtime_float();
+    $timer["bar_" . $bar]["end"] = microtime_float();
 }
 
 echo "</div>\n";

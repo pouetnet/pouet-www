@@ -10,8 +10,8 @@ if (get_setting("logos")) {
     $s = new BM_Query();
     $s->AddTable("logos");
     $s->AddField("logos.file as file");
-    $s->attach(array("logos" => "author1"), array("users as u1" => "id"));
-    $s->attach(array("logos" => "author2"), array("users as u2" => "id"));
+    $s->attach(["logos" => "author1"], ["users as u1" => "id"]);
+    $s->attach(["logos" => "author2"], ["users as u2" => "id"]);
     $s->AddOrder("rand()");
     $s->AddWhere("logos.vote_count>0");
     $s->SetLimit("1");
@@ -26,18 +26,18 @@ if (get_setting("logos")) {
     $timer["logo"]["end"] = microtime_float();
 
 
-    $random_quotes = array(
-      'send your logos to <a href="submit_logo.php">us</a> and be a popstar !',
-      '<a href="logo_vote.php">vote</a> for the logos you like and be a lamah !',
-      'pouët.net is brought to you by <a href="http://www.pouet.net/groups.php?which=5">mandarine</a>',
-      'pouët.net is hosted on the huge <a href="http://www.scene.org/">scene.org</a> servers',
-    /*
+    $random_quotes = [
+        'send your logos to <a href="submit_logo.php">us</a> and be a popstar !',
+        '<a href="logo_vote.php">vote</a> for the logos you like and be a lamah !',
+        'pouët.net is brought to you by <a href="http://www.pouet.net/groups.php?which=5">mandarine</a>',
+        'pouët.net is hosted on the huge <a href="http://www.scene.org/">scene.org</a> servers',
+        /*
       'pou?t != scene && scene != pou?t',
       'help make KOOL DEMO-SHOCK to japanese brain',
       'i am not an atomic playboy',
       'glop me beautiful'
     */
-      );
+    ];
     ?>
   <div id='logo'>
     <a href="./index.php"><img src="<?=POUET_CONTENT_URL?>logos/<?=$logo->file?>" alt="logo"></a>

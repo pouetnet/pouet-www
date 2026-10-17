@@ -2,9 +2,9 @@
 
 class Rewriter
 {
-    private $rules = array();
-    private $bootstrap = array();
-    private $entryPoints = array();
+    private $rules = [];
+    private $bootstrap = [];
+    private $entryPoints = [];
     public function addRules($arr)
     {
         if (!is_array($arr)) {
@@ -48,14 +48,14 @@ class Rewriter
 
         $newURL = "";
         foreach ($this->rules as $k => $v) {
-            if (preg_match("/".$k."/", $url_a["path"])) {
-                $newURL = preg_replace("/".$k."/", $v, $url_a["path"]);
+            if (preg_match("/" . $k . "/", $url_a["path"])) {
+                $newURL = preg_replace("/" . $k . "/", $v, $url_a["path"]);
             }
         }
 
 
         if ($newURL) {
-            $newGET = array();
+            $newGET = [];
             parse_str(@$url_a["query"] ?: "", $newGET);
 
             $url_a = parse_url($newURL);

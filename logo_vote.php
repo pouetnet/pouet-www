@@ -16,15 +16,15 @@ class PouetBoxLogoVote extends PouetBox
 
     public function RenderContent()
     {
-        echo "<img src=".POUET_CONTENT_URL."logos/"._html($this->logo->file)." alt='logo'>";
+        echo "<img src=" . POUET_CONTENT_URL . "logos/" . _html($this->logo->file) . " alt='logo'>";
     }
     public function RenderFooter()
     {
         echo "  <div class='foot'>";
-        echo "    <form action='".$_SERVER["REQUEST_URI"]."' method='post'>";
+        echo "    <form action='" . $_SERVER["REQUEST_URI"] . "' method='post'>";
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
-        echo "      <input name='logoID' type='hidden' value='".(int)$this->logo->id."'>";
+        echo "      <input name='logoID' type='hidden' value='" . (int) $this->logo->id . "'>";
         echo "      <input name='submit' type='submit' value='rulez'>";
         echo "      <input name='submit' type='submit' value='sucks'>";
         echo "    </form>\n";
@@ -46,22 +46,22 @@ class PouetBoxLogoLama extends PouetBox
 
     public function RenderContent()
     {
-        $lama_pictures = array(
-          'lamer.jpg',
-          'lama.jpg',
-          'dalai-lama.jpg',
-          'lamerbus.jpg',
-          'lamerst-by-charlie.jpg',
-          'lamercream.jpg',
-          'lamerjewels.jpg',
-          'lamercow-by-everybody.jpg',
-        );
+        $lama_pictures = [
+            'lamer.jpg',
+            'lama.jpg',
+            'dalai-lama.jpg',
+            'lamerbus.jpg',
+            'lamerst-by-charlie.jpg',
+            'lamercream.jpg',
+            'lamerjewels.jpg',
+            'lamercow-by-everybody.jpg',
+        ];
 
-        echo "<img src='gfx/lamer/".$lama_pictures[array_rand($lama_pictures)]."' alt='Lamer picture'>";
+        echo "<img src='gfx/lamer/" . $lama_pictures[array_rand($lama_pictures)] . "' alt='Lamer picture'>";
     }
     public function RenderFooter()
     {
-        echo "  <div class='foot'><a href='".POUET_ROOT_URL."'>get back</a></div>\n";
+        echo "  <div class='foot'><a href='" . POUET_ROOT_URL . "'>get back</a></div>\n";
         echo "</div>\n";
     }
 
@@ -90,21 +90,21 @@ if ($currentUser) {
         if ($vote && $csrf->ValidateToken()) {
             SQLLib::Query(sprintf_esc("delete from logos_votes where logo = %d and user = %d", $_POST["logoID"], $currentUser->id));
 
-            $a = array();
-            $a["logo"] = (int)$_POST["logoID"];
+            $a = [];
+            $a["logo"] = (int) $_POST["logoID"];
             $a["user"] = $currentUser->id;
             $a["vote"] = $vote;
             SQLLib::InsertRow("logos_votes", $a);
         }
 
-        SQLLib::Query(sprintf_esc("update logos set vote_count = (select sum(vote) from logos_votes where logo = %d) where id = %d", (int)$_POST["logoID"], (int)$_POST["logoID"]));
+        SQLLib::Query(sprintf_esc("update logos set vote_count = (select sum(vote) from logos_votes where logo = %d) where id = %d", (int) $_POST["logoID"], (int) $_POST["logoID"]));
 
         // ajax
         if ($_POST["partial"] == 1) {
             $s = clone $sel;
             $visibleLogos = $_POST["visibleLogos"];
             foreach ($visibleLogos as $k => $v) {
-                $visibleLogos[$k] = (int)$v;
+                $visibleLogos[$k] = (int) $v;
             }
             $s->AddWhere(sprintf_esc("logos.id not in (%s)", implode(",", $visibleLogos)));
             $s->SetLimit(1);

@@ -2,5 +2,5 @@
 
 require_once("bootstrap.inc.php");
 
-$_SESSION = array();
+$_SESSION = [];
 redirect("index.php");

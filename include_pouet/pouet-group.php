@@ -20,16 +20,14 @@ class PouetGroup extends BM_Class
     }
     public static function getFields()
     {
-        return array("id","name","acronym","disambiguation","web","addedUser","addedDate");
+        return ["id","name","acronym","disambiguation","web","addedUser","addedDate"];
     }
     public static function getExtendedFields()
     {
-        return array("csdb","zxdemo","demozoo");
+        return ["csdb","zxdemo","demozoo"];
     }
 
-    public static function onAttach(&$node, &$query)
-    {
-    }
+    public static function onAttach(&$node, &$query) {}
 
     public function Delete()
     {
@@ -59,7 +57,7 @@ class PouetGroup extends BM_Class
         return sprintf(
             "<a href='groups.php?which=%d'>%s</a>",
             $this->id,
-            _html($this->name)
+            _html($this->name),
         );
     }
     public function RenderFull()

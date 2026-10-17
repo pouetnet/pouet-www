@@ -9,7 +9,7 @@ $sql->AddField("id");
 $sql->AddField("name");
 $sql->AddTable("parties");
 
-$r = array();
+$r = [];
 if (@$_POST["search"]) {
     $sql->AddWhere(sprintf_esc("name like '%%%s%%'", _like($_POST["search"])));
     $sql->AddOrder(sprintf_esc("if(name='%s',1,2), name", $_POST["search"]));

@@ -6,7 +6,7 @@ $r = SQLLib::selectRows(sprintf_esc("select name,type,party_year from prods wher
 $res[0] = $_GET["what"];
 foreach ($r as $o) {
     $res[1][] = $o->name;
-    $res[2][] = $o->type.($o->party_year ? ", ".$o->party_year : "");
+    $res[2][] = $o->type . ($o->party_year ? ", " . $o->party_year : "");
 }
 header("Content-type: application/json; charset=utf-8");
 echo json_encode($res);

@@ -25,7 +25,7 @@ class PouetRequestBase
     public static function ValidateRequest($input, &$output)
     {
         $output = $input;
-        return array();
+        return [];
     }
 
     // return HTML string describing the changes
@@ -40,7 +40,7 @@ class PouetRequestBase
     // return error array on error, empty array on success
     public static function Process($itemID, $reqData)
     {
-        return array();
+        return [];
     }
 };
 
@@ -101,4 +101,4 @@ class PouetRequestClassDoStuffToProds extends PouetRequestClassBase
 
 */
 
-$REQUESTTYPES = array();
+$REQUESTTYPES = [];

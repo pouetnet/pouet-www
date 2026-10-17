@@ -11,21 +11,21 @@ class PouetBoxSubmitPartyEdition extends PouetBox
         $this->uniqueID = "pouetbox_submitpartyedition";
         $this->title = "submit a party edition!";
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
     }
     public function Validate($data)
     {
         global $currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
-        $errors = array();
+        $errors = [];
         if ($data["download"]) {
             $url = parse_url($data["download"]);
             if (($url["scheme"] != "http" && $url["scheme"] != "ftp" && $url["scheme"] != "https") || strstr($data["download"], "://") === false) {
@@ -46,7 +46,7 @@ class PouetBoxSubmitPartyEdition extends PouetBox
     }
     public function Commit($data)
     {
-        $a = array();
+        $a = [];
         $a["download"] = trim($data["download"]);
         $a["csdb"] = $data["csdbID"];
         //$a["zxdemo"] = $data["zxdemoID"];
@@ -55,48 +55,48 @@ class PouetBoxSubmitPartyEdition extends PouetBox
         $a["artcity"] = $data["artcity"];
         SQLLib::InsertRow("partylinks", $a);
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $this->fields = array(
-          "download" => array(
-            "name" => "download directory",
-            "type" => "url",
-          ),
-          "csdbID" => array(
-            "name" => "csdb id",
-            "type" => "number",
-          ),
-/*
+        $this->fields = [
+            "download" => [
+                "name" => "download directory",
+                "type" => "url",
+            ],
+            "csdbID" => [
+                "name" => "csdb id",
+                "type" => "number",
+            ],
+            /*
           "zxdemoID"=>array(
             "name"=>"zxdemo id",
           ),
 */
-          "demozooID" => array(
-            "name" => "demozoo id",
-            "type" => "number",
-          ),
-          "slengpungID" => array(
-            "name" => "slengpung id",
-            "type" => "number",
-          ),
-          "artcity" => array(
-            "name" => "artcity tags",
-            "info" => "normally this is in a \"partyname,partyyear\" format, such as \"chaos constructions,2005\"",
-          ),
-          "results" => array(
-            "name" => "results file",
-            "type" => "file",
-          ),
-        );
+            "demozooID" => [
+                "name" => "demozoo id",
+                "type" => "number",
+            ],
+            "slengpungID" => [
+                "name" => "slengpung id",
+                "type" => "number",
+            ],
+            "artcity" => [
+                "name" => "artcity tags",
+                "info" => "normally this is in a \"partyname,partyyear\" format, such as \"chaos constructions,2005\"",
+            ],
+            "results" => [
+                "name" => "results file",
+                "type" => "file",
+            ],
+        ];
         foreach ($_POST as $k => $v) {
             if ($this->fields[$k]) {
                 $this->fields[$k]["value"] = $v;
@@ -117,9 +117,9 @@ class PouetBoxSubmitPartyEdition extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";

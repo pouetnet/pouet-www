@@ -10,7 +10,7 @@ $sql->AddField("name");
 $sql->AddField("disambiguation");
 $sql->AddTable("groups");
 
-$r = array();
+$r = [];
 if (@$_POST["search"]) {
     $terms = split_search_terms($_POST["search"]);
     foreach ($terms as $term) {

@@ -11,41 +11,41 @@ class PouetBoxSubmitParty extends PouetBox
         $this->uniqueID = "pouetbox_submitparty";
         $this->title = "submit a party!";
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
     }
     public function Validate($data)
     {
         global $partyID,$currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!trim($data["name"])) {
-            return array("Oh yeah, the party with no name, I remember that one!");
+            return ["Oh yeah, the party with no name, I remember that one!"];
         }
         if ($data["website"]) {
             $url = parse_url($data["website"]);
             if (($url["scheme"] != "http" && $url["scheme"] != "https") || strstr($data["website"], "://") === false) {
-                return array("please only websites with http or https links, kthx");
+                return ["please only websites with http or https links, kthx"];
             }
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["web"] = $data["website"];
         $a["addedUser"] = get_login_id();
         $a["addedDate"] = date("Y-m-d H:i:s");
         $this->partyID = SQLLib::InsertRow("parties", $a);
 
-        return array();
+        return [];
     }
     public function GetInsertionID()
     {
@@ -55,23 +55,23 @@ class PouetBoxSubmitParty extends PouetBox
     public function LoadFromDB()
     {
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $this->fields = array(
-          "name" => array(
-            "name" => "party name",
-            "required" => true,
-            "infoAfter" => "only enter the party name, but <b>not</b> the year !<br>eg. <b>Assembly</b> and not <strike><b>Assembly 1996</b></strike>",
-          ),
-          "website" => array(
-            "name" => "website url",
-            "type" => "url",
-          ),
-        );
+        $this->fields = [
+            "name" => [
+                "name" => "party name",
+                "required" => true,
+                "infoAfter" => "only enter the party name, but <b>not</b> the year !<br>eg. <b>Assembly</b> and not <strike><b>Assembly 1996</b></strike>",
+            ],
+            "website" => [
+                "name" => "website url",
+                "type" => "url",
+            ],
+        ];
         foreach ($_POST as $k => $v) {
             if ($this->fields[$k]) {
                 $this->fields[$k]["value"] = $v;
@@ -92,9 +92,9 @@ class PouetBoxSubmitParty extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";

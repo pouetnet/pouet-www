@@ -24,20 +24,20 @@ class PouetBoxAvatarGallery extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
 
         $width = 15;
 
-        $g = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
+        $g = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
         shuffle($g);
         $g = array_slice($g, 0, $width * $width);
 
         echo "<ul id='avatargallery'>\n";
         foreach ($g as $v) {
-            printf("  <li><img src='".POUET_CONTENT_URL."avatars/%s' alt='%s' title='%s'></li>\n", basename($v), basename($v), basename($v));
+            printf("  <li><img src='" . POUET_CONTENT_URL . "avatars/%s' alt='%s' title='%s'></li>\n", basename($v), basename($v), basename($v));
         }
         echo "</ul>\n";
 
@@ -58,18 +58,18 @@ class PouetBoxSubmitAvatar extends PouetBox
     {
         global $groupID,$currentUser;
 
-        $errormessage = array();
+        $errormessage = [];
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!is_uploaded_file($_FILES["avatar"]["tmp_name"])) {
-            return array("upload error !");
+            return ["upload error !"];
         }
 
         list($width, $height, $type) = getimagesize($_FILES["avatar"]["tmp_name"]);
@@ -96,7 +96,7 @@ class PouetBoxSubmitAvatar extends PouetBox
             $errormessage[] = "please give a senseful filename devoid of dumb characters, kthx? (nothing but alphanumerics, dash and underscore is allowed, 32 chars max)";
         }
 
-        if (file_exists(POUET_CONTENT_LOCAL."avatars/".$filename)) {
+        if (file_exists(POUET_CONTENT_LOCAL . "avatars/" . $filename)) {
             $errormessage[] = "this filename already exists on the server";
         }
 
@@ -104,15 +104,15 @@ class PouetBoxSubmitAvatar extends PouetBox
             return $errormessage;
         }
 
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         $filename = strtolower(basename($_FILES["avatar"]["name"]));
 
-        move_uploaded_file_fake($_FILES["avatar"]["tmp_name"], POUET_CONTENT_LOCAL . "avatars/".$filename);
+        move_uploaded_file_fake($_FILES["avatar"]["tmp_name"], POUET_CONTENT_LOCAL . "avatars/" . $filename);
 
-        return array();
+        return [];
     }
 
     public function Render()
@@ -127,9 +127,9 @@ class PouetBoxSubmitAvatar extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
 
         echo "in order to upload a new avatar, make sure to follow those rules:<br>";

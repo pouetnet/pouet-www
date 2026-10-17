@@ -13,13 +13,13 @@ class PouetBoxIndexLogin extends PouetBoxLogin
 
         global $currentUser;
         if (!$currentUser) {
-            LOG::Warning("Login ID is ".get_login_id()." but currentUser is null!");
+            LOG::Warning("Login ID is " . get_login_id() . " but currentUser is null!");
             parent::RenderBody();
             return;
         }
         echo "<div class='content loggedin'>\n";
         echo "you are logged in as<br>\n";
-        echo $currentUser->PrintLinkedAvatar()." ";
+        echo $currentUser->PrintLinkedAvatar() . " ";
         echo $currentUser->PrintLinkedName();
         echo "</div>\n";
         if ($currentUser->IsGloperator()) {
@@ -39,10 +39,10 @@ class PouetBoxIndexLogin extends PouetBoxLogin
         }
 
         $broken = SQLLib::SelectRow(sprintf_esc(
-            " select count(*) as c from prods_linkcheck".
-      " left join prods on prods.id = prods_linkcheck.prodID".
-      " where prods.addedUser = %d and (returnCode = 0 or (returnCode >= 400 && returnCode <= 599))",
-            $currentUser->id
+            " select count(*) as c from prods_linkcheck"
+      . " left join prods on prods.id = prods_linkcheck.prodID"
+      . " where prods.addedUser = %d and (returnCode = 0 or (returnCode >= 400 && returnCode <= 599))",
+            $currentUser->id,
         ));
         if ($broken->c) {
             echo "<div class='content notifications'>\n";
@@ -50,15 +50,15 @@ class PouetBoxIndexLogin extends PouetBoxLogin
             echo "</div>\n";
         }
 
-        $cheevs = array(
-             64 => "you're definitely keeping up with the commodore !",
+        $cheevs = [
+            64 => "you're definitely keeping up with the commodore !",
             286 => "you just entered protected mode !",
             808 => "so many glöps - it's quite a kick !",
-           1337 => "above this level is elitez only !",
-           6510 => "you've clearly been processing a lot !",
-          31337 => "greetings to elitez only !",
-          64738 => "maybe it's time to reset your account !",
-        );
+            1337 => "above this level is elitez only !",
+            6510 => "you've clearly been processing a lot !",
+            31337 => "greetings to elitez only !",
+            64738 => "maybe it's time to reset your account !",
+        ];
         if (@$cheevs[$currentUser->glops]) {
             echo "<div class='content achievements'>\n";
             printf("<p><b>congratulations ! you reached %d glöps !</b></p>", $currentUser->glops);

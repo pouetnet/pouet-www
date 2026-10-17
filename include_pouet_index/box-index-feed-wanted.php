@@ -14,19 +14,19 @@ class PouetBoxIndexFeedWanted extends PouetBoxCachable
 
         $this->cacheTime = 60 * 60;
 
-        $this->rss = class_exists("DomDocument") ? new lastRSS(array(
-          "cacheTime" => 5 * 60, // in seconds
-          "dateFormat" => "Y-m-d",
-          "stripHtml" => false,
-        )) : null;
+        $this->rss = class_exists("DomDocument") ? new lastRSS([
+            "cacheTime" => 5 * 60, // in seconds
+            "dateFormat" => "Y-m-d",
+            "stripHtml" => false,
+        ]) : null;
         if ($this->rss) {
-            $this->rss->setItemTags(array(
-              "link",
-              "title",
-              "pubDate",
-              "wanted:demand",
-              "wanted:area",
-            ));
+            $this->rss->setItemTags([
+                "link",
+                "title",
+                "pubDate",
+                "wanted:demand",
+                "wanted:area",
+            ]);
         }
 
         $this->limit = 5;
@@ -39,9 +39,9 @@ class PouetBoxIndexFeedWanted extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of posts visible","default" => 5,"min" => 1,"max" => 10),
-        );
+        return [
+            "limit" => ["name" => "number of posts visible","default" => 5,"min" => 1,"max" => 10],
+        ];
     }
 
     public function LoadFromCachedData($data)
@@ -56,7 +56,7 @@ class PouetBoxIndexFeedWanted extends PouetBoxCachable
 
     public function LoadFromDB()
     {
-        $this->rssData = $this->rss ? $this->rss->get('https://wanted.scene.org/rss/?random=weighted') : array();
+        $this->rssData = $this->rss ? $this->rss->get('https://wanted.scene.org/rss/?random=weighted') : [];
     }
 
     public function RenderBody()
@@ -71,7 +71,7 @@ class PouetBoxIndexFeedWanted extends PouetBoxCachable
             if ((time() - $time) < 60 * 60 * 24 * 30) {
                 echo "New! ";
             }
-            echo "<a href='".$this->rssData['items'][$i]['link']."'>".$this->rssData['items'][$i]['title']."</a> ";
+            echo "<a href='" . $this->rssData['items'][$i]['link'] . "'>" . $this->rssData['items'][$i]['title'] . "</a> ";
             echo "</li>\n";
         }
         echo "</ul>\n";

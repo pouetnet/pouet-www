@@ -19,7 +19,7 @@ class PouetBoxButtons extends PouetBox
     public function Render()
     {
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
         $type = "";
         foreach ($this->buttons as $b) {
             if ($type != $b->type) {
@@ -27,12 +27,12 @@ class PouetBoxButtons extends PouetBox
                     echo "</ul>\n";
                     echo "</div>\n";
                 }
-                echo "<h2>"._html($b->type)."</h2>\n";
+                echo "<h2>" . _html($b->type) . "</h2>\n";
                 echo "<div class='content'>\n";
                 echo "<ul>\n";
                 $type = $b->type;
             }
-            echo "  <li><a href='"._html($b->url)."'><img src='".POUET_CONTENT_URL."buttons/".$b->img."' title='"._html($b->alt)."' alt='"._html($b->alt)."'></a></li>\n";
+            echo "  <li><a href='" . _html($b->url) . "'><img src='" . POUET_CONTENT_URL . "buttons/" . $b->img . "' title='" . _html($b->alt) . "' alt='" . _html($b->alt) . "'></a></li>\n";
         }
         echo "</ul>\n";
         echo "</div>\n";

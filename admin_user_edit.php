@@ -4,7 +4,7 @@ require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
 if ($currentUser && !$currentUser->IsModerator()) {
-    redirect("user.php?who=".(int)$_GET["who"]);
+    redirect("user.php?who=" . (int) $_GET["who"]);
     exit();
 }
 
@@ -21,15 +21,15 @@ class PouetBoxAdminEditUser extends PouetBox
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->user = PouetUser::Spawn($this->id);
 
         $this->uniqueID = "pouetbox_adminedituser";
-        $this->title = "edit this user: <a href='user.php?who=".$this->user->id."'>"._html($this->user->nickname)."</a>";
+        $this->title = "edit this user: <a href='user.php?who=" . $this->user->id . "'>" . _html($this->user->nickname) . "</a>";
         $this->sceneID = $this->user->GetSceneIDData(false);
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
 
         $row = SQLLib::selectRow("DESC users level");
         $this->levels = enum2array($row->Type);
@@ -38,57 +38,57 @@ class PouetBoxAdminEditUser extends PouetBox
     public function Commit($data)
     {
         global $currentUser;
-        $a = array();
+        $a = [];
         if ($currentUser->IsAdministrator() && array_search($data["level"], $this->levels) !== false) {
             $a["level"] = $data["level"];
         }
-        $a["permissionSubmitItems"] = (int)($data["permissionSubmitItems"] == "on");
-        $a["permissionOpenBBS"] = (int)($data["permissionOpenBBS"] == "on");
-        $a["permissionPostBBS"] = (int)($data["permissionPostBBS"] == "on");
-        $a["permissionPostOneliner"] = (int)($data["permissionPostOneliner"] == "on");
-        SQLLib::UpdateRow("users", $a, "id=".(int)$this->user->id);
+        $a["permissionSubmitItems"] = (int) ($data["permissionSubmitItems"] == "on");
+        $a["permissionOpenBBS"] = (int) ($data["permissionOpenBBS"] == "on");
+        $a["permissionPostBBS"] = (int) ($data["permissionPostBBS"] == "on");
+        $a["permissionPostOneliner"] = (int) ($data["permissionPostOneliner"] == "on");
+        SQLLib::UpdateRow("users", $a, "id=" . (int) $this->user->id);
     }
     public function LoadFromDB()
     {
         global $currentUser;
-        $this->fields = array(
-          "lastLogin" => array(
-            "name" => "last logged in",
-            "type" => "static",
-            "value" => $this->user->lastLogin . " (".dateDiffReadable(time(), $this->user->lastLogin)." ago)",
-          ),
-          "lastIP" => array(
-            "name" => "last IP",
-            "type" => "static",
-            "value" => "<a href='admin_user_edit.php?ip=".rawurlencode($this->user->lastip)."'>"._html($this->user->lastip)."</a> ("._html($this->user->lasthost).") [<a href='https://geodatatool.com/lander/?IP="._html($this->user->lastip)."' target='_blank'>geoip</a>]",
-          ),
-          "level" => array(
-            "name" => "level",
-            "type" => "select",
-            "value" => $this->user->level,
-            "fields" => $this->levels,
-          ),
-          "permissionSubmitItems" => array(
-            "name" => "allow user to add items",
-            "type" => "checkbox",
-            "value" => $this->user->permissionSubmitItems,
-          ),
-          "permissionOpenBBS" => array(
-            "name" => "allow user to open new topics on the BBS",
-            "type" => "checkbox",
-            "value" => $this->user->permissionOpenBBS,
-          ),
-          "permissionPostBBS" => array(
-            "name" => "allow user to post to the BBS",
-            "type" => "checkbox",
-            "value" => $this->user->permissionPostBBS,
-          ),
-          "permissionPostOneliner" => array(
-            "name" => "allow user to post in the oneliner",
-            "type" => "checkbox",
-            "value" => $this->user->permissionPostOneliner,
-          ),
-        );
+        $this->fields = [
+            "lastLogin" => [
+                "name" => "last logged in",
+                "type" => "static",
+                "value" => $this->user->lastLogin . " (" . dateDiffReadable(time(), $this->user->lastLogin) . " ago)",
+            ],
+            "lastIP" => [
+                "name" => "last IP",
+                "type" => "static",
+                "value" => "<a href='admin_user_edit.php?ip=" . rawurlencode($this->user->lastip) . "'>" . _html($this->user->lastip) . "</a> (" . _html($this->user->lasthost) . ") [<a href='https://geodatatool.com/lander/?IP=" . _html($this->user->lastip) . "' target='_blank'>geoip</a>]",
+            ],
+            "level" => [
+                "name" => "level",
+                "type" => "select",
+                "value" => $this->user->level,
+                "fields" => $this->levels,
+            ],
+            "permissionSubmitItems" => [
+                "name" => "allow user to add items",
+                "type" => "checkbox",
+                "value" => $this->user->permissionSubmitItems,
+            ],
+            "permissionOpenBBS" => [
+                "name" => "allow user to open new topics on the BBS",
+                "type" => "checkbox",
+                "value" => $this->user->permissionOpenBBS,
+            ],
+            "permissionPostBBS" => [
+                "name" => "allow user to post to the BBS",
+                "type" => "checkbox",
+                "value" => $this->user->permissionPostBBS,
+            ],
+            "permissionPostOneliner" => [
+                "name" => "allow user to post in the oneliner",
+                "type" => "checkbox",
+                "value" => $this->user->permissionPostOneliner,
+            ],
+        ];
         if ($currentUser && !$currentUser->IsAdministrator()) {
             $this->fields["level"]["type"] = "static";
         }
@@ -105,9 +105,9 @@ class PouetBoxAdminEditUser extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";
@@ -130,7 +130,7 @@ class PouetBoxAdminUserNicks extends PouetBox
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
         $this->title = "previous nicks";
     }
     public function LoadFromDB()
@@ -161,7 +161,7 @@ class PouetBoxAdminUserIPs extends PouetBox
         parent::__construct();
 
         $this->ip = $ip;
-        $this->title = "users using "._html($ip);
+        $this->title = "users using " . _html($ip);
     }
     public function LoadFromDB()
     {
@@ -176,12 +176,12 @@ class PouetBoxAdminUserIPs extends PouetBox
         foreach ($this->users as $p) {
             echo "<li>\n";
             echo "<span>\n";
-            echo $p->PrintLinkedAvatar()." ";
-            echo $p->PrintLinkedName()." ";
-            echo "[<a href='admin_user_edit.php?who=".(int)$p->id."'>edit</a>]";
+            echo $p->PrintLinkedAvatar() . " ";
+            echo $p->PrintLinkedName() . " ";
+            echo "[<a href='admin_user_edit.php?who=" . (int) $p->id . "'>edit</a>]";
             echo "</span>\n";
             echo "<span>";
-            echo $p->glops." glöps";
+            echo $p->glops . " glöps";
             echo "</span>\n";
             echo "<span>";
             echo $p->level;
@@ -196,13 +196,13 @@ $form = new PouetFormProcessor();
 
 $box = null;
 if (is_numeric(@$_GET["who"])) {
-    $form->SetSuccessURL("user.php?who=".(int)$_GET["who"]."#success", true);
+    $form->SetSuccessURL("user.php?who=" . (int) $_GET["who"] . "#success", true);
 
     $box = new PouetBoxAdminEditUser($_GET["who"]);
     $form->Add("user", $box);
     $form->Add("userNicks", new PouetBoxAdminUserNicks($_GET["who"]));
 } elseif (@$_GET["ip"]) {
-    $form->SetSuccessURL("user.php?ip=".rawurlencode($_GET["ip"])."#success", true);
+    $form->SetSuccessURL("user.php?ip=" . rawurlencode($_GET["ip"]) . "#success", true);
 
     $form->Add("userIP", new PouetBoxAdminUserIPs($_GET["ip"]));
 }
@@ -212,7 +212,7 @@ if ($currentUser && $currentUser->IsAdministrator()) {
 }
 
 if ($box && $box->user) {
-    $TITLE = "edit this user: ".$box->user->nickname;
+    $TITLE = "edit this user: " . $box->user->nickname;
 } else {
     $TITLE = "edit user";
 }

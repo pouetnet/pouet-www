@@ -37,9 +37,9 @@ class PouetBoxIndexLatestLists extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of lists visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit" => ["name" => "number of lists visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function LoadFromDB()
@@ -48,7 +48,7 @@ class PouetBoxIndexLatestLists extends PouetBoxCachable
         $s->AddField("lists.id as id");
         $s->AddField("lists.name as name");
         $s->AddTable("lists");
-        $s->attach(array("lists" => "owner"), array("users as user" => "id"));
+        $s->attach(["lists" => "owner"], ["users as user" => "id"]);
         $s->AddOrder("lists.addedDate desc");
         $s->SetLimit(POUET_CACHE_MAX);
         $this->data = $s->perform();
@@ -62,7 +62,7 @@ class PouetBoxIndexLatestLists extends PouetBoxCachable
         foreach ($this->data as $l) {
             echo "<li>\n";
             printf("  <span><a href='lists.php?which=%d'>%s</a></span>\n", $l->id, _html($l->name));
-            echo "  <span class='rowuser'>".$l->user->PrintLinkedAvatar()."</span>\n";
+            echo "  <span class='rowuser'>" . $l->user->PrintLinkedAvatar() . "</span>\n";
             echo "</li>\n";
             if (++$n == $this->limit) {
                 break;

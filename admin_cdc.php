@@ -21,17 +21,17 @@ class PouetBoxAdminAddCDC extends PouetBoxEditConnectionsBase
         parent::__construct();
         $this->uniqueID = "pouetbox_admineditcdc";
         $this->title = "edit cdcs";
-        $this->headers = array("prod","groups","added date");
+        $this->headers = ["prod","groups","added date"];
 
         $s = new BM_Query();
         $s->AddTable("cdc");
         $s->AddField("cdc.id");
         $s->AddField("cdc.addedDate");
-        $s->attach(array("cdc" => "which"), array("prods as prod" => "id"));
+        $s->attach(["cdc" => "which"], ["prods as prod" => "id"]);
         $s->AddOrder("cdc.addedDate");
         $this->data = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->data as $v) {
             $a[] = &$v->prod;
         }
@@ -40,15 +40,15 @@ class PouetBoxAdminAddCDC extends PouetBoxEditConnectionsBase
     public function Commit($data)
     {
         if (@$data["delAffil"]) {
-            SQLLib::Query("delete from cdc where id=".(int)$data["delCDC"]);
-            return array();
+            SQLLib::Query("delete from cdc where id=" . (int) $data["delCDC"]);
+            return [];
         }
 
-        $a = array();
+        $a = [];
         $a["which"] = $data["which"];
         $a["addedDate"] = $data["addedDate"];
         if (@$data["editCDCID"]) {
-            SQLLib::UpdateRow("cdc", $a, "id=".(int)$data["editCDCID"]);
+            SQLLib::UpdateRow("cdc", $a, "id=" . (int) $data["editCDCID"]);
             $a["id"] = $data["editCDCID"];
         } else {
             $a["id"] = SQLLib::InsertRow("cdc", $a);
@@ -64,19 +64,19 @@ class PouetBoxAdminAddCDC extends PouetBoxEditConnectionsBase
             exit();
         }
 
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td colspan='2'><input name='which' value='"._html($row ? $row->prod->id : "")."' class='prodID'></td>\n";
-        echo "    <td><input name='addedDate' value='"._html($row && $row->addedDate ? $row->addedDate : date("Y-m-d"))."'></td>\n";
+        echo "    <td colspan='2'><input name='which' value='" . _html($row ? $row->prod->id : "") . "' class='prodID'></td>\n";
+        echo "    <td><input name='addedDate' value='" . _html($row && $row->addedDate ? $row->addedDate : date("Y-m-d")) . "'></td>\n";
     }
     public function RenderNormalRow($v)
     {
         echo "<td>\n";
         echo $v->prod->RenderTypeIcons();
         echo $v->prod->RenderPlatformIcons();
-        echo "<span class='prod'>".$v->prod->RenderLink()."</span>\n";
+        echo "<span class='prod'>" . $v->prod->RenderLink() . "</span>\n";
         echo "</td>\n";
 
         echo "<td>\n";
@@ -114,9 +114,9 @@ document.observe("dom:loaded",function(){
 }
 
 
-$boxen = array(
-  "PouetBoxAdminAddCDC",
-);
+$boxen = [
+    "PouetBoxAdminAddCDC",
+];
 if (@$_GET["partial"] && $currentUser && $currentUser->CanEditItems()) {
     // ajax responses
     $prod = new stdClass();

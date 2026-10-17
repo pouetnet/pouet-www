@@ -17,11 +17,11 @@ class PouetBoxCDCModerator extends PouetBox
         $s = new BM_Query();
         $s->AddTable("cdc");
         $s->AddField("cdc.addedDate");
-        $s->attach(array("cdc" => "which"), array("prods as prod" => "id"));
+        $s->attach(["cdc" => "which"], ["prods as prod" => "id"]);
         $s->AddOrder("cdc.addedDate desc");
         $this->cdcs = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->cdcs as $v) {
             $a[] = &$v->prod;
         }
@@ -38,7 +38,7 @@ class PouetBoxCDCModerator extends PouetBox
             echo "<td>\n";
             echo $p->RenderTypeIcons();
             echo $p->RenderPlatformIcons();
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo "</td>\n";
 
             echo "<td>\n";
@@ -68,13 +68,13 @@ class PouetBoxCDCUser extends PouetBox
     {
         $s = new BM_Query();
         $s->AddTable("users_cdcs");
-        $s->attach(array("users_cdcs" => "cdc"), array("prods as prod" => "id"));
+        $s->attach(["users_cdcs" => "cdc"], ["prods as prod" => "id"]);
         $s->AddGroup("users_cdcs.cdc");
         $s->AddField("count(*) as c");
         $s->AddOrder("c desc");
         $this->cdcs = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->cdcs as $v) {
             $a[] = &$v->prod;
         }
@@ -96,7 +96,7 @@ class PouetBoxCDCUser extends PouetBox
             echo "<td>\n";
             echo $p->RenderTypeIcons();
             echo $p->RenderPlatformIcons();
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo "</td>\n";
 
             echo "<td>\n";

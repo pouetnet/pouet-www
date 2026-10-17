@@ -22,8 +22,8 @@ class PouetBoxBoardNfo extends PouetBoxASCIIViewer
         $s->AddField("othernfos_board.name");
         $s->AddTable("othernfos");
         $s->SetLimit(1);
-        $s->attach(array("othernfos" => "adder"), array("users as user" => "id"));
-        $s->attach(array("othernfos" => "refID"), array("boards as board" => "id"));
+        $s->attach(["othernfos" => "adder"], ["users as user" => "id"]);
+        $s->attach(["othernfos" => "refID"], ["boards as board" => "id"]);
         $s->AddWhere(sprintf_esc("othernfos.id=%d", $_GET["which"]));
         $s->GetQuery();
         list($this->nfo) = $s->perform();
@@ -34,14 +34,14 @@ class PouetBoxBoardNfo extends PouetBoxASCIIViewer
     {
         parent::RenderHeader();
 
-        echo " <h2><big>"._html($this->nfo->name)."</big>";
+        echo " <h2><big>" . _html($this->nfo->name) . "</big>";
         echo "</h2>\n";
     }
     public function RenderBody()
     {
         $this->asciiFilename = get_local_boardnfo_path($_GET["which"]);
         ;
-        $this->bodyTitle = "nfo added by "._html($this->nfo->user->nickname)." on "._html($this->nfo->added);
+        $this->bodyTitle = "nfo added by " . _html($this->nfo->user->nickname) . " on " . _html($this->nfo->added);
 
         parent::RenderBody();
     }

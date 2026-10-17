@@ -16,18 +16,18 @@ class PouetBoxSubmitLogo extends PouetBox
     {
         global $currentUser;
 
-        $errormessage = array();
+        $errormessage = [];
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!is_uploaded_file($_FILES["logo"]["tmp_name"])) {
-            return array("upload error !");
+            return ["upload error !"];
         }
 
         list($width, $height, $type) = getimagesize($_FILES["logo"]["tmp_name"]);
@@ -54,7 +54,7 @@ class PouetBoxSubmitLogo extends PouetBox
             $errormessage[] = "please give a senseful filename devoid of dumb characters, kthx? (nothing but alphanumerics, dash and underscore is allowed, 32 chars max)";
         }
 
-        if (file_exists(POUET_CONTENT_LOCAL . "/logos/".$filename)) {
+        if (file_exists(POUET_CONTENT_LOCAL . "/logos/" . $filename)) {
             $errormessage[] = "this filename already exists on the server";
         }
 
@@ -62,7 +62,7 @@ class PouetBoxSubmitLogo extends PouetBox
             return $errormessage;
         }
 
-        return array();
+        return [];
     }
     public function Commit($data)
     {
@@ -70,15 +70,15 @@ class PouetBoxSubmitLogo extends PouetBox
 
         $filename = strtolower(basename($_FILES["logo"]["name"]));
 
-        move_uploaded_file_fake($_FILES["logo"]["tmp_name"], POUET_CONTENT_LOCAL . "/logos/".$filename);
+        move_uploaded_file_fake($_FILES["logo"]["tmp_name"], POUET_CONTENT_LOCAL . "/logos/" . $filename);
 
-        $a = array();
+        $a = [];
         $a["author1"] = $currentUser->id;
         $a["author2"] = null;
         $a["file"] = $filename;
         SQLLib::InsertRow("logos", $a);
 
-        return array();
+        return [];
     }
 
     public function Render()
@@ -93,9 +93,9 @@ class PouetBoxSubmitLogo extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
 
         echo "<p><b>.gif</b> <b>.jpg</b> or <b>.png</b> width and height limit are <b>700</b>x<b>200</b></p>\n";

@@ -3,7 +3,7 @@
 //require_once("credentials.php");
 require_once("sqllib.inc.php");
 
-$BM_ORM_CLASSES = array();
+$BM_ORM_CLASSES = [];
 
 function BM_AddClass($class)
 {
@@ -19,10 +19,10 @@ class BM_Node
     public $attachments;
     public $prefix;
     public $fieldFunc;
-    public function __construct(&$query, $a = array())
+    public function __construct(&$query, $a = [])
     {
         global $BM_ORM_CLASSES;
-        $this->attachments = array();
+        $this->attachments = [];
         foreach ($a as $k => $v) {
             $this->$k = $v;
         }
@@ -60,9 +60,9 @@ class BM_Node
 
         $prefix = $localTable . "_" . $relationTableAlias;
 
-        $query->AddJoin("LEFT", $relationTableCanonical . " AS " . $prefix, sprintf("%s.%s = %s.%s", $localTable, $localField, $prefix, $relationField) . ($additionalCondition ? " AND ".$additionalCondition : ""));
+        $query->AddJoin("LEFT", $relationTableCanonical . " AS " . $prefix, sprintf("%s.%s = %s.%s", $localTable, $localField, $prefix, $relationField) . ($additionalCondition ? " AND " . $additionalCondition : ""));
 
-        $node = new BM_Node($query, array("id" => $relationTableAlias,"table" => $relationTableCanonical,"prefix" => $prefix));
+        $node = new BM_Node($query, ["id" => $relationTableAlias,"table" => $relationTableCanonical,"prefix" => $prefix]);
         $this->attachments[] = $node;
 
         if ($node->class) {
@@ -79,7 +79,7 @@ class BM_Node
     {
         $class = $this->class;
         foreach ($class::getExtendedFields() as $v) {
-            $query->AddField($this->getTableInstanceName().".".$v);
+            $query->AddField($this->getTableInstanceName() . "." . $v);
         }
     }
 };
@@ -89,9 +89,9 @@ class BM_Query extends SQLSelect
     public $root;
     public function __construct($table = null)
     {
-        $this->root = array();
+        $this->root = [];
         if ($table) {
-            $this->root = new BM_Node($this, array("table" => $table));
+            $this->root = new BM_Node($this, ["table" => $table]);
             if ($this->root->class) {
                 $this->root->class::onAttach($this->root, $this);
             }
@@ -149,7 +149,7 @@ class BM_Query extends SQLSelect
     }
     public function perform() // "'perform'?! in germany, queries get EXECUTED!" /dfox/
     {
-        $objects = array();
+        $objects = [];
         $sql = $this->GetQuery();
         $rows = SQLLib::selectRows($sql);
         foreach ($rows as $row) {
@@ -170,7 +170,7 @@ class BM_Query extends SQLSelect
     }
     public function performWithCalcRows(&$count)
     {
-        $objects = array();
+        $objects = [];
         $sql = $this->GetQuery();
         $sql = preg_replace("/^SELECT/", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         $rows = SQLLib::selectRows($sql);
@@ -190,7 +190,7 @@ class BM_Query extends SQLSelect
         }
 
         $row = SQLLib::selectRow("SELECT FOUND_ROWS() as f");
-        $count = (int)$row->f;
+        $count = (int) $row->f;
 
         return $objects;
     }
@@ -202,32 +202,28 @@ class BM_Class
 {
     public static function getTable()
     {
-        trigger_error("GetTable not overridden in ".get_class(), E_USER_ERROR);
+        trigger_error("GetTable not overridden in " . get_class(), E_USER_ERROR);
     }
     public static function getFields()
     {
-        return array("id");
+        return ["id"];
     }
     public static function getExtendedFields()
     {
-        return array_merge(static::getFields(), array());
+        return array_merge(static::getFields(), []);
     }
     public static function getPrimaryKey()
     {
         return "id";
     }
-    public static function onAttach(&$node, &$query)
-    {
-    }
-    public function onFinishedPopulate()
-    {
-    }
+    public static function onAttach(&$node, &$query) {}
+    public function onFinishedPopulate() {}
 
     public static function spawn($id)
     {
         $query = new BM_Query(static::getTable());
         $query->addExtendedFields();
-        $query->AddWhere(sprintf_esc("%s.%s = %d", static::getTable(), static::getPrimaryKey(), (int)$id));
+        $query->AddWhere(sprintf_esc("%s.%s = %d", static::getTable(), static::getPrimaryKey(), (int) $id));
         $query->SetLimit(1);
         $rows = $query->perform();
         return reset($rows);
