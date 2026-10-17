@@ -26,10 +26,11 @@ jobs:
         run: git ls-files -z '*.php' | xargs -0 -r -n1 php -l
       - name: Forbid short open tags
         # php -l takes the code after a bare "<?" for text, so tokenize with
-        # short_open_tag on to find them
+        # short_open_tag on to find them. Also in the config templates, which
+        # become the sites' config.inc.php
         run: |
           # shellcheck disable=SC2016 # the $s are PHP's
-          git ls-files -z '*.php' | xargs -0 -r php -d short_open_tag=On -r '
+          git ls-files -z '*.php' '*.php.dist' | xargs -0 -r php -d short_open_tag=On -r '
             $bad = 0;
             foreach (array_slice($argv, 1) as $f) {
               foreach (token_get_all(file_get_contents($f)) as $t) {
