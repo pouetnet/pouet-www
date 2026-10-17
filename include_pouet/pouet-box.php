@@ -10,7 +10,7 @@ class PouetBox
     {
         $this->title = "";
         $this->uniqueID = "pouetbox";
-        $this->classes = array();
+        $this->classes = [];
     }
 
     public function GetData() // override
@@ -21,13 +21,13 @@ class PouetBox
     public function RenderHeader()
     {
         echo "\n\n";
-        echo "<div class='pouettbl".($this->classes ? (" ".implode(" ", $this->classes)) : "")."' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl" . ($this->classes ? (" " . implode(" ", $this->classes)) : "") . "' id='" . $this->uniqueID . "'>\n";
         $this->RenderTitle();
     }
 
     public function RenderTitle()
     {
-        echo " <h2>".$this->title."</h2>\n";
+        echo " <h2>" . $this->title . "</h2>\n";
     }
 
     public function RenderBody()
@@ -50,11 +50,11 @@ class PouetBox
     public function Render()
     {
         global $timer;
-        $timer[$this->uniqueID." render"]["start"] = microtime_float();
+        $timer[$this->uniqueID . " render"]["start"] = microtime_float();
         $this->RenderHeader();
         $this->RenderBody();
         $this->RenderFooter();
-        $timer[$this->uniqueID." render"]["end"] = microtime_float();
+        $timer[$this->uniqueID . " render"]["end"] = microtime_float();
     }
 
     public function RenderBuffered()
@@ -70,15 +70,14 @@ class PouetBox
     }
 
     public function LoadFromDB() // override
-    {
-    }
+    {}
 
     public function Load()
     {
         global $timer;
-        $timer[$this->uniqueID." load"]["start"] = microtime_float();
+        $timer[$this->uniqueID . " load"]["start"] = microtime_float();
         $this->LoadFromDB();
-        $timer[$this->uniqueID." load"]["end"] = microtime_float();
+        $timer[$this->uniqueID . " load"]["end"] = microtime_float();
     }
 }
 
@@ -86,12 +85,12 @@ trait PouetForm
 {
     public function Validate($data)
     {
-        return array();
+        return [];
     }
 
     public function Commit($data)
     {
-        return array();
+        return [];
     }
 
     public function ParsePostMessage($data)
@@ -113,12 +112,10 @@ trait PouetForm
 
 trait PouetFrontPage
 {
-    public function SetParameters($data)
-    {
-    }
+    public function SetParameters($data) {}
     public function GetParameterSettings()
     {
-        return array();
+        return [];
     }
 }
 
@@ -136,12 +133,11 @@ class PouetBoxCachable extends PouetBox
     }
 
     public function LoadFromCachedData($data) // override
-    {
-    }
+    {}
 
     public function GetCacheFilename()
     {
-        return POUET_ROOT_LOCAL . "/cache/".$this->uniqueID.".cache";
+        return POUET_ROOT_LOCAL . "/cache/" . $this->uniqueID . ".cache";
     }
 
     public function SaveToCache()
@@ -171,10 +167,10 @@ class PouetBoxCachable extends PouetBox
     public function Load($cached = false)
     {
         global $timer;
-        $timer[$this->uniqueID." load"]["start"] = microtime_float();
+        $timer[$this->uniqueID . " load"]["start"] = microtime_float();
         if ($cached) {
             if ($this->IsCacheValid()) {
-                $this->logz .= "<!-- loading ".$this->uniqueID." from cache... -->\n";
+                $this->logz .= "<!-- loading " . $this->uniqueID . " from cache... -->\n";
                 $this->LoadFromCachedData($this->GetCachedData());
             } else {
                 $this->LoadFromDB();
@@ -183,7 +179,7 @@ class PouetBoxCachable extends PouetBox
         } else {
             $this->LoadFromDB();
         }
-        $timer[$this->uniqueID." load"]["end"] = microtime_float();
+        $timer[$this->uniqueID . " load"]["end"] = microtime_float();
     }
 
 };

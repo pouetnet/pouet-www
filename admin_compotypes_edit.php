@@ -23,7 +23,7 @@ class PouetBoxCompotypesEditBox extends PouetBoxEditConnectionsBase
         $this->title = "edit compo types";
         $this->allowDelete = false; // for now
 
-        $this->headers = array("#","compo name");
+        $this->headers = ["#","compo name"];
         $this->data = SQLLib::SelectRows("select * from compotypes order by id");
     }
     public function Commit($data)
@@ -37,10 +37,10 @@ class PouetBoxCompotypesEditBox extends PouetBoxEditConnectionsBase
         }
         */
 
-        $a = array();
+        $a = [];
         $a["componame"] = trim($data["componame"]);
         if (@$data["editCompoID"]) {
-            SQLLib::UpdateRow("compotypes", $a, "id=".(int)$data["editCompoID"]);
+            SQLLib::UpdateRow("compotypes", $a, "id=" . (int) $data["editCompoID"]);
             $a["id"] = $data["editCompoID"];
         } else {
             $a["id"] = SQLLib::InsertRow("compotypes", $a);
@@ -51,17 +51,17 @@ class PouetBoxCompotypesEditBox extends PouetBoxEditConnectionsBase
             $this->RenderNormalRowEnd(toObject($a));
             exit();
         }
-        return array();
+        return [];
     }
     public function RenderEditRow($row = null)
     {
-        echo "    <td>"._html($row ? $row->id : "")."</td>\n";
-        echo "    <td><input name='componame' value='"._html($row ? $row->componame : "")."'></td>\n";
+        echo "    <td>" . _html($row ? $row->id : "") . "</td>\n";
+        echo "    <td><input name='componame' value='" . _html($row ? $row->componame : "") . "'></td>\n";
     }
     public function RenderNormalRow($row)
     {
-        echo "    <td>"._html($row->id)."</td>\n";
-        echo "    <td>"._html($row->componame)."</td>\n";
+        echo "    <td>" . _html($row->id) . "</td>\n";
+        echo "    <td>" . _html($row->componame) . "</td>\n";
     }
     public function RenderBody()
     {
@@ -78,9 +78,9 @@ document.observe("dom:loaded",function(){
     }
 };
 
-$boxen = array(
-  "PouetBoxCompotypesEditBox",
-);
+$boxen = [
+    "PouetBoxCompotypesEditBox",
+];
 if (@$_GET["partial"] && $currentUser && $currentUser->IsModerator()) {
     // ajax responses
     foreach ($boxen as $class) {

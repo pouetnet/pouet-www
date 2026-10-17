@@ -6,7 +6,7 @@ function pouetAdmin_recacheFrontPage()
 {
     $content = "<ul>";
     foreach (glob("cache/*") as $v) {
-        $content .= "<li>deleting '".$v."'</li>\n";
+        $content .= "<li>deleting '" . $v . "'</li>\n";
         @unlink($v);
     }
     $content .= "</ul>";
@@ -17,7 +17,7 @@ function pouetAdmin_recacheFrontPagePartial()
     $content = "<ul>";
     foreach (glob("cache/*") as $v) {
         if (@$_POST["deleteCache"][basename($v)] == "on") {
-            $content .= "<li>deleting '".$v."'</li>\n";
+            $content .= "<li>deleting '" . $v . "'</li>\n";
             @unlink($v);
         }
     }
@@ -30,7 +30,7 @@ function pouetAdmin_recacheTopDemos()
     global $timer;
 
     // this needs to be made faster. a LOT faster.
-    $total = array();
+    $total = [];
 
     // list by views
     $timer["recache_views"]["start"] = microtime_float();
@@ -45,11 +45,11 @@ function pouetAdmin_recacheTopDemos()
         $total[$tmp->id] += $i;
         $i++;
         if ($i <= 5) {
-            $content .= "<li><b>"._html($tmp->name)."</b> - ".$tmp->views." views</li>\n";
+            $content .= "<li><b>" . _html($tmp->name) . "</b> - " . $tmp->views . " views</li>\n";
         }
     }
     $content .= "</ol>";
-    $content .= "<h3>".$i." prod views loaded</h3>\n";
+    $content .= "<h3>" . $i . " prod views loaded</h3>\n";
     $timer["recache_views"]["end"] = microtime_float();
 
     $i = 0;
@@ -70,11 +70,11 @@ function pouetAdmin_recacheTopDemos()
         $total[$tmp->id] += $i;
         $i++;
         if ($i <= 5) {
-            $content .= "<li><b>"._html($tmp->name)."</b> - "._html($tmp->theSum)." votes</li>\n";
+            $content .= "<li><b>" . _html($tmp->name) . "</b> - " . _html($tmp->theSum) . " votes</li>\n";
         }
     }
     $content .= "</ol>";
-    $content .= "<h3>".$i." vote counts loaded</h3>\n";
+    $content .= "<h3>" . $i . " vote counts loaded</h3>\n";
     $timer["recache_votes"]["end"] = microtime_float();
 
     $timer["recache_sort"]["start"] = microtime_float();
@@ -85,20 +85,20 @@ function pouetAdmin_recacheTopDemos()
     $i = 1;
     unset($tmp);
     unset($top_demos);
-    $a = array();
+    $a = [];
     foreach ($total as $key => $val) {
-        $a[] = array(
-          "id" => $key,
-          "rank" => $i,
-        );
+        $a[] = [
+            "id" => $key,
+            "rank" => $i,
+        ];
         if (count($a) == 100) {
             SQLLib::UpdateRowMulti("prods", "id", $a);
-            $a = array();
+            $a = [];
         }
         $i++;
     }
     SQLLib::UpdateRowMulti("prods", "id", $a);
-    $content .= "<h3>".$i." prod rankings updated</h3>\n";
+    $content .= "<h3>" . $i . " prod rankings updated</h3>\n";
     $timer["recache_update"]["end"] = microtime_float();
 
     @unlink('cache/pouetbox_topalltime.cache');
@@ -112,7 +112,7 @@ function pouetAdmin_recheckLinkProd($prod)
         printf("   * %d\n", $prod->id);
     }
     $sideload = new Sideload();
-    $urls = array();
+    $urls = [];
     $url = verysofturlencode($prod->download);
     for ($x = 0; $x < 10; $x++) {
         if (php_sapi_name() == "cli") {
@@ -142,7 +142,7 @@ function pouetAdmin_recheckLinkProd($prod)
         return "";
     }
 
-    $a = array();
+    $a = [];
     $a["prodID"] = $prod->id;
     $a["protocol"] = "http";
     if (strpos($lastUrl, "ftp://") === 0) {
@@ -156,7 +156,7 @@ function pouetAdmin_recheckLinkProd($prod)
 
     if ($prod) {
         $out = json_encode($a);
-        $out .= "\n[".$prod->id."] " . json_encode($urls) . " >> ". $a["returnCode"];
+        $out .= "\n[" . $prod->id . "] " . json_encode($urls) . " >> " . $a["returnCode"];
     } else {
         $out = $prod->id . " -> " . $a["returnCode"];
     }
@@ -181,7 +181,7 @@ function pouetAdmin_createDataDump()
     // prods
     $filename = $dir . "/pouetdatadump-prods-" . $ymd . ".json.gz";
     $gz = gzopen(POUET_DATADUMP_PATH . $filename . ".inprogress", 'w9');
-    gzwrite($gz, '{"dump_date":"'.$dateStamp.'","prods":['."\n");
+    gzwrite($gz, '{"dump_date":"' . $dateStamp . '","prods":[' . "\n");
     $first = true;
     $rows = SQLLib::SelectRows("select id from prods order by id");
     foreach ($rows as $row) {
@@ -190,7 +190,7 @@ function pouetAdmin_createDataDump()
         }
         $first = false;
         $item = PouetProd::Spawn($row->id);
-        $a = array(&$item);
+        $a = [&$item];
 
         PouetCollectPlatforms($a);
         PouetCollectAwards($a);
@@ -200,13 +200,13 @@ function pouetAdmin_createDataDump()
         $s = new BM_Query("credits");
         $s->AddField("credits.role");
         $s->AddWhere(sprintf("credits.prodID = %d", $item->id));
-        $s->Attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->Attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddOrder("credits.role");
         $item->credits = $s->perform();
 
         gzwrite($gz, json_encode($item->ToAPI()));
     }
-    gzwrite($gz, "\n".']}');
+    gzwrite($gz, "\n" . ']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
     $out[] = sprintf("dumped %d prods into %s", count($rows), $filename);
@@ -214,7 +214,7 @@ function pouetAdmin_createDataDump()
     // groups
     $filename = $dir . "/pouetdatadump-groups-" . $ymd . ".json.gz";
     $gz = gzopen(POUET_DATADUMP_PATH . $filename . ".inprogress", 'w9');
-    gzwrite($gz, '{"dump_date":"'.$dateStamp.'","groups":['."\n");
+    gzwrite($gz, '{"dump_date":"' . $dateStamp . '","groups":[' . "\n");
     $first = true;
     $rows = SQLLib::SelectRows("select id from groups order by id");
     foreach ($rows as $row) {
@@ -225,7 +225,7 @@ function pouetAdmin_createDataDump()
         $item = PouetGroup::Spawn($row->id);
         gzwrite($gz, json_encode($item->ToAPI()));
     }
-    gzwrite($gz, "\n".']}');
+    gzwrite($gz, "\n" . ']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
     $out[] = sprintf("dumped %d groups into %s", count($rows), $filename);
@@ -233,7 +233,7 @@ function pouetAdmin_createDataDump()
     // parties
     $filename = $dir . "/pouetdatadump-parties-" . $ymd . ".json.gz";
     $gz = gzopen(POUET_DATADUMP_PATH . $filename . ".inprogress", 'w9');
-    gzwrite($gz, '{"dump_date":"'.$dateStamp.'","parties":['."\n");
+    gzwrite($gz, '{"dump_date":"' . $dateStamp . '","parties":[' . "\n");
     $first = true;
     $rows = SQLLib::SelectRows("select id from parties order by id");
     foreach ($rows as $row) {
@@ -244,7 +244,7 @@ function pouetAdmin_createDataDump()
         $item = PouetParty::Spawn($row->id);
         gzwrite($gz, json_encode($item->ToAPI()));
     }
-    gzwrite($gz, "\n".']}');
+    gzwrite($gz, "\n" . ']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
     $out[] = sprintf("dumped %d parties into %s", count($rows), $filename);
@@ -252,7 +252,7 @@ function pouetAdmin_createDataDump()
     // boards
     $filename = $dir . "/pouetdatadump-boards-" . substr(preg_replace("/[^0-9]+/", "", $dateStamp), 0, 8) . ".json.gz";
     $gz = gzopen(POUET_DATADUMP_PATH . $filename . ".inprogress", 'w9');
-    gzwrite($gz, '{"dump_date":"'.$dateStamp.'","boards":['."\n");
+    gzwrite($gz, '{"dump_date":"' . $dateStamp . '","boards":[' . "\n");
     $first = true;
     $rows = SQLLib::SelectRows("select id from boards order by id");
     foreach ($rows as $row) {
@@ -263,7 +263,7 @@ function pouetAdmin_createDataDump()
         $item = PouetBoard::Spawn($row->id);
         gzwrite($gz, json_encode($item->ToAPI()));
     }
-    gzwrite($gz, "\n".']}');
+    gzwrite($gz, "\n" . ']}');
     gzclose($gz);
     rename(POUET_DATADUMP_PATH . $filename . ".inprogress", POUET_DATADUMP_PATH . $filename);
     $out[] = sprintf("dumped %d boards into %s", count($rows), $filename);
@@ -276,18 +276,18 @@ function pouetAdmin_recacheBBS()
 
     $content = "Updated ";
     foreach ($topics as $topic) {
-        $post = SQLLib::SelectRow("SELECT * FROM bbs_posts WHERE topic=".(int)$topic->id." ORDER BY added DESC");
+        $post = SQLLib::SelectRow("SELECT * FROM bbs_posts WHERE topic=" . (int) $topic->id . " ORDER BY added DESC");
 
-        $a = array();
+        $a = [];
         $a["userlastpost"] = $post->author;
         $a["lastpost"] = $post->added;
 
-        $count = SQLLib::SelectRow("SELECT count(*) AS c FROM bbs_posts WHERE topic=".(int)$topic->id."");
+        $count = SQLLib::SelectRow("SELECT count(*) AS c FROM bbs_posts WHERE topic=" . (int) $topic->id . "");
         $a["count"] = $count->c - 1;
 
-        $content .= $topic->id.", ";
+        $content .= $topic->id . ", ";
 
-        SQLLib::UpdateRow("bbs_topics", $a, "id=".$topic->id);
+        SQLLib::UpdateRow("bbs_topics", $a, "id=" . $topic->id);
     }
 
     @unlink('cache/pouetbox_latestbbs.cache');

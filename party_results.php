@@ -23,12 +23,12 @@ class PouetBoxPartyResults extends PouetBoxASCIIViewer
         if (!$this->party) {
             return;
         }
-        $this->title = $this->party->name." ".(int)$_GET["when"]." results";
+        $this->title = $this->party->name . " " . (int) $_GET["when"] . " results";
     }
     public function RenderHeader()
     {
         parent::RenderHeader();
-        echo " <h2><big>".$this->party->PrintLinked($_GET["when"])." results"."</big></h2>\n";
+        echo " <h2><big>" . $this->party->PrintLinked($_GET["when"]) . " results" . "</big></h2>\n";
     }
     public function RenderBody()
     {

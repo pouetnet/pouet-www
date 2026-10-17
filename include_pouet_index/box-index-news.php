@@ -17,10 +17,10 @@ class PouetBoxIndexNews extends PouetBox
 
     public function Render()
     {
-        echo "<div class='pouettbl ".$this->uniqueID."'>\n";
-        echo " <h3><a href='".$this->link."'>"._html($this->title)."</a></h3>\n";
-        echo " <div class='content'>\n".str_replace("<br/>", "<br>", $this->content)."\n</div>\n";
-        echo " <div class='foot'>lobstregated at <a href='https://news.scene.org/'>Scene.org</a> on ".($this->timestamp)."</div>\n";
+        echo "<div class='pouettbl " . $this->uniqueID . "'>\n";
+        echo " <h3><a href='" . $this->link . "'>" . _html($this->title) . "</a></h3>\n";
+        echo " <div class='content'>\n" . str_replace("<br/>", "<br>", $this->content) . "\n</div>\n";
+        echo " <div class='foot'>lobstregated at <a href='https://news.scene.org/'>Scene.org</a> on " . ($this->timestamp) . "</div>\n";
         echo "</div>\n";
     }
 };
@@ -40,18 +40,18 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
         $this->cacheTime = 60 * 15;
 
         $this->uniqueID = "pouetbox_news";
-        $this->rss = class_exists("DomDocument") ? new lastRSS(array(
-          "cacheTime" => 5 * 60, // in seconds
-          "dateFormat" => "Y-m-d",
-          "stripHtml" => false,
-        )) : null;
+        $this->rss = class_exists("DomDocument") ? new lastRSS([
+            "cacheTime" => 5 * 60, // in seconds
+            "dateFormat" => "Y-m-d",
+            "stripHtml" => false,
+        ]) : null;
 
         $this->limit = 5;
     }
 
     public function LoadFromDB()
     {
-        $this->rssNews = $this->rss ? $this->rss->get('https://news.scene.org/feeds/rss/') : array();
+        $this->rssNews = $this->rss ? $this->rss->get('https://news.scene.org/feeds/rss/') : [];
     }
 
     public function LoadFromCachedData($data)
@@ -71,9 +71,9 @@ class PouetBoxIndexNewsBoxes extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of news items visible","default" => 5,"min" => 1,"max" => 10),
-        );
+        return [
+            "limit" => ["name" => "number of news items visible","default" => 5,"min" => 1,"max" => 10],
+        ];
     }
 
     public function Render()

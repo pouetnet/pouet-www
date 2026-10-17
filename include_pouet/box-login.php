@@ -17,14 +17,14 @@ class PouetBoxLogin extends PouetBox
     }
     public function RenderBody()
     {
-        $loginURL = "login.php?return=".rawurlencode(rootRelativePath());
+        $loginURL = "login.php?return=" . rawurlencode(rootRelativePath());
 
         echo "<div class='content loggedout'>\n";
         printf("<a href='%s'>login via SceneID</a>", _html($loginURL));
         echo "</div>\n";
 
         echo "<div class='foot'>\n";
-        echo "<a href='"._html($loginURL)."'>log in</a> ::\n";
+        echo "<a href='" . _html($loginURL) . "'>log in</a> ::\n";
         echo "<a href='https://id.scene.org/register/'>register</a>\n";
         echo "</div>";
     }

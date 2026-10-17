@@ -13,13 +13,13 @@ require("include_pouet/menu.inc.php");
 
 if ($currentUser) {
     if (@$_GET["avatar"]) {
-        $sql = array();
+        $sql = [];
         $sql["avatar"] = basename($_GET["avatar"]);
-        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/".$sql["avatar"])) {
+        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/" . $sql["avatar"])) {
             $sql["avatar"] = basename($avatars[ array_rand($avatars) ]);
         }
 
-        SQLLib::UpdateRow("users", $sql, "id=".(int)get_login_id());
+        SQLLib::UpdateRow("users", $sql, "id=" . (int) get_login_id());
 
         $currentUser->avatar = $sql["avatar"];
     }
@@ -40,20 +40,20 @@ if ($currentUser) {
 
             echo " <h2>:: account</h2>\n";
             echo " <div class='content'>\n";
-            echo " <p>SceneID tells us your name is <b>"._html($currentUser->nickname)."</b> so that's what we're gonna stick to. you can go to your <a href='account.php'>profile</a> to change it.</p>";
-            echo " <p id='currentAvatar'>we also randomly picked an avatar for you: ".$currentUser->PrintAvatar()."</p>";
+            echo " <p>SceneID tells us your name is <b>" . _html($currentUser->nickname) . "</b> so that's what we're gonna stick to. you can go to your <a href='account.php'>profile</a> to change it.</p>";
+            echo " <p id='currentAvatar'>we also randomly picked an avatar for you: " . $currentUser->PrintAvatar() . "</p>";
             echo " </div>\n";
 
             echo " <div class='content'>\n";
             echo " <p>if you don't like it, here are a bunch of other ones:</p>";
 
-            $avatars = glob(POUET_CONTENT_LOCAL."avatars/*.gif");
+            $avatars = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
             shuffle($avatars);
 
             echo " <ul id='welcome-avatarlist'>";
             for ($x = 0; $x < 30; $x++) {
                 $a = basename($avatars[$x]);
-                printf("<li><a href='welcome.php?avatar=%s'><img src='".POUET_CONTENT_URL."avatars/%s' class='avatar'></a></li>", rawurlencode($a), rawurlencode($a));
+                printf("<li><a href='welcome.php?avatar=%s'><img src='" . POUET_CONTENT_URL . "avatars/%s' class='avatar'></a></li>", rawurlencode($a), rawurlencode($a));
             }
             echo " </ul>";
 
@@ -99,7 +99,7 @@ document.observe("dom:loaded",function(){
             if (@$_GET["return"]) {
                 echo " <h2>:: return</h2>\n";
                 echo " <div class='content'>\n";
-                echo " <p>...or you can continue whatever you were doing by <a href='"._html($_GET["return"])."'>clicking here</a></p>";
+                echo " <p>...or you can continue whatever you were doing by <a href='" . _html($_GET["return"]) . "'>clicking here</a></p>";
                 echo " </div>\n";
             }
         }

@@ -18,13 +18,13 @@ class PouetBoxLatestComments extends PouetBox
         $s->AddTable("comments");
         $s->AddField("comments.rating");
         $s->AddField("comments.addedDate");
-        $s->attach(array("comments" => "which"), array("prods as prod" => "id"));
-        $s->attach(array("comments" => "who"), array("users as user" => "id"));
+        $s->attach(["comments" => "which"], ["prods as prod" => "id"]);
+        $s->attach(["comments" => "who"], ["users as user" => "id"]);
         $s->AddOrder("comments.addedDate DESC");
         $s->AddWhere(sprintf_esc("(UNIX_TIMESTAMP()-UNIX_TIMESTAMP(comments.addedDate))<=(3600*%d)", get_setting("commentshours")));
         $this->comments = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->comments as $v) {
             $a[] = &$v->prod;
         }
@@ -52,11 +52,11 @@ class PouetBoxLatestComments extends PouetBox
             $rating = $row->rating > 0 ? "rulez" : ($row->rating < 0 ? "sucks" : "isok");
 
             echo "<td>\n";
-            echo "<span class='icon ".$rating."' title='".$rating."'>".$rating."</span>";
+            echo "<span class='icon " . $rating . "' title='" . $rating . "'>" . $rating . "</span>";
             echo "</td>\n";
 
             echo "<td>\n";
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo "</td>\n";
 
             echo "<td>\n";
@@ -68,12 +68,12 @@ class PouetBoxLatestComments extends PouetBox
             echo "</td>\n";
 
             echo "<td class='date'>\n";
-            echo dateDiffReadable(time(), $row->addedDate)." ago";
+            echo dateDiffReadable(time(), $row->addedDate) . " ago";
             echo "</td>\n";
 
             echo "<td>\n";
-            echo $row->user->PrintLinkedAvatar()." ";
-            echo $row->user->PrintLinkedName()." ";
+            echo $row->user->PrintLinkedAvatar() . " ";
+            echo $row->user->PrintLinkedName() . " ";
             echo "</td>\n";
 
             echo "</tr>\n";

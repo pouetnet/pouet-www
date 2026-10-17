@@ -28,7 +28,7 @@ class PouetBoxModalMessage extends PouetBox
     public function RenderFooter()
     {
         if ($this->enableFooter) {
-            echo "  <div class='foot'><a href='"._html($this->returnPage)."'>get back</a></div>\n";
+            echo "  <div class='foot'><a href='" . _html($this->returnPage) . "'>get back</a></div>\n";
         }
         echo "</div>\n";
     }

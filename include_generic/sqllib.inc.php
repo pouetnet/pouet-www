@@ -12,9 +12,9 @@ class SQLLibException extends Exception
     public function __toString()
     {
         $e .= date("Y-m-d H:i:s");
-        $e .= "\nError: ".$this->getMessage()."\n";
-        $e .= "\nQuery: ".$this->query."\n";
-        $e .= "\nTrace: ".$this->getTraceAsString();
+        $e .= "\nError: " . $this->getMessage() . "\n";
+        $e .= "\nQuery: " . $this->query . "\n";
+        $e .= "\nTrace: " . $this->getTraceAsString();
         return $e;
     }
 }
@@ -24,7 +24,7 @@ class SQLLib
     public static $debugMode = false;
     public static $telemetry = false;
     public static $arraysCleaned = false;
-    public static $queries = array();
+    public static $queries = [];
 
     protected static $link;
     protected static $charset = "";
@@ -33,10 +33,10 @@ class SQLLib
     {
         SQLLib::$link = @mysqli_connect($host, $username, $password, $database);
         if (mysqli_connect_errno()) {
-            throw new SQLLibException("Unable to connect MySQL: ".mysqli_connect_error());
+            throw new SQLLibException("Unable to connect MySQL: " . mysqli_connect_error());
         }
 
-        $charsets = array("utf8mb4","utf8");
+        $charsets = ["utf8mb4","utf8"];
         SQLLib::$charset = "";
         foreach ($charsets as $c) {
             if (mysqli_set_charset(SQLLib::$link, $c)) {
@@ -106,7 +106,7 @@ class SQLLib
     public static function SelectRows($cmd)
     {
         $r = SQLLib::Query($cmd);
-        $a = array();
+        $a = [];
         while ($o = SQLLib::Fetch($r)) {
             $a[] = $o;
         }
@@ -123,7 +123,7 @@ class SQLLib
         return $a;
     }
 
-    public static function InsertRow($table, $o, $onDup = array())
+    public static function InsertRow($table, $o, $onDup = [])
     {
         if (!SQLLib::$arraysCleaned) {
             trigger_error("Arrays not cleaned before InsertRow!", E_USER_ERROR);
@@ -134,12 +134,12 @@ class SQLLib
         } elseif (is_array($o)) {
             $a = $o;
         }
-        $keys = array();
-        $values = array();
+        $keys = [];
+        $values = [];
         foreach ($a as $k => $v) {
-            $keys[] = "`".mysqli_real_escape_string(SQLLib::$link, $k)."`";
+            $keys[] = "`" . mysqli_real_escape_string(SQLLib::$link, $k) . "`";
             if ($v !== null) {
-                $values[] = "'".mysqli_real_escape_string(SQLLib::$link, $v)."'";
+                $values[] = "'" . mysqli_real_escape_string(SQLLib::$link, $v) . "'";
             } else {
                 $values[] = "null";
             }
@@ -149,11 +149,11 @@ class SQLLib
             "insert %s (%s) values (%s)",
             $table,
             implode(", ", $keys),
-            implode(", ", $values)
+            implode(", ", $values),
         );
         if ($onDup) {
             $cmd .= " ON DUPLICATE KEY UPDATE ";
-            $set = array();
+            $set = [];
             if ($onDup) {
                 foreach ($onDup as $k => $v) {
                     if ($v === null) {
@@ -182,32 +182,32 @@ class SQLLib
             trigger_error("Arrays not cleaned before InsertMultiRow!", E_USER_ERROR);
         }
 
-        $keys = array();
-        $allValues = array();
+        $keys = [];
+        $allValues = [];
         foreach ($arr as $o) {
             if (is_object($o)) {
                 $a = get_object_vars($o);
             } elseif (is_array($o)) {
                 $a = $o;
             }
-            $keys = array();
-            $values = array();
+            $keys = [];
+            $values = [];
             foreach ($a as $k => $v) {
-                $keys[] = "`".mysqli_real_escape_string(SQLLib::$link, $k)."`";
+                $keys[] = "`" . mysqli_real_escape_string(SQLLib::$link, $k) . "`";
                 if ($v !== null) {
-                    $values[] = "'".mysqli_real_escape_string(SQLLib::$link, $v)."'";
+                    $values[] = "'" . mysqli_real_escape_string(SQLLib::$link, $v) . "'";
                 } else {
                     $values[] = "null";
                 }
             }
-            $allValues[] = "(".implode(", ", $values).")";
+            $allValues[] = "(" . implode(", ", $values) . ")";
         }
 
         $cmd = sprintf(
             "insert %s (%s) values %s",
             $table,
             implode(", ", $keys),
-            implode(", ", $allValues)
+            implode(", ", $allValues),
         );
         $r = SQLLib::Query($cmd);
     }
@@ -223,7 +223,7 @@ class SQLLib
         } elseif (is_array($o)) {
             $a = $o;
         }
-        $set = array();
+        $set = [];
         foreach ($a as $k => $v) {
             if ($v === null) {
                 $set[] = sprintf("`%s`=null", mysqli_real_escape_string(SQLLib::$link, $k));
@@ -235,7 +235,7 @@ class SQLLib
             "update %s set %s where %s",
             $table,
             implode(", ", $set),
-            $where
+            $where,
         );
         SQLLib::Query($cmd);
     }
@@ -263,8 +263,8 @@ class SQLLib
 
         $fields = array_keys($tuples[0]);
 
-        $sql = "UPDATE ".$table;
-        $keys = array();
+        $sql = "UPDATE " . $table;
+        $keys = [];
         $cond = "";
         foreach ($fields as $field) {
             if ($field == $key) {
@@ -273,12 +273,12 @@ class SQLLib
             foreach ($tuples as $tuple) {
                 $cond .= sprintf_esc(" WHEN %d THEN '%s' ", $tuple[$key], $tuple[$field]);
             }
-            $sql .= " SET `".$field."` = (CASE `".$key."` ".$cond." END)";
+            $sql .= " SET `" . $field . "` = (CASE `" . $key . "` " . $cond . " END)";
         }
         foreach ($tuples as $tuple) {
             $keys[] = $tuple[$key];
         }
-        $sql .= " WHERE `".$key."` IN (".implode(",", $keys).")";
+        $sql .= " WHERE `" . $key . "` IN (" . implode(",", $keys) . ")";
 
         //echo $sql."\n\n";
         SQLLib::Query($sql);
@@ -345,12 +345,12 @@ class SQLSelect
 
     public function __construct()
     {
-        $this->fields = array();
-        $this->tables = array();
-        $this->conditions = array();
-        $this->joins = array();
-        $this->orders = array();
-        $this->groups = array();
+        $this->fields = [];
+        $this->tables = [];
+        $this->conditions = [];
+        $this->joins = [];
+        $this->orders = [];
+        $this->groups = [];
         $this->limit = null;
         $this->offset = null;
     }
@@ -372,7 +372,7 @@ class SQLSelect
     }
     public function AddWhere($s)
     {
-        $this->conditions[] = "(".$s.")";
+        $this->conditions[] = "(" . $s . ")";
     }
     public function AddOrder($s)
     {
@@ -401,25 +401,25 @@ class SQLSelect
         } else {
             $sql .= " * ";
         }
-        $sql .= " FROM ".implode(", ", $this->tables);
+        $sql .= " FROM " . implode(", ", $this->tables);
         if ($this->joins) {
             foreach ($this->joins as $v) {
-                $sql .= " ".$v->type." JOIN ".$v->table." ON ".$v->condition;
+                $sql .= " " . $v->type . " JOIN " . $v->table . " ON " . $v->condition;
             }
         }
         if ($this->conditions) {
-            $sql .= " WHERE ".implode(" AND ", $this->conditions);
+            $sql .= " WHERE " . implode(" AND ", $this->conditions);
         }
         if ($this->groups) {
-            $sql .= " GROUP BY ".implode(", ", $this->groups);
+            $sql .= " GROUP BY " . implode(", ", $this->groups);
         }
         if ($this->orders) {
-            $sql .= " ORDER BY ".implode(", ", $this->orders);
+            $sql .= " ORDER BY " . implode(", ", $this->orders);
         }
         if ($this->offset !== null) {
-            $sql .= " LIMIT ".$this->offset . ", " . $this->limit;
+            $sql .= " LIMIT " . $this->offset . ", " . $this->limit;
         } elseif ($this->limit !== null) {
-            $sql .= " LIMIT ".$this->limit;
+            $sql .= " LIMIT " . $this->limit;
         }
         return $sql;
     }
@@ -445,7 +445,7 @@ function nop($s)
 }
 function clearArray($a)
 {
-    $ar = array();
+    $ar = [];
     foreach ($a as $k => $v) {
         if (is_array($v)) {
             $ar[$k] = clearArray($v);

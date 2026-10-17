@@ -4,7 +4,7 @@ require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-party-submit.php");
 
 if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("party.php?which=".(int)$_GET["which"]);
+    redirect("party.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -17,24 +17,24 @@ class PouetBoxAdminEditParty extends PouetBoxSubmitParty
     {
         parent::__construct();
 
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->party = PouetParty::Spawn($this->id);
 
-        $this->title = "edit this party: ". $this->party->PrintLinked();
+        $this->title = "edit this party: " . $this->party->PrintLinked();
     }
     public function Commit($data)
     {
         global $partyID;
 
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["web"] = $data["website"];
-        SQLLib::UpdateRow("parties", $a, "id=".$this->id);
+        SQLLib::UpdateRow("parties", $a, "id=" . $this->id);
 
         gloperator_log("party", $this->id, "party_edit");
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -63,28 +63,28 @@ class PouetBoxAdminDeleteParty extends PouetBox
         global $verificationStrings;
         $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-        $this->title = "delete this party: ".$party->PrintLinked();
+        $this->title = "delete this party: " . $party->PrintLinked();
     }
     public function Validate($data)
     {
         if ($data["check"] != $data["checkOrig"]) {
-            return array("wrong verification string !");
+            return ["wrong verification string !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         $this->party->Delete();
 
-        gloperator_log("party", (int)$this->party->id, "party_delete", get_object_vars($this->party));
+        gloperator_log("party", (int) $this->party->id, "party_delete", get_object_vars($this->party));
 
-        return array();
+        return [];
     }
     public function RenderBody()
     {
         echo "<div class='content'>";
-        echo "  <p>To make sure you want to delete <b>this</b> party, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <p>To make sure you want to delete <b>this</b> party, type \"" . $this->checkString . "\" here:</p>";
+        echo "  <input name='checkOrig' type='hidden' value='" . _html($this->checkString) . "'>";
         echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
         echo "<div class='foot'>";
@@ -111,7 +111,7 @@ document.observe("dom:loaded",function(){
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("party.php?which=".(int)$_GET["which"], true);
+$form->SetSuccessURL("party.php?which=" . (int) $_GET["which"], true);
 
 $box = new PouetBoxAdminEditParty($_GET["which"]);
 $form->Add("party", $box);
@@ -122,7 +122,7 @@ if ($currentUser && $currentUser->CanEditItems()) {
     $form->Process();
 }
 
-$TITLE = "edit a party: ".$box->party->name;
+$TITLE = "edit a party: " . $box->party->name;
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");

@@ -17,7 +17,7 @@ class PouetBoxTopList extends PouetBox
         $row = SQLLib::selectRow("DESC prods type");
         $m = enum2array($row->Type);
 
-        $this->types = array();
+        $this->types = [];
         $this->types[""] = "- none - ";
         foreach ($m as $v) {
             $this->types[$v] = $v;
@@ -27,55 +27,55 @@ class PouetBoxTopList extends PouetBox
     public function LoadFromDB()
     {
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         $plat[""] = "- none -";
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $this->fields = array(
-          "type" => array(
-            "name" => "type",
-            "type" => "select",
-            //"multiple"=>true,
-            "assoc" => true,
-            "fields" => $this->types,
-            "info" => " ",
-            //"required"=>true,
-          ),
-          "platform" => array(
-            "name" => "platform",
-            "type" => "select",
-            //"multiple"=>true,
-            "assoc" => true,
-            "fields" => $plat,
-            "info" => " ",
-            //"required"=>true,
-          ),
-          "limit" => array(
-            "name" => "number of prods",
-            "type" => "number",
-            "value" => 10,
-            "max" => 64,
-          ),
-          "days" => array(
-            "name" => "days to go back",
-            "type" => "number",
-            "value" => 0,
-            "info" => "0 means alltime",
-          ),
-          "dateFrom" => array(
-            "name" => "starting date [inclusive]",
-            "type" => "date",
-            "value" => date("Y-m-d", time() - 30 * 24 * 60 * 60),
-          ),
-          "dateTo" => array(
-            "name" => "ending date [inclusive]",
-            "type" => "date",
-            "value" => date("Y-m-d"),
-          ),
-        );
+        $this->fields = [
+            "type" => [
+                "name" => "type",
+                "type" => "select",
+                //"multiple"=>true,
+                "assoc" => true,
+                "fields" => $this->types,
+                "info" => " ",
+                //"required"=>true,
+            ],
+            "platform" => [
+                "name" => "platform",
+                "type" => "select",
+                //"multiple"=>true,
+                "assoc" => true,
+                "fields" => $plat,
+                "info" => " ",
+                //"required"=>true,
+            ],
+            "limit" => [
+                "name" => "number of prods",
+                "type" => "number",
+                "value" => 10,
+                "max" => 64,
+            ],
+            "days" => [
+                "name" => "days to go back",
+                "type" => "number",
+                "value" => 0,
+                "info" => "0 means alltime",
+            ],
+            "dateFrom" => [
+                "name" => "starting date [inclusive]",
+                "type" => "date",
+                "value" => date("Y-m-d", time() - 30 * 24 * 60 * 60),
+            ],
+            "dateTo" => [
+                "name" => "ending date [inclusive]",
+                "type" => "date",
+                "value" => date("Y-m-d"),
+            ],
+        ];
 
 
         if ($_GET) {
@@ -108,7 +108,7 @@ class PouetBoxTopList extends PouetBox
         if (@$_GET["platform"]) {
             $s->AddJoin("", "prods_platforms", sprintf_esc("prods_platforms.prod = prods.id AND prods_platforms.platform=%d", $_GET["platform"]));
         }
-        $limit = (int)(@$_GET["limit"] ? $_GET["limit"] : 10);
+        $limit = (int) (@$_GET["limit"] ? $_GET["limit"] : 10);
         $limit = min($limit, 64);
         $limit = max($limit, 10);
         $s->SetLimit($limit);
@@ -136,15 +136,15 @@ class PouetBoxTopList extends PouetBox
             echo $p->RenderTypeIcons();
             echo $p->RenderPlatformIcons();
             echo $p->RenderSingleRowShort();
-            echo " ".$p->RenderAccolades();
+            echo " " . $p->RenderAccolades();
             printf("    </span>");
 
-            echo "<span class='toplist rulez'>".$p->voteup."</span>\n";
-            echo "<span class='toplist isok'>".$p->votepig."</span>\n";
-            echo "<span class='toplist sucks'>".$p->votedown."</span>\n";
+            echo "<span class='toplist rulez'>" . $p->voteup . "</span>\n";
+            echo "<span class='toplist isok'>" . $p->votepig . "</span>\n";
+            echo "<span class='toplist sucks'>" . $p->votedown . "</span>\n";
 
-            $pop = (int)calculate_popularity($p->views);
-            echo "<span>".progress_bar_solo($pop, $pop."%")."</span>";
+            $pop = (int) calculate_popularity($p->views);
+            echo "<span>" . progress_bar_solo($pop, $pop . "%") . "</span>";
 
             printf("  </li>\n");
         }

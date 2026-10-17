@@ -9,7 +9,7 @@ $sql->AddField("id");
 $sql->AddField("name");
 $sql->AddTable("boards");
 
-$r = array();
+$r = [];
 if (@$_POST["search"]) {
     $terms = split_search_terms($_POST["search"]);
     foreach ($terms as $term) {

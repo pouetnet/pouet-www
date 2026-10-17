@@ -5,7 +5,7 @@ require_once("../bootstrap.inc.php");
 header("Content-type: application/xml; charset=utf-8");
 //header("Content-type: text/plain; charset=utf-8");
 
-$xml = new SimpleXMLElement("<"."?xml version='1.0' encoding='UTF-8'?"."><xnfo/>");
+$xml = new SimpleXMLElement("<" . "?xml version='1.0' encoding='UTF-8'?" . "><xnfo/>");
 
 $prod = PouetProd::Spawn(@$_GET["which"]);
 
@@ -13,7 +13,7 @@ if (!$prod) {
     die($xml->AsXML());
 }
 
-$a = array(&$prod);
+$a = [&$prod];
 PouetCollectPlatforms($a);
 
 $xml->addAttribute("standard", "1.1");
@@ -34,11 +34,11 @@ $s->AddField("prodotherparty.party_compo");
 $s->AddField("prodotherparty.party_place");
 $s->AddField("prodotherparty.party_year");
 $s->AddTable("prodotherparty");
-$s->attach(array("prodotherparty" => "party"), array("parties as party" => "id"));
+$s->attach(["prodotherparty" => "party"], ["parties as party" => "id"]);
 $s->AddWhere(sprintf_esc("prod=%d", $prod->id));
 $rows = $s->perform();
 foreach ($rows as $row) {
-    $prod->placings[] = new PouetPlacing(array("party" => $row->party,"compo" => $row->party_compo,"ranking" => $row->party_place,"year" => $row->party_year));
+    $prod->placings[] = new PouetPlacing(["party" => $row->party,"compo" => $row->party_compo,"ranking" => $row->party_place,"year" => $row->party_year]);
 }
 
 global $COMPOTYPES;
@@ -80,7 +80,7 @@ foreach ($downloads as $v) {
 $shot = find_screenshot($prod->id);
 if ($shot) {
     $xml->demo->addChild("screenshot");
-    $xml->demo->screenshot->addChild("url", _html(POUET_CONTENT_URL.$shot));
+    $xml->demo->screenshot->addChild("url", _html(POUET_CONTENT_URL . $shot));
 }
 
 $dom = dom_import_simplexml($xml)->ownerDocument;

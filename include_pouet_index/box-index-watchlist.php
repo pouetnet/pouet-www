@@ -27,9 +27,9 @@ class PouetBoxIndexWatchlist extends PouetBox
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit"      => array("name" => "number of prods visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX),
-        );
+        return [
+            "limit"      => ["name" => "number of prods visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX],
+        ];
     }
 
     public function IsVisibleLoggedOut()
@@ -50,7 +50,7 @@ class PouetBoxIndexWatchlist extends PouetBox
             return;
         }
 
-        $i = array();
+        $i = [];
         foreach ($ids as $v) {
             $i[] = $v->prodID;
         }
@@ -59,12 +59,12 @@ class PouetBoxIndexWatchlist extends PouetBox
         //$s->AddTable(sprintf_esc("(select * from comments where comments.which in (%s) order by comments.addedDate desc) as c ",implode(",",$i)));
         $s->AddTable(sprintf_esc("(select *, max(comments.addedDate) as maxDate from comments where comments.which in (%s) group by comments.which) as c ", implode(",", $i)));
         $s->AddJoin("left", "comments", "c.maxDate = comments.addedDate and c.which = comments.which");
-        $s->attach(array("comments" => "which"), array("prods as prod" => "id"));
-        $s->attach(array("comments" => "who"), array("users as user" => "id"));
+        $s->attach(["comments" => "which"], ["prods as prod" => "id"]);
+        $s->attach(["comments" => "who"], ["users as user" => "id"]);
         //$s->AddGroup("c.which");
         $s->AddOrder("comments.addedDate desc");
         $s->AddField("comments.id as commentID");
-        $s->SetLimit((int)$this->limit);
+        $s->SetLimit((int) $this->limit);
         $this->data = $s->perform();
     }
 

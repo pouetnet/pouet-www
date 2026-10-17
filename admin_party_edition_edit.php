@@ -5,7 +5,7 @@ require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-party-edition-submit.php");
 
 if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("party.php?which=".(int)$_GET["which"]."&when=".(int)$_GET["when"]);
+    redirect("party.php?which=" . (int) $_GET["which"] . "&when=" . (int) $_GET["when"]);
     exit();
 }
 
@@ -25,25 +25,25 @@ class PouetBoxAdminEditPartyEdition extends PouetBoxSubmitPartyEdition
 
         $this->party = PouetParty::Spawn($this->id);
 
-        $this->title = "edit this party: ". $this->party->PrintLinked($this->year);
+        $this->title = "edit this party: " . $this->party->PrintLinked($this->year);
     }
     public function Commit($data)
     {
         global $partyID;
 
-        $sql = array();
+        $sql = [];
         $sql["download"] = $data["download"];
-        $sql["csdb"] = (int)$data["csdbID"];
-        $sql["slengpung"] = (int)$data["slengpungID"];
+        $sql["csdb"] = (int) $data["csdbID"];
+        $sql["slengpung"] = (int) $data["slengpungID"];
         //$sql["zxdemo"] = $data["zxdemoID"];
-        $sql["demozoo"] = (int)$data["demozooID"];
+        $sql["demozoo"] = (int) $data["demozooID"];
         $sql["artcity"] = $data["artcity"];
 
         if ($sql["download"] && !filter_var($sql["download"], FILTER_VALIDATE_URL)) {
-            return array("invalid download URL");
+            return ["invalid download URL"];
         }
         if ($sql["artcity"] && !filter_var($sql["artcity"], FILTER_VALIDATE_URL)) {
-            return array("invalid artcity URL");
+            return ["invalid artcity URL"];
         }
 
         $links = SQLLib::selectRow(sprintf_esc("select * from partylinks where party = %d and year = %d", $this->id, $this->year));
@@ -59,9 +59,9 @@ class PouetBoxAdminEditPartyEdition extends PouetBoxSubmitPartyEdition
             move_uploaded_file_fake($_FILES["results"]["tmp_name"], get_local_partyresult_path($this->id, $this->year));
         }
 
-        gloperator_log("party", (int)$this->id, "party_edit_links", array("year" => $this->year));
+        gloperator_log("party", (int) $this->id, "party_edit_links", ["year" => $this->year]);
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -88,7 +88,7 @@ class PouetBoxAdminEditPartyEdition extends PouetBoxSubmitPartyEdition
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("party.php?which=".(int)$_GET["which"]."&when=".(int)$_GET["when"], true);
+$form->SetSuccessURL("party.php?which=" . (int) $_GET["which"] . "&when=" . (int) $_GET["when"], true);
 
 $box = new PouetBoxAdminEditPartyEdition($_GET["which"], $_GET["when"]);
 $form->Add("partyyear", $box);

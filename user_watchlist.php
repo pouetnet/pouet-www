@@ -20,7 +20,7 @@ class PouetBoxUserWatchlist extends PouetBox
             return;
         }
 
-        $i = array();
+        $i = [];
         foreach ($ids as $v) {
             $i[] = $v->prodID;
         }
@@ -37,8 +37,8 @@ class PouetBoxUserWatchlist extends PouetBox
         $s->AddField("cmts.addedDate as lastcomment");
         $s->AddField("cmts.rating as lastcommentrating");
         $s->AddWhere(sprintf_esc("prods.id in (%s)", implode(",", $i)));
-        $s->AddJoin("left", "(select comments.addedDate,comments.who,comments.which,comments.rating from (".$sub->GetQuery().") as dummy left join comments on dummy.maxDate = comments.addedDate and dummy.which = comments.which) as cmts", "cmts.which=prods.id");
-        $s->attach(array("cmts" => "who"), array("users as user" => "id"));
+        $s->AddJoin("left", "(select comments.addedDate,comments.who,comments.which,comments.rating from (" . $sub->GetQuery() . ") as dummy left join comments on dummy.maxDate = comments.addedDate and dummy.which = comments.which) as cmts", "cmts.which=prods.id");
+        $s->attach(["cmts" => "who"], ["users as user" => "id"]);
         $s->AddOrder("cmts.addedDate DESC");
         $this->prods = $s->perform();
 
@@ -61,7 +61,7 @@ class PouetBoxUserWatchlist extends PouetBox
 
             echo "<td>\n";
             echo $p->RenderTypeIcons();
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo "</td>\n";
 
             echo "<td>\n";
@@ -81,8 +81,8 @@ class PouetBoxUserWatchlist extends PouetBox
                     $rating = "rulez";
                 }
                 echo "<td>";
-                echo "<span class='vote ".$rating."'>".$rating."</span> ";
-                echo $p->lastcomment." ".$p->user->PrintLinkedAvatar()."</td>\n";
+                echo "<span class='vote " . $rating . "'>" . $rating . "</span> ";
+                echo $p->lastcomment . " " . $p->user->PrintLinkedAvatar() . "</td>\n";
             } else {
                 echo "<td>&nbsp;</td>";
             }

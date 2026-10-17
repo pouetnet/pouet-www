@@ -26,7 +26,7 @@ class PouetBoxBBSTopicList extends PouetBox
         $s = new SQLSelect();
 
         $perPage = get_setting("bbsbbstopics");
-        $this->page = (int)max(1, (int)@$_GET["page"]);
+        $this->page = (int) max(1, (int) @$_GET["page"]);
 
         $s = new BM_query();
         $s->AddField("bbs_topics.id as id");
@@ -37,8 +37,8 @@ class PouetBoxBBSTopicList extends PouetBox
         $s->AddField("bbs_topics.category as category");
         $s->AddField("bbs_topics.closed as closed");
         $s->AddTable("bbs_topics");
-        $s->attach(array("bbs_topics" => "userfirstpost"), array("users as firstuser" => "id"));
-        $s->attach(array("bbs_topics" => "userlastpost"), array("users as lastuser" => "id"));
+        $s->attach(["bbs_topics" => "userfirstpost"], ["users as firstuser" => "id"]);
+        $s->attach(["bbs_topics" => "userlastpost"], ["users as lastuser" => "id"]);
 
 
         $dir = "DESC";
@@ -47,24 +47,24 @@ class PouetBoxBBSTopicList extends PouetBox
         }
 
         switch (@$_GET["order"]) {
-            case "firstpost": $s->AddOrder("bbs_topics.firstpost ".$dir);
+            case "firstpost": $s->AddOrder("bbs_topics.firstpost " . $dir);
                 break;
-            case "userfirstpost": $s->AddOrder("bbs_topics_firstuser.nickname ".$dir);
+            case "userfirstpost": $s->AddOrder("bbs_topics_firstuser.nickname " . $dir);
                 break;
-            case "userlastpost": $s->AddOrder("bbs_topics_lastuser.nickname ".$dir);
+            case "userlastpost": $s->AddOrder("bbs_topics_lastuser.nickname " . $dir);
                 break;
-            case "topic": $s->AddOrder("bbs_topics.topic ".$dir);
+            case "topic": $s->AddOrder("bbs_topics.topic " . $dir);
                 break;
-            case "category": $s->AddOrder("bbs_topics.category ".$dir);
+            case "category": $s->AddOrder("bbs_topics.category " . $dir);
                 break;
-            case "count": $s->AddOrder("bbs_topics.count ".$dir);
+            case "count": $s->AddOrder("bbs_topics.count " . $dir);
                 break;
             case "lastpost":
-            default: $s->AddOrder("bbs_topics.lastpost ".$dir);
+            default: $s->AddOrder("bbs_topics.lastpost " . $dir);
                 break;
         }
-        $s->AddOrder("bbs_topics.lastpost ".$dir);
-        $s->SetLimit($perPage, (int)(($this->page - 1) * $perPage));
+        $s->AddOrder("bbs_topics.lastpost " . $dir);
+        $s->SetLimit($perPage, (int) (($this->page - 1) * $perPage));
 
         if (@$_GET["category"]) {
             $s->AddWhere(sprintf_esc("category='%s'", $_GET["category"]));
@@ -79,27 +79,27 @@ class PouetBoxBBSTopicList extends PouetBox
 
     public function Render()
     {
-        echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
-        $headers = array(
-          "firstpost" => "started",
-          "userfirstpost" => "by",
-          "category" => "category",
-          "topic" => "bbs topic",
-          "count" => "replies",
-          "lastpost" => "last post",
-          "userlastpost" => "by",
-        );
+        echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
+        $headers = [
+            "firstpost" => "started",
+            "userfirstpost" => "by",
+            "category" => "category",
+            "topic" => "bbs topic",
+            "count" => "replies",
+            "lastpost" => "last post",
+            "userlastpost" => "by",
+        ];
         echo "<caption>the oldskool pouët.net bbs</caption>\n";
         echo "<tr class='sortable'>\n";
         foreach ($headers as $key => $text) {
             $out = sprintf(
                 "<th id='th_%s'><a href='%s' class='%s%s' id='%s'>%s</a></th>\n",
                 $key,
-                adjust_query_header(array("order" => $key)),
+                adjust_query_header(["order" => $key]),
                 @$_GET["order"] == $key ? "selected" : "",
                 (@$_GET["order"] == $key && @$_GET["reverse"]) ? " reverse" : "",
-                "prodlistsort_".$key,
-                $text
+                "prodlistsort_" . $key,
+                $text,
             );
             if ($key == "type" || $key == "name") {
                 $out = str_replace("</th>", "", $out);
@@ -119,24 +119,24 @@ class PouetBoxBBSTopicList extends PouetBox
             echo "</td>\n";
 
             echo " <td>";
-            echo $p->firstuser->PrintLinkedAvatar()." ";
+            echo $p->firstuser->PrintLinkedAvatar() . " ";
             echo $p->firstuser->PrintLinkedName();
             echo "</td>\n";
 
-            echo " <td>"._html($p->category)."</td>\n";
+            echo " <td>" . _html($p->category) . "</td>\n";
 
             echo " <td class='topic'>";
-            echo "<a href='topic.php?which=".(int)$p->id."'>"._html($p->topic)."</a>";
+            echo "<a href='topic.php?which=" . (int) $p->id . "'>" . _html($p->topic) . "</a>";
             echo "</td>\n";
 
-            echo " <td>".$p->count."</td>\n";
+            echo " <td>" . $p->count . "</td>\n";
 
-            echo " <td title='"._html(dateDiffReadable(time(), $p->lastpost))." ago'>";
+            echo " <td title='" . _html(dateDiffReadable(time(), $p->lastpost)) . " ago'>";
             echo $p->lastpost;
             echo "</td>\n";
 
             echo " <td>";
-            echo $p->lastuser->PrintLinkedAvatar()." ";
+            echo $p->lastuser->PrintLinkedAvatar() . " ";
             echo $p->lastuser->PrintLinkedName();
             echo "</td>\n";
 
@@ -146,14 +146,14 @@ class PouetBoxBBSTopicList extends PouetBox
         $perPage = get_setting("bbsbbstopics");
 
         echo "<tr>\n";
-        echo "<td class='nav' colspan=".(count($headers)).">\n";
+        echo "<td class='nav' colspan=" . (count($headers)) . ">\n";
 
-        $this->page = ((int)@$_GET["page"] ? $_GET["page"] : 1);
+        $this->page = ((int) @$_GET["page"] ? $_GET["page"] : 1);
         if ($this->page > 1) {
-            echo "  <div class='prevpage'><a href='".adjust_query(array("page" => ($this->page - 1)))."'>previous page</a></div>\n";
+            echo "  <div class='prevpage'><a href='" . adjust_query(["page" => ($this->page - 1)]) . "'>previous page</a></div>\n";
         }
         if ($this->page < ($this->count / $perPage)) {
-            echo "  <div class='nextpage'><a href='".adjust_query(array("page" => ($this->page + 1)))."'>next page</a></div>\n";
+            echo "  <div class='nextpage'><a href='" . adjust_query(["page" => ($this->page + 1)]) . "'>next page</a></div>\n";
         }
 
         echo "  <select name='page'>\n";
@@ -211,7 +211,7 @@ if ($currentUser) {
 
 $TITLE = "BBS";
 if ($list->page > 1) {
-    $TITLE .= " :: page ".(int)$list->page;
+    $TITLE .= " :: page " . (int) $list->page;
 }
 
 require_once("include_pouet/header.php");
@@ -222,7 +222,7 @@ echo "<form action='bbs.php' method='get'>\n";
 
 foreach ($_GET as $k => $v) {
     if ($k != "type" && $k != "platform" && $k != "page") {
-        echo "<input type='hidden' name='"._html($k)."' value='"._html($v)."'>\n";
+        echo "<input type='hidden' name='" . _html($k) . "' value='" . _html($v) . "'>\n";
     }
 }
 

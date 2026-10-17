@@ -10,8 +10,8 @@ if (@$_GET["post"]) { // setting-independent post lookup
             redirect(sprintf("prod.php?which=%d#c%d", $prodID, $_GET["post"]));
         } else {
             $inner = sprintf_esc("select id, @rowID:=@rowID+1 as rowID from comments, (SELECT @rowID:=0) as init where which = %d", $prodID);
-            $row = SQLLib::SelectRow(sprintf_esc("select * from (".$inner.") as t where id = %d", $_GET["post"]));
-            redirect(sprintf("prod.php?which=%d&page=%d#c%d", $prodID, (int)(($row->rowID - 1) / get_setting("prodcomments")) + 1, $_GET["post"]));
+            $row = SQLLib::SelectRow(sprintf_esc("select * from (" . $inner . ") as t where id = %d", $_GET["post"]));
+            redirect(sprintf("prod.php?which=%d&page=%d#c%d", $prodID, (int) (($row->rowID - 1) / get_setting("prodcomments")) + 1, $_GET["post"]));
         }
         exit();
     }
@@ -37,7 +37,7 @@ class PouetBoxProdMain extends PouetBox
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_prodmain";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
         //$this->title = "some stats";
     }
 
@@ -54,7 +54,7 @@ class PouetBoxProdMain extends PouetBox
 
         $this->linkCheck = SQLLib::SelectRow(sprintf_esc("SELECT * FROM prods_linkcheck where prodID = %d", $this->id));
 
-        $a = array(&$this->prod);
+        $a = [&$this->prod];
         PouetCollectPlatforms($a);
         PouetCollectAwards($a);
 
@@ -66,7 +66,7 @@ class PouetBoxProdMain extends PouetBox
         $s->AddField("added");
         $s->AddTable("screenshots");
         $s->SetLimit(1);
-        $s->attach(array("screenshots" => "user"), array("users as user" => "id"));
+        $s->attach(["screenshots" => "user"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("prod=%d", $this->id));
         $scr = $s->perform();
         $this->screenshot = $scr ? $scr[0] : null;
@@ -76,28 +76,28 @@ class PouetBoxProdMain extends PouetBox
         $s->AddField("prodotherparty.party_place");
         $s->AddField("prodotherparty.party_year");
         $s->AddTable("prodotherparty");
-        $s->attach(array("prodotherparty" => "party"), array("parties as party" => "id"));
+        $s->attach(["prodotherparty" => "party"], ["parties as party" => "id"]);
         $s->AddWhere(sprintf_esc("prod=%d", $this->id));
         $rows = $s->perform();
         foreach ($rows as $row) {
-            $this->prod->placings[] = new PouetPlacing(array("party" => $row->party,"compo" => $row->party_compo,"ranking" => $row->party_place,"year" => $row->party_year));
+            $this->prod->placings[] = new PouetPlacing(["party" => $row->party,"compo" => $row->party_compo,"ranking" => $row->party_place,"year" => $row->party_year]);
         }
 
         $s = new BM_Query();
         $s->AddTable("affiliatedprods");
         $s->AddField("affiliatedprods.type");
-        $s->attach(array("affiliatedprods" => "original"), array("prods as prodOriginal" => "id"));
-        $s->attach(array("affiliatedprods" => "derivative"), array("prods as prodDerivative" => "id"));
+        $s->attach(["affiliatedprods" => "original"], ["prods as prodOriginal" => "id"]);
+        $s->attach(["affiliatedprods" => "derivative"], ["prods as prodDerivative" => "id"]);
         $s->AddWhere(sprintf_esc("affiliatedprods.original=%d or affiliatedprods.derivative=%d", $this->id, $this->id));
         $this->relatedProds = $s->perform();
 
         $s = new BM_Query();
         $s->AddTable("users_cdcs");
-        $s->attach(array("users_cdcs" => "user"), array("users as user" => "id"));
+        $s->attach(["users_cdcs" => "user"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("cdc = %d", $this->id));
         $cdcs = $s->perform();
 
-        $this->userCDCs = array();
+        $this->userCDCs = [];
         foreach ($cdcs as $v) {
             $this->userCDCs[$v->user->id] = $v;
         }
@@ -107,11 +107,11 @@ class PouetBoxProdMain extends PouetBox
         $s->AddTable("credits");
         $s->AddField("credits.role");
         $s->AddWhere(sprintf("credits.prodID = %d", $this->id));
-        $s->Attach(array("credits" => "userID"), array("users as user" => "id"));
+        $s->Attach(["credits" => "userID"], ["users as user" => "id"]);
         $s->AddOrder("credits.role");
         $this->credits = $s->perform();
 
-        $this->downloadLinks = array();
+        $this->downloadLinks = [];
         /*
         if ($this->prod->sceneorg)
         {
@@ -126,21 +126,21 @@ class PouetBoxProdMain extends PouetBox
             $o = new stdClass();
             $o->type = "csdb";
             $o->id = "csdbID";
-            $o->link = "https://csdb.dk/release/?id=".(int)$this->prod->csdb;
+            $o->link = "https://csdb.dk/release/?id=" . (int) $this->prod->csdb;
             $this->downloadLinks[] = $o;
         }
         if ($this->prod->zxdemo) {
             $o = new stdClass();
             $o->type = "zxdemo";
             $o->id = "zxdemoID";
-            $o->link = "http://zxdemo.org/item.php?id=".(int)$this->prod->zxdemo;
+            $o->link = "http://zxdemo.org/item.php?id=" . (int) $this->prod->zxdemo;
             $this->downloadLinks[] = $o;
         }
         if ($this->prod->demozoo) {
             $o = new stdClass();
             $o->type = "demozoo";
             $o->id = "demozooID";
-            $o->link = "http://demozoo.org/productions/".(int)$this->prod->demozoo."/";
+            $o->link = "http://demozoo.org/productions/" . (int) $this->prod->demozoo . "/";
             $this->downloadLinks[] = $o;
         }
         $this->downloadLinks = array_merge($this->downloadLinks, SQLLib::selectRows(sprintf_esc("select type, link from downloadlinks where prod = %d order by type", $this->id)));
@@ -161,7 +161,7 @@ class PouetBoxProdMain extends PouetBox
         }
 
         if ($host === "youtu.be" && !empty($parsed["path"])) {
-            $path = trim((string)$parsed["path"], "/");
+            $path = trim((string) $parsed["path"], "/");
             if ($path !== "") {
                 $segments = explode("/", $path);
                 foreach ($segments as $segment) {
@@ -172,10 +172,10 @@ class PouetBoxProdMain extends PouetBox
                 }
             }
         } elseif ($host === "youtube.com" || substr($host, -12) === ".youtube.com") {
-            $path = trim(isset($parsed["path"]) ? (string)$parsed["path"] : "", "/");
+            $path = trim(isset($parsed["path"]) ? (string) $parsed["path"] : "", "/");
             if ($path !== "") {
                 $parts = explode("/", $path);
-                if (!empty($parts[1]) && in_array($parts[0], array("embed", "shorts", "live"), true)) {
+                if (!empty($parts[1]) && in_array($parts[0], ["embed", "shorts", "live"], true)) {
                     $videoId = explode("/", $parts[1])[0];
                 }
             }
@@ -193,7 +193,7 @@ class PouetBoxProdMain extends PouetBox
         }
 
         // extract optional timestamp
-        $videoTimestamp=null;
+        $videoTimestamp = null;
         if (!empty($parsed["query"])) {
             parse_str($parsed["query"], $query);
             if (isset($query["t"]) && is_string($query["t"]) && $query["t"] !== '') {
@@ -203,7 +203,7 @@ class PouetBoxProdMain extends PouetBox
             }
         }
 
-        return "https://www.youtube.com/embed/".$videoId.$videoTimestamp;
+        return "https://www.youtube.com/embed/" . $videoId . $videoTimestamp;
     }
 
     private function isEmbeddableYoutubeUrl($url)
@@ -228,10 +228,10 @@ class PouetBoxProdMain extends PouetBox
         if ($this->screenshotPath) {
             $title = "screenshot";
             if ($this->screenshot) {
-                $title = "screenshot added by "._html($this->screenshot->user->nickname)." on "._html($this->screenshot->added);
+                $title = "screenshot added by " . _html($this->screenshot->user->nickname) . " on " . _html($this->screenshot->added);
             }
 
-            return "<img class=\"pouetsscreenshotimg\" src='".POUET_CONTENT_URL.$this->screenshotPath."' alt='".$title."' title='".$title."'>\n";
+            return "<img class=\"pouetsscreenshotimg\" src='" . POUET_CONTENT_URL . $this->screenshotPath . "' alt='" . $title . "' title='" . $title . "'>\n";
         } else {
             global $currentUser;
             $s = "no screenshot yet.\n";
@@ -249,11 +249,11 @@ class PouetBoxProdMain extends PouetBox
         echo "<table id='stattable'>\n";
         echo " <tr>\n";
         echo "  <td>platform :</td>\n";
-        echo "  <td>".$this->prod->RenderPlatformNames()."</td>\n";
+        echo "  <td>" . $this->prod->RenderPlatformNames() . "</td>\n";
         echo " </tr>\n";
         echo " <tr>\n";
         echo "  <td>type :</td>\n";
-        echo "  <td>".$this->prod->RenderTypeNames()."</td>\n";
+        echo "  <td>" . $this->prod->RenderTypeNames() . "</td>\n";
         echo " </tr>\n";
         echo " <tr>\n";
         echo "  <td>release date :</td>\n";
@@ -274,7 +274,7 @@ class PouetBoxProdMain extends PouetBox
                 if ($p->party) {
                     echo " <tr>\n";
                     echo "  <td>release party :</td>\n";
-                    echo "  <td>".$p->party->PrintLinked($p->year)."</td>\n";
+                    echo "  <td>" . $p->party->PrintLinked($p->year) . "</td>\n";
                     echo " </tr>\n";
                 }
                 echo " <tr>\n";
@@ -329,14 +329,14 @@ class PouetBoxProdMain extends PouetBox
             if ($invitationParty) {
                 echo " <tr>\n";
                 echo "  <td>invitation for :</td>\n";
-                echo "  <td>".$invitationParty->PrintLinked($this->prod->invitationyear)."</td>\n";
+                echo "  <td>" . $invitationParty->PrintLinked($this->prod->invitationyear) . "</td>\n";
                 echo " </tr>\n";
             }
         }
         if ($this->board) {
             echo " <tr>\n";
             echo "  <td>advertising for :</td>\n";
-            echo "  <td><a href='boards.php?which=".(int)$this->board->id."'>"._html($this->board->name)."</a></td>\n";
+            echo "  <td><a href='boards.php?which=" . (int) $this->board->id . "'>" . _html($this->board->name) . "</a></td>\n";
             echo " </tr>\n";
         }
         echo "</table>\n";
@@ -353,12 +353,12 @@ class PouetBoxProdMain extends PouetBox
                     continue;
                 }
                 echo " <tr>\n";
-                echo "  <td>".$p->party->PrintLinked($p->year)."</td>\n";
+                echo "  <td>" . $p->party->PrintLinked($p->year) . "</td>\n";
                 //if ($p->ranking)
-                echo "  <td>".$p->PrintRanking()."</td>\n";
+                echo "  <td>" . $p->PrintRanking() . "</td>\n";
                 //if ($p->compo)
                 global $COMPOTYPES;
-                echo "  <td>".$COMPOTYPES[ $p->compo ]."</td>\n";
+                echo "  <td>" . $COMPOTYPES[ $p->compo ] . "</td>\n";
                 echo " </tr>\n";
             }
             echo "</table>\n";
@@ -366,9 +366,9 @@ class PouetBoxProdMain extends PouetBox
     }
     public function RenderPopularity()
     {
-        $pop = (int)calculate_popularity($this->prod->views);
-        echo "popularity : ".$pop."%<br>\n";
-        echo progress_bar($pop, $pop."%");
+        $pop = (int) calculate_popularity($this->prod->views);
+        echo "popularity : " . $pop . "%<br>\n";
+        echo progress_bar($pop, $pop . "%");
 
         $this->prod->RenderAwards();
     }
@@ -382,19 +382,19 @@ class PouetBoxProdMain extends PouetBox
             $p = "rulez";
         }
         echo "<ul id='avgstats'>";
-        echo "<li class=".$p.">".$this->prod->RenderAvgRaw()."</li>\n";
+        echo "<li class=" . $p . ">" . $this->prod->RenderAvgRaw() . "</li>\n";
         $cdcs = count($this->userCDCs);
         if ($this->isPouetCDC) {
             $cdcs++;
         }
         if ($cdcs) {
-            echo "<li class='cdc'>".$cdcs."</li>\n";
+            echo "<li class='cdc'>" . $cdcs . "</li>\n";
         }
 
         global $currentUser;
         if ($currentUser) {
             echo "<li class='watchlist'>";
-            echo "<form action='prod.php?which=".$this->prod->id."' method='post' id='watchlistFrm'>";
+            echo "<form action='prod.php?which=" . $this->prod->id . "' method='post' id='watchlistFrm'>";
             $csrf = new CSRFProtect();
             $csrf->PrintToken();
 
@@ -439,14 +439,14 @@ document.observe("dom:loaded",function(){
         }
 
         echo "</ul>";
-        printf("<div id='alltimerank'>alltime top: %s</div>", $this->prod->rank ? "#".(int)$this->prod->rank : "n/a");
+        printf("<div id='alltimerank'>alltime top: %s</div>", $this->prod->rank ? "#" . (int) $this->prod->rank : "n/a");
     }
     public function RenderThumbs()
     {
         echo "<ul class='prodthumbs'>\n";
-        echo "<li class='rulez'>".$this->prod->voteup."</li>\n";
-        echo "<li class='isok'>".$this->prod->votepig."</li>\n";
-        echo "<li class='sucks'>".$this->prod->votedown."</li>\n";
+        echo "<li class='rulez'>" . $this->prod->voteup . "</li>\n";
+        echo "<li class='isok'>" . $this->prod->votepig . "</li>\n";
+        echo "<li class='sucks'>" . $this->prod->votedown . "</li>\n";
         echo "</ul>\n";
     }
     public function RenderLinks()
@@ -456,7 +456,7 @@ document.observe("dom:loaded",function(){
         if ($this->linkCheck) {
             if ($this->linkCheck->returnCode == 0
             || $this->linkCheck->returnCode >= 400 && $this->linkCheck->returnCode <= 599) {
-                printf("<span class='brokenLink error' title='%s'>Link broken!</span> ", $this->linkCheck->returnCode == 0 ? "server not found" : "server returned ".$this->linkCheck->returnCode);
+                printf("<span class='brokenLink error' title='%s'>Link broken!</span> ", $this->linkCheck->returnCode == 0 ? "server not found" : "server returned " . $this->linkCheck->returnCode);
             }
             /*
             TODO: not sure about this
@@ -466,24 +466,21 @@ document.observe("dom:loaded",function(){
             }
             */
         }
-        echo "[<a id='mainDownloadLink' href='"._html($this->prod->download)."'>download</a>]";
+        echo "[<a id='mainDownloadLink' href='" . _html($this->prod->download) . "'>download</a>]";
         echo "</li>\n";
 
         foreach ($this->downloadLinks as $link) {
-            echo "<li".(@$link->id ? " id='".$link->id."'" : "").">";
+            echo "<li" . (@$link->id ? " id='" . $link->id . "'" : "") . ">";
 
-            if ($this->isEmbeddableYoutubeUrl($link->link))
-            {
-                echo "[<a class='lightBoxVideoLink' href='"._html($this->getYoutubeEmbedUrl($link->link))."'><span title='play embedded' class='youtubeEmbed' style='width:100%'>embed</span></a>] ";
-                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
-            }
-            else
-            {
-                echo "[<a href='"._html($link->link)."'>"._html($link->type)."</a>]";
+            if ($this->isEmbeddableYoutubeUrl($link->link)) {
+                echo "[<a class='lightBoxVideoLink' href='" . _html($this->getYoutubeEmbedUrl($link->link)) . "'><span title='play embedded' class='youtubeEmbed' style='width:100%'>embed</span></a>] ";
+                echo "[<a href='" . _html($link->link) . "'>" . _html($link->type) . "</a>]";
+            } else {
+                echo "[<a href='" . _html($link->link) . "'>" . _html($link->type) . "</a>]";
             }
             echo "</li>\n";
         }
-        echo "<li>[<a href='mirrors.php?which=".$this->id."'>mirrors...</a>]</li>\n";
+        echo "<li>[<a href='mirrors.php?which=" . $this->id . "'>mirrors...</a>]</li>\n";
         echo "</ul>\n";
     }
     public function RenderCredits()
@@ -495,9 +492,9 @@ document.observe("dom:loaded",function(){
                 continue;
             }
             echo "<li>";
-            echo $v->user->PrintLinkedAvatar()." ";
+            echo $v->user->PrintLinkedAvatar() . " ";
             echo $v->user->PrintLinkedName();
-            echo " ["._html($v->role)."]";
+            echo " [" . _html($v->role) . "]";
             echo "</li>";
         }
         echo "</ul>";
@@ -506,14 +503,14 @@ document.observe("dom:loaded",function(){
     {
         global $currentUser;
 
-        $timer[$this->uniqueID." render"]["start"] = microtime_float();
+        $timer[$this->uniqueID . " render"]["start"] = microtime_float();
 
         echo "<table id='pouetbox_prodmain'>\n";
         echo "<tr id='prodheader'>\n";
         echo "<th colspan='3'>\n";
-        echo " <span id='title'><span id='prod-title'>"._html($this->prod->name)."</span>";
+        echo " <span id='title'><span id='prod-title'>" . _html($this->prod->name) . "</span>";
         if ($this->prod->groups) {
-            echo " by ".$this->prod->RenderGroupsLong();
+            echo " by " . $this->prod->RenderGroupsLong();
         }
         echo "</span>\n";
         printf("<div id='nfo'>");
@@ -543,7 +540,7 @@ document.observe("dom:loaded",function(){
         echo "</tr>\n";
 
         echo "<tr>\n";
-        echo " <td rowspan='3' id='screenshot'>".$this->RenderScreenshot()."</td>\n";
+        echo " <td rowspan='3' id='screenshot'>" . $this->RenderScreenshot() . "</td>\n";
         echo " <td colspan='2'>\n";
         $this->RenderDetails();
         echo " </td>\n";
@@ -576,7 +573,7 @@ document.observe("dom:loaded",function(){
         } elseif ($currentUser) {
             echo "<tr>\n";
             echo " <td id='credits' colspan='3' class='r2'>";
-            echo " <p>this prod has no credits assigned yet! <a href='submit_modification_request.php?prod=".$this->id."&amp;requestType=prod_add_credit'>click here</a> to add some !</p>";
+            echo " <p>this prod has no credits assigned yet! <a href='submit_modification_request.php?prod=" . $this->id . "&amp;requestType=prod_add_credit'>click here</a> to add some !</p>";
             echo "</td>\n";
             echo "</tr>\n";
         }
@@ -584,12 +581,12 @@ document.observe("dom:loaded",function(){
 
         if ($this->prod->addedUser) {
             echo "<tr>\n";
-            echo " <td class='foot' colspan='3'>added on the ".$this->prod->addedDate." by ".$this->prod->addedUser->PrintLinkedName()." ".$this->prod->addedUser->PrintLinkedAvatar()."</td>\n";
+            echo " <td class='foot' colspan='3'>added on the " . $this->prod->addedDate . " by " . $this->prod->addedUser->PrintLinkedName() . " " . $this->prod->addedUser->PrintLinkedAvatar() . "</td>\n";
             echo "</tr>\n";
         }
 
         echo "</table>\n";
-        $timer[$this->uniqueID." render"]["end"] = microtime_float();
+        $timer[$this->uniqueID . " render"]["end"] = microtime_float();
     }
 
 };
@@ -609,24 +606,24 @@ class PouetBoxProdPopularityHelper extends PouetBox
 
     public function RenderContent()
     {
-        $url = POUET_ROOT_URL . "prod.php?which=".$this->prod->id;
+        $url = POUET_ROOT_URL . "prod.php?which=" . $this->prod->id;
         echo "<p>increase the popularity of this prod by spreading this URL:</p>\n";
-        echo "<input type='text' value='"._html($url)."' readonly='readonly'>\n";
+        echo "<input type='text' value='" . _html($url) . "' readonly='readonly'>\n";
         echo "<p>or via:\n";
 
-        echo "  <a href='https://www.facebook.com/sharer/sharer.php?u="._html(rawurlencode($url))."'>facebook</a>\n";
+        echo "  <a href='https://www.facebook.com/sharer/sharer.php?u=" . _html(rawurlencode($url)) . "'>facebook</a>\n";
 
-        $text = "You should watch \"".$this->prod->name."\" on @pouetdotnet: ".$url;
-        echo "  <a href='https://twitter.com/intent/tweet?text="._html(rawurlencode($text))."'>twitter</a>\n";
+        $text = "You should watch \"" . $this->prod->name . "\" on @pouetdotnet: " . $url;
+        echo "  <a href='https://twitter.com/intent/tweet?text=" . _html(rawurlencode($text)) . "'>twitter</a>\n";
 
-        echo "  <a href='http://pinterest.com/pin/create/button/?url="._html(rawurlencode($url))."'>pinterest</a>\n";
+        echo "  <a href='http://pinterest.com/pin/create/button/?url=" . _html(rawurlencode($url)) . "'>pinterest</a>\n";
 
-        echo "  <a href='http://tumblr.com/widgets/share/tool?canonicalUrl="._html(rawurlencode($url))."&amp;posttype=link'>tumblr</a>\n";
+        echo "  <a href='http://tumblr.com/widgets/share/tool?canonicalUrl=" . _html(rawurlencode($url)) . "&amp;posttype=link'>tumblr</a>\n";
 
-        $text = "You should watch \"".$this->prod->name."\" on Pou\xC3\xABt: ".$url;
-        echo "  <a href='https://bsky.app/intent/compose/?text="._html(rawurlencode($text))."'>bluesky</a>\n";
+        $text = "You should watch \"" . $this->prod->name . "\" on Pou\xC3\xABt: " . $url;
+        echo "  <a href='https://bsky.app/intent/compose/?text=" . _html(rawurlencode($text)) . "'>bluesky</a>\n";
 
-        echo "  <a href='https://www.threads.net/intent/post?text="._html(rawurlencode($text))."'>threads</a>\n";
+        echo "  <a href='https://www.threads.net/intent/post?text=" . _html(rawurlencode($text)) . "'>threads</a>\n";
 
         echo "</p>\n";
     }
@@ -645,9 +642,9 @@ class PouetBoxProdComments extends PouetBox
         parent::__construct();
         $this->uniqueID = "pouetbox_prodcomments";
         $this->title = "comments";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
-        $this->credits = array();
+        $this->credits = [];
         foreach ($main->credits as $credit) {
             if (!$credit->user) {
                 continue;
@@ -665,20 +662,20 @@ class PouetBoxProdComments extends PouetBox
         $s->AddField("comments.comment as comment");
         $s->AddField("comments.rating as rating");
         $s->AddField("comments.addedDate as addedDate");
-        $s->attach(array("comments" => "who"), array("users as user" => "id"));
+        $s->attach(["comments" => "who"], ["users as user" => "id"]);
         $s->AddTable("comments");
         $s->AddOrder("comments.addedDate");
-        $s->AddWhere("comments.which=".$this->id);
+        $s->AddWhere("comments.which=" . $this->id);
         $perPage = get_setting("prodcomments");
         if ($perPage != -1) {
             $sc = new SQLSelect();
             $sc->AddField("count(*) as c");
-            $sc->AddWhere("comments.which=".$this->id);
+            $sc->AddWhere("comments.which=" . $this->id);
             $sc->AddTable("comments");
 
             $commentCount = SQLLib::SelectRow($sc->GetQuery())->c;
 
-            $this->paginator->SetData("prod.php?which=".$this->id, $commentCount, $perPage, @$_GET["page"]);
+            $this->paginator->SetData("prod.php?which=" . $this->id, $commentCount, $perPage, @$_GET["page"]);
             $this->paginator->SetLimitOnQuery($s);
             /*
             $this->commentCount =
@@ -714,21 +711,21 @@ class PouetBoxProdComments extends PouetBox
                 $author = true;
             }
 
-            echo "<div class='comment cite-".$c->user->id."".($author ? " author" : "")."' id='c".$c->id."'>\n";
+            echo "<div class='comment cite-" . $c->user->id . "" . ($author ? " author" : "") . "' id='c" . $c->id . "'>\n";
 
-            echo "  <div class='content'>".$p."</div>\n";
+            echo "  <div class='content'>" . $p . "</div>\n";
 
             echo "  <div class='foot'>";
             if ($c->rating) {
-                echo "<span class='vote ".$rating."'>".$rating."</span>";
+                echo "<span class='vote " . $rating . "'>" . $rating . "</span>";
             }
             if (@$main->userCDCs[$c->user->id]) {
                 echo "<span class='vote cdc'>cdc</span>";
                 unset($main->userCDCs[$c->user->id]);
             }
 
-            echo "<span class='tools' data-cid='".$c->id."'></span> added on the <a href='prod.php?post=".$c->id."'>".$c->addedDate."</a> by ";
-            echo $c->user->PrintLinkedName()." ".$c->user->PrintLinkedAvatar();
+            echo "<span class='tools' data-cid='" . $c->id . "'></span> added on the <a href='prod.php?post=" . $c->id . "'>" . $c->addedDate . "</a> by ";
+            echo $c->user->PrintLinkedName() . " " . $c->user->PrintLinkedAvatar();
 
             echo "</div>\n";
             echo "</div>\n\n";
@@ -754,7 +751,7 @@ class PouetBoxProdLists extends PouetBox
         parent::__construct();
         $this->uniqueID = "pouetbox_prodlists";
         $this->title = "lists containing this prod";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
     }
 
     public function LoadFromDB()
@@ -764,8 +761,8 @@ class PouetBoxProdLists extends PouetBox
         $s->AddField("lists.name as name");
         $s->AddTable("list_items");
         $s->AddJoin("", "lists", "list_items.list=lists.id");
-        $s->attach(array("lists" => "owner"), array("users as user" => "id"));
-        $s->AddWhere("list_items.itemid=".$this->id);
+        $s->attach(["lists" => "owner"], ["users as user" => "id"]);
+        $s->AddWhere("list_items.itemid=" . $this->id);
         $s->AddWhere("list_items.type='prod'");
         $s->AddOrder("lists.name");
         $this->data = $s->perform();
@@ -777,7 +774,7 @@ class PouetBoxProdLists extends PouetBox
         foreach ($this->data as $list) {
             echo "<li>\n";
             printf("  <span><a href='lists.php?which=%d'>%s</a></span>\n", $list->id, _html($list->name));
-            echo "  <span>".$list->user->PrintLinkedAvatar()." ".$list->user->PrintLinkedName()."</span>\n";
+            echo "  <span>" . $list->user->PrintLinkedAvatar() . " " . $list->user->PrintLinkedName() . "</span>\n";
             echo "</li>\n";
         }
         echo "</ul>\n";
@@ -803,8 +800,8 @@ class PouetBoxProdSubmitChanges extends PouetBox
         echo "<p>do not post about it in the comments, it will get lost.</p>";
         //echo "instead, <a href='mailto:pouet@neuromatrice.net?subject=about%20prod%20number%20".$this->id."'>email</a> or <a href='topic.php?which=1024'>post</a> about it.";
         //echo "<p>instead, <a href='topic.php?which=1024'>post</a> about it here ! [<a href='gloperator_log.php?which=".$this->id."&amp;what=prod'>previous edits</a>]</p>";
-        echo "<p>instead, <a href='submit_modification_request.php?prod=".$this->id."'>click here</a> !</p>";
-        echo "<p>[<a href='gloperator_log.php?which=".$this->id."&amp;what=prod'>previous edits</a>]</p>";
+        echo "<p>instead, <a href='submit_modification_request.php?prod=" . $this->id . "'>click here</a> !</p>";
+        echo "<p>[<a href='gloperator_log.php?which=" . $this->id . "&amp;what=prod'>previous edits</a>]</p>";
     }
 
 };
@@ -828,8 +825,8 @@ class PouetBoxProdSneakyCDCs extends PouetBox
         $s->AddField("lists.name as name");
         $s->AddTable("list_items");
         $s->AddJoin("", "lists", "list_items.list=lists.id");
-        $s->attach(array("lists" => "owner"), array("users as user" => "id"));
-        $s->AddWhere("list_items.itemid=".$this->id);
+        $s->attach(["lists" => "owner"], ["users as user" => "id"]);
+        $s->AddWhere("list_items.itemid=" . $this->id);
         $s->AddWhere("list_items.type='prod'");
         $s->AddOrder("lists.name");
         $this->data = $s->perform();
@@ -840,7 +837,7 @@ class PouetBoxProdSneakyCDCs extends PouetBox
         global $main;
         echo "<ul class='boxlist'>\n";
         foreach ($main->userCDCs as $cdc) {
-            echo "<li>".$cdc->user->PrintLinkedAvatar()." ".$cdc->user->PrintLinkedName()."</li>\n";
+            echo "<li>" . $cdc->user->PrintLinkedAvatar() . " " . $cdc->user->PrintLinkedName() . "</li>\n";
         }
         echo "</ul>\n";
     }
@@ -854,7 +851,7 @@ function isEventEligible($event, $prod)
         return false;
     }
     if ($event->eligibleYear) {
-        if (!$prod->releaseDate || $event->eligibleYear != (int)substr($prod->releaseDate, 0, 4)) {
+        if (!$prod->releaseDate || $event->eligibleYear != (int) substr($prod->releaseDate, 0, 4)) {
             return false;
         }
     }
@@ -898,7 +895,7 @@ class PouetBoxProdAwardSuggestions extends PouetBox
         $s->AddWhere(sprintf_esc("awardssuggestions_votes.prodID='%d'", $this->prodID));
         $s->AddWhere(sprintf_esc("awardssuggestions_votes.userID='%d'", $currentUser->id));
         $_votes = $s->perform();
-        $this->votes = array();
+        $this->votes = [];
         foreach ($_votes as $vote) {
             $this->votes[] = $vote->categoryID;
         }
@@ -908,10 +905,10 @@ class PouetBoxProdAwardSuggestions extends PouetBox
         global $currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in!");
+            return ["you have to be logged in!"];
         }
 
-        return array();
+        return [];
     }
 
     public function Commit($post)
@@ -928,16 +925,16 @@ class PouetBoxProdAwardSuggestions extends PouetBox
             $event = $AWARDSSUGGESTIONS_EVENTS[$category->eventID];
 
             if (isEventEligible($event, $main->prod)) {
-                $a = array(
-                  "prodID" => $this->prodID,
-                  "userID" => $currentUser->id,
-                  "categoryID" => $catID,
-                );
+                $a = [
+                    "prodID" => $this->prodID,
+                    "userID" => $currentUser->id,
+                    "categoryID" => $catID,
+                ];
                 SQLLib::InsertRow("awardssuggestions_votes", $a);
             }
         }
 
-        return array();
+        return [];
     }
 
     public function RenderContent()
@@ -978,40 +975,40 @@ class PouetBoxProdPost extends PouetBox
         global $currentUser;
 
         parent::__construct();
-        $this->prodID = (int)$prod;
+        $this->prodID = (int) $prod;
         $this->uniqueID = "pouetbox_prodpost";
         $this->title = "add a comment";
 
-        $this->myVote = $currentUser ? SQLLib::SelectRow(sprintf_esc("SELECT * FROM comments WHERE who=%d AND which=%d AND rating!=0 LIMIT 1", (int)$currentUser->id, $this->prodID)) : 0;
+        $this->myVote = $currentUser ? SQLLib::SelectRow(sprintf_esc("SELECT * FROM comments WHERE who=%d AND which=%d AND rating!=0 LIMIT 1", (int) $currentUser->id, $this->prodID)) : 0;
     }
     public function Validate($post)
     {
         global $currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in!");
+            return ["you have to be logged in!"];
         }
 
         if (!$currentUser->CanPostInProdComments()) {
-            return array("not allowed lol.");
+            return ["not allowed lol."];
         }
 
         if (!is_string_meaningful($post["comment"])) {
-            return array("not too meaningful, is it...");
+            return ["not too meaningful, is it..."];
         }
 
         $r = SQLLib::SelectRow(sprintf_esc("SELECT id FROM prods where id=%d", $this->prodID));
         if (!$r) {
-            return array("you sneaky bastard you >_<");
+            return ["you sneaky bastard you >_<"];
         }
 
         $r = SQLLib::SelectRow(sprintf_esc("SELECT comment,who,which FROM comments WHERE which = %d ORDER BY addedDate DESC LIMIT 1", $this->prodID));
 
         if ($r && $r->who == get_login_id() && $r->comment == $post["comment"]) {
-            return array("ERROR! DOUBLEPOST == ROB IS JARIG!");
+            return ["ERROR! DOUBLEPOST == ROB IS JARIG!"];
         }
 
-        return array();
+        return [];
     }
 
     public function Commit($post)
@@ -1033,7 +1030,7 @@ class PouetBoxProdPost extends PouetBox
                 break;
         }
 
-        $a = array();
+        $a = [];
         $a["addedDate"] = date("Y-m-d H:i:s");
         $a["who"] = get_login_id();
         $a["which"] = $this->prodID;
@@ -1047,7 +1044,7 @@ class PouetBoxProdPost extends PouetBox
         @unlink("cache/pouetbox_topmonth.cache");
         @unlink("cache/pouetbox_stats.cache");
 
-        return array();
+        return [];
     }
 
     public function RenderBody()
@@ -1066,7 +1063,7 @@ class PouetBoxProdPost extends PouetBox
             $csrf->PrintToken();
 
             echo "<div class='content'>\n";
-            echo " <input type='hidden' name='which' value='".(int)$this->prod."'>\n";
+            echo " <input type='hidden' name='which' value='" . (int) $this->prod . "'>\n";
             echo " <input type='hidden' name='type' value='comment'>\n";
             if (!$this->myVote) {
                 echo " <div id='prodvote'>\n";
@@ -1112,13 +1109,13 @@ document.observe("dom:loaded",function(){
 
 };
 
-$prodid = (int)@$_GET["which"];
+$prodid = (int) @$_GET["which"];
 if (!$prodid) {
     $prodid = rand(1, 90000);
 }
 
 $form = new PouetFormProcessor();
-$form->SetSuccessURL("prod.php?which=".(int)$prodid, true);
+$form->SetSuccessURL("prod.php?which=" . (int) $prodid, true);
 
 $main = new PouetBoxProdMain($prodid);
 $main->Load();
@@ -1141,9 +1138,9 @@ if ($main->prod) {
 
     // OpenGraph docs: https://ogp.me/
     // Twitter card docs: https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started
-    $metaValues["og:title"] =
-    $metaValues["twitter:title"] =
-    $TITLE = $main->prod->name.($main->prod->groups ? " by ".$main->prod->RenderGroupsPlain() : "");
+    $metaValues["og:title"]
+    = $metaValues["twitter:title"]
+    = $TITLE = $main->prod->name . ($main->prod->groups ? " by " . $main->prod->RenderGroupsPlain() : "");
 
     $metaValues["og:type"] = "website";
     $metaValues["og:url"] = POUET_ROOT_URL . "prod.php?which=" . $main->prod->id;
@@ -1151,14 +1148,16 @@ if ($main->prod) {
     $metaValues["twitter:site"] = "@pouetdotnet";
 
     $desc = implode(" / ", $main->prod->types);
-    $desc .= " for ". implode(" / ", array_map(function ($i) { return $i["name"]; }, $main->prod->platforms));
+    $desc .= " for " . implode(" / ", array_map(function ($i) {
+        return $i["name"];
+    }, $main->prod->platforms));
     if ($main->prod->placings) {
         $desc .= ", " . strip_tags($main->prod->placings[0]->PrintResult());
     } else {
         $desc .= ", released in " . $main->prod->RenderReleaseDate();
     }
-    $metaValues["og:description"] =
-    $metaValues["twitter:description"] = $desc;
+    $metaValues["og:description"]
+    = $metaValues["twitter:description"] = $desc;
 
     $linkedData["@type"] = "MediaObject"; // https://schema.org/CreativeWork
     $linkedData["name"] = $main->prod->name;
@@ -1168,21 +1167,21 @@ if ($main->prod) {
 
     $ratingCount = $main->prod->voteup + $main->prod->votedown + $main->prod->votepig;
     if ($ratingCount) {
-        $linkedData["aggregateRating"] = array(
-          "@type" => "AggregateRating",
-          "ratingValue" => $main->prod->voteavg,
-          "ratingCount" => $ratingCount,
-          "bestRating" => 1,
-          "worstRating" => -1
-        );
+        $linkedData["aggregateRating"] = [
+            "@type" => "AggregateRating",
+            "ratingValue" => $main->prod->voteavg,
+            "ratingCount" => $ratingCount,
+            "bestRating" => 1,
+            "worstRating" => -1,
+        ];
     }
 
     if ($main->screenshotPath) {
-        $metaValues["og:image"] =
-        $metaValues["twitter:image"] =
-        $linkedData["image"] = POUET_CONTENT_URL . $main->screenshotPath;
-        $metaValues["og:image:alt"] =
-        $metaValues["twitter:image:alt"] = "Screenshot of " . $TITLE;
+        $metaValues["og:image"]
+        = $metaValues["twitter:image"]
+        = $linkedData["image"] = POUET_CONTENT_URL . $main->screenshotPath;
+        $metaValues["og:image:alt"]
+        = $metaValues["twitter:image:alt"] = "Screenshot of " . $TITLE;
 
         $size = @getimagesize(POUET_CONTENT_LOCAL . $main->screenshotPath);
         if ($size) {
@@ -1210,7 +1209,7 @@ if (@$_POST["wlAction"] && $currentUser) {
     if ($_POST["wlAction"] == "removeFromWatchlist") {
         SQLLib::Query(sprintf_esc("delete from watchlist where prodID = %d and userID = %d", $prodid, $currentUser->id));
     } elseif ($_POST["wlAction"] == "addToWatchlist") {
-        $a = array("prodID" => $prodid,"userID" => $currentUser->id);
+        $a = ["prodID" => $prodid,"userID" => $currentUser->id];
         SQLLib::InsertRow("watchlist", $a);
     }
     if (@$_POST["partial"]) {
@@ -1227,7 +1226,7 @@ if (@$_POST["wlAction"] && $currentUser) {
 }
 
 if ($main->prod) {
-    $RSS["export/lastprodcomments.rss.php?prod=".(int)$main->prod->id] = "latest comments on ".$main->prod->name;
+    $RSS["export/lastprodcomments.rss.php?prod=" . (int) $main->prod->id] = "latest comments on " . $main->prod->name;
 }
 
 require_once("include_pouet/header.php");

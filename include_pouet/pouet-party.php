@@ -15,11 +15,11 @@ class PouetParty extends BM_Class
     }
     public static function getFields()
     {
-        return array("id","name","web");
+        return ["id","name","web"];
     }
     public static function getExtendedFields()
     {
-        return array("addedDate","addedUser");
+        return ["addedDate","addedUser"];
     }
     public static function onAttach(&$node, &$query)
     {
@@ -52,13 +52,13 @@ class PouetParty extends BM_Class
                 $this->id,
                 $year,
                 _html($this->name),
-                $year
+                $year,
             );
         } else {
             return sprintf(
                 "<a href='party.php?which=%d'>%s</a>",
                 $this->id,
-                _html($this->name)
+                _html($this->name),
             );
         }
     }
@@ -74,7 +74,7 @@ class PouetParty extends BM_Class
             $this->id,
             $year,
             _html($s),
-            $year
+            $year,
         );
     }
     public function RenderFull($year = null)
@@ -91,7 +91,7 @@ class PouetParty extends BM_Class
     }
     public function RenderResultsLink($year)
     {
-        return "[<a href='party_results.php?which=".$this->id."&amp;when=".$year."'>results</a>] ";
+        return "[<a href='party_results.php?which=" . $this->id . "&amp;when=" . $year . "'>results</a>] ";
     }
 };
 
@@ -113,7 +113,7 @@ class PouetPlacing
     }
     public function PrintRanking()
     {
-        $n = (int)$this->ranking;
+        $n = (int) $this->ranking;
         if (!$n) {
             return "";
         }
@@ -146,7 +146,7 @@ class PouetPlacing
         if ($n == 13) {
             $suf = "th";
         }
-        return $this->ranking."<span class='ordinal'>".$suf."</span>";
+        return $this->ranking . "<span class='ordinal'>" . $suf . "</span>";
     }
     public function PrintResult()
     {

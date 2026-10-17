@@ -11,12 +11,12 @@ class PouetBoxSubmitGroup extends PouetBox
         $this->uniqueID = "pouetbox_submitgroup";
         $this->title = "submit a group!";
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
     }
 
     public function ValidateInput($data)
     {
-        $errormessage = array();
+        $errormessage = [];
         return $errormessage;
     }
     public function Validate($data)
@@ -24,87 +24,87 @@ class PouetBoxSubmitGroup extends PouetBox
         global $groupID,$currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in !");
+            return ["you have to be logged in !"];
         }
 
         if (!$currentUser->CanSubmitItems()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!trim($data["name"])) {
-            return array("Whitespace groupnames are sooo \t       \t        \t.");
+            return ["Whitespace groupnames are sooo \t       \t        \t."];
         }
         if ($data["website"]) {
             $url = parse_url($data["website"]);
             if (($url["scheme"] != "http" && $url["scheme"] != "https") || strstr($data["website"], "://") === false) {
-                return array("please only websites with http or https links, kthx");
+                return ["please only websites with http or https links, kthx"];
             }
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         global $groupID;
 
-        $a = array();
+        $a = [];
         $a["name"] = trim($data["name"]);
         $a["acronym"] = $data["acronym"];
         $a["disambiguation"] = $data["disambiguation"];
         $a["web"] = $data["website"];
         $a["addedUser"] = get_login_id();
-        $a["csdb"] = (int)$data["csdbID"];
+        $a["csdb"] = (int) $data["csdbID"];
         //$a["zxdemo"] = $data["zxdemoID"];
-        $a["demozoo"] = (int)$data["demozooID"];
+        $a["demozoo"] = (int) $data["demozooID"];
         $a["addedDate"] = date("Y-m-d H:i:s");
         $this->groupID = SQLLib::InsertRow("groups", $a);
 
-        return array();
+        return [];
     }
     public function GetInsertionID()
     {
-        return (int)$this->groupID;
+        return (int) $this->groupID;
     }
 
     public function LoadFromDB()
     {
         global $PLATFORMS;
-        $plat = array();
+        $plat = [];
         foreach ($PLATFORMS as $k => $v) {
             $plat[$k] = $v["name"];
         }
         uasort($plat, "strcasecmp");
 
-        $this->fields = array(
-          "name" => array(
-            "name" => "group name",
-            "required" => true,
-          ),
-          "acronym" => array(
-            "name" => "acronym",
-            "html" => "maxlength='8'",
-          ),
-          "website" => array(
-            "name" => "website url",
-            "type" => "url",
-          ),
-          "disambiguation" => array(
-            "name" => "disambiguation",
-            "infoAfter" => "If there are a multiple groups with the same name, add distinguishing platforms or countries here, otherwise leave it empty.",
-          ),
-          "csdbID" => array(
-            "name" => "csdb ID",
-            "type" => "number",
-          ),
-/*
+        $this->fields = [
+            "name" => [
+                "name" => "group name",
+                "required" => true,
+            ],
+            "acronym" => [
+                "name" => "acronym",
+                "html" => "maxlength='8'",
+            ],
+            "website" => [
+                "name" => "website url",
+                "type" => "url",
+            ],
+            "disambiguation" => [
+                "name" => "disambiguation",
+                "infoAfter" => "If there are a multiple groups with the same name, add distinguishing platforms or countries here, otherwise leave it empty.",
+            ],
+            "csdbID" => [
+                "name" => "csdb ID",
+                "type" => "number",
+            ],
+            /*
           "zxdemoID"=>array(
             "name"=>"zxdemo ID",
           ),
 */
-          "demozooID" => array(
-            "name" => "demozoo ID",
-            "type" => "number",
-          ),
-        );
+            "demozooID" => [
+                "name" => "demozoo ID",
+                "type" => "number",
+            ],
+        ];
         foreach ($_POST as $k => $v) {
             if ($this->fields[$k]) {
                 $this->fields[$k]["value"] = $v;
@@ -124,9 +124,9 @@ class PouetBoxSubmitGroup extends PouetBox
         }
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title."</h2>\n";
+        echo "  <h2>" . $this->title . "</h2>\n";
         echo "  <div class='content'>\n";
         $this->formifier->RenderForm($this->fields);
         echo "  </div>\n";

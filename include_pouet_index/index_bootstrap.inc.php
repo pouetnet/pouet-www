@@ -1,7 +1,7 @@
 <?php
 
 // front page boxes
-$indexAvailableBoxes = array();
+$indexAvailableBoxes = [];
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-bbs-latest.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-cdc.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-watchlist.php");

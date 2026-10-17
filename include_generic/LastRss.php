@@ -20,16 +20,16 @@ class LastRss
      * cURL options
      * @var array
      */
-    private $curlOptions = array(
+    private $curlOptions = [
         CURLOPT_HEADER => false,
         CURLOPT_CONNECTTIMEOUT => 2,
         CURLOPT_TIMEOUT => 5,
-//		CURLOPT_FOLLOWLOCATION => true,
+        //		CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_MAXREDIRS => 3,
         CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_FAILONERROR => true,
         CURLOPT_ENCODING => 'gzip,deflate',
-    );
+    ];
 
     /**
      * Error strings
@@ -51,10 +51,10 @@ class LastRss
     /**
      * Array of tags where HTML is suspected
      */
-    private $htmlSuspected = array('title', 'description');
+    private $htmlSuspected = ['title', 'description'];
 
-    private $channelTags = array('title', 'link', 'description', 'lastBuildDate');
-    private $itemTags = array('title', 'link', 'description', 'pubDate', 'guid');
+    private $channelTags = ['title', 'link', 'description', 'lastBuildDate'];
+    private $itemTags = ['title', 'link', 'description', 'pubDate', 'guid'];
 
     /**
      * Maximum number of items to be returned
@@ -69,7 +69,7 @@ class LastRss
     /**
      * XML name spaces
      */
-    private static $xmlns = array(
+    private static $xmlns = [
         // @todo: asi se nikde nepouziva - smazat
         'atom' => 'http://www.w3.org/2005/Atom',
         'content' => 'http://purl.org/rss/1.0/modules/content/',
@@ -77,19 +77,19 @@ class LastRss
         'dc' => 'http://purl.org/dc/elements/1.1/',
         'sy' => 'http://purl.org/rss/1.0/modules/syndication/',
         'slash' => 'http://purl.org/rss/1.0/modules/slash/',
-    );
+    ];
 
     /**
      * XML name spaces used in used tags
      */
-    private $usedXmlns = array();
+    private $usedXmlns = [];
 
     public $lastError = null;
 
     /**
      * Constructor to initialize all options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         foreach ($options as $name => $value) {
             $this->$name = $value;
@@ -198,13 +198,13 @@ class LastRss
         if (!$xmlData) {
             return false;
         }
-        $result = array();
+        $result = [];
         $doc = new DomDocument();
         // Try to load XML or return parse error
         if (false == @$doc->loadXml($xmlData)) {
             // Try to fix XML by Tidy and try to load one more time
             if (function_exists("tidy_repair_string")) {
-                $xmlData = tidy_repair_string($xmlData, array('output-xml' => true, 'input-xml' => true), 'utf8');
+                $xmlData = tidy_repair_string($xmlData, ['output-xml' => true, 'input-xml' => true], 'utf8');
             }
             if (false == @$doc->loadXml($xmlData)) {
                 $this->lastError = self::$parseError;
@@ -231,7 +231,7 @@ class LastRss
         $items = $xpath->evaluate('/rss/channel/item');
 
         foreach ($items as $item) {
-            $tmpItem = array();
+            $tmpItem = [];
 
             // Parse item tags
             foreach ($this->itemTags as &$tag) {
@@ -242,7 +242,7 @@ class LastRss
                         break;
                     case 'category':
                         // Category is multivalue tag
-                        $tmpItem[$tag] = array();
+                        $tmpItem[$tag] = [];
                         foreach ($xpath->query('category', $item) as $node) {
                             $tmpItem[$tag][] = trim($node->nodeValue);
                         }
@@ -319,7 +319,7 @@ class LastRss
             }
         }
         if (@!$result['itemsCount']) {
-            $result = @unserialize(file_get_contents($cache_file)) ?: array();
+            $result = @unserialize(file_get_contents($cache_file)) ?: [];
             $result["cached"] = true;
         }
 

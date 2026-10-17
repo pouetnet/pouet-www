@@ -14,26 +14,26 @@ class PouetBoxModificationRequest extends PouetBox
         $this->uniqueID = "pouetbox_modificationrequest";
         $this->title = "submit a change request";
         $this->formifier = new Formifier();
-        $this->fields = array();
+        $this->fields = [];
     }
 
     public function Validate($data)
     {
         global $currentUser;
 
-        $errormessage = array();
+        $errormessage = [];
 
         if (!$currentUser) {
             $errormessage[] = "you need to be logged in first.";
             return $errormessage;
         }
 
-        return array();
+        return [];
     }
 
     public function Commit($data)
     {
-        $post = array();
+        $post = [];
 
         global $REQUESTTYPES;
         if ($REQUESTTYPES[ $_REQUEST["requestType"] ]) {
@@ -42,15 +42,15 @@ class PouetBoxModificationRequest extends PouetBox
                 return $error;
             }
         } else {
-            return array("no such request type!");
+            return ["no such request type!"];
         }
-        $a = array();
+        $a = [];
         $a["requestType"] = $data["requestType"];
         if (@$_REQUEST["prod"]) {
-            $a["itemID"] = (int)$_REQUEST["prod"];
+            $a["itemID"] = (int) $_REQUEST["prod"];
             $a["itemType"] = "prod";
         } elseif (@$_REQUEST["group"]) {
-            $a["itemID"] = (int)$_REQUEST["group"];
+            $a["itemID"] = (int) $_REQUEST["group"];
             $a["itemType"] = "group";
         }
         $a["requestDate"] = date("Y-m-d H:i:s");
@@ -61,17 +61,17 @@ class PouetBoxModificationRequest extends PouetBox
         global $reqID;
         $reqID = SQLLib::InsertRow("modification_requests", $a);
 
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
-        $this->fields = array(
-          "requestType" => array(
-            "type" => "select",
-            "name" => "whatchu want",
-            "assoc" => true,
-          ),
-        );
+        $this->fields = [
+            "requestType" => [
+                "type" => "select",
+                "name" => "whatchu want",
+                "assoc" => true,
+            ],
+        ];
 
         global $REQUESTTYPES;
 
@@ -97,9 +97,9 @@ class PouetBoxModificationRequest extends PouetBox
         $js = "";
 
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
 
-        echo "  <h2>".$this->title.": ";
+        echo "  <h2>" . $this->title . ": ";
         if (@$_REQUEST["prod"]) {
             $prod = PouetProd::Spawn($_REQUEST["prod"]);
             if (!$prod) {
@@ -141,7 +141,7 @@ class PouetBoxModificationRequest extends PouetBox
             echo "  </div>\n";
             echo "  <h2>more data</h2>\n";
             echo "  <div class='content'>\n";
-            $fields = array();
+            $fields = [];
 
             global $REQUESTTYPES;
             if ($REQUESTTYPES[ $_REQUEST["requestType"] ]) {
@@ -184,9 +184,9 @@ $TITLE = "submit a modification request";
 
 if (@$_REQUEST["requestType"] == "other") {
     if (@$_REQUEST["prod"]) {
-        redirect("topic.php?which=".(int)FIXMETHREAD_ID."&fromProd=".(int)$_REQUEST["prod"]."#pouetbox_bbspost");
+        redirect("topic.php?which=" . (int) FIXMETHREAD_ID . "&fromProd=" . (int) $_REQUEST["prod"] . "#pouetbox_bbspost");
     } elseif (@$_REQUEST["group"]) {
-        redirect("topic.php?which=".(int)FIXMETHREAD_ID."&fromGroup=".(int)$_REQUEST["group"]."#pouetbox_bbspost");
+        redirect("topic.php?which=" . (int) FIXMETHREAD_ID . "&fromGroup=" . (int) $_REQUEST["group"] . "#pouetbox_bbspost");
     }
     exit();
 }
@@ -198,21 +198,21 @@ echo "<div id='content'>\n";
 
 $form = new PouetFormProcessor();
 
-$form->successMessage =
-  "your request was recorded and will be processed by a glöperator eventually !</a> <br>". // l33t h4x
-  "you can keep track of the status of your requests <a href='account.php#pouetbox_accountreq'>on your accounts page !";
+$form->successMessage
+  = "your request was recorded and will be processed by a glöperator eventually !</a> <br>" // l33t h4x
+  . "you can keep track of the status of your requests <a href='account.php#pouetbox_accountreq'>on your accounts page !";
 
 if (@$_REQUEST["prod"]) {
-    $form->SetSuccessURL("prod.php?which=".(int)$_REQUEST["prod"], false);
+    $form->SetSuccessURL("prod.php?which=" . (int) $_REQUEST["prod"], false);
 } elseif (@$_REQUEST["group"]) {
-    $form->SetSuccessURL("groups.php?which=".(int)$_REQUEST["group"], false);
+    $form->SetSuccessURL("groups.php?which=" . (int) $_REQUEST["group"], false);
 } else {
     $form->SetSuccessURL("", false);
 }
 
 $form->Add("logo", new PouetBoxModificationRequest());
 
-if ($currentUser && $currentUser->CanSubmitItems() && (int)@$_POST["finalStep"] == 1) {
+if ($currentUser && $currentUser->CanSubmitItems() && (int) @$_POST["finalStep"] == 1) {
     $form->Process();
 } else {
     unset($_POST[ PouetFormProcessor::fieldName ]);

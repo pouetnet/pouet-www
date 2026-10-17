@@ -37,7 +37,7 @@ if (!$currentUser) {
                     $box = new PouetBoxBBSPost($_POST["which"]);
                     $thing = "BBS post";
                     $data = $_POST["message"];
-                    $message->returnPage = "topic.php?which=".(int)$_POST["which"];
+                    $message->returnPage = "topic.php?which=" . (int) $_POST["which"];
                 } break;
             case "bbs":
                 {
@@ -61,7 +61,7 @@ if ($box) {
     } else {
         $errormessage = $box->ParsePostMessage($_POST);
         if (!$errormessage) {
-            $message->title = "You've successfully added the following ".$thing.":";
+            $message->title = "You've successfully added the following " . $thing . ":";
             $message->message = $data;
             if ($box instanceof PouetBoxCachable) {
                 $box->ForceCacheUpdate();

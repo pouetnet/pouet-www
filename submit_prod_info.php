@@ -4,7 +4,7 @@ require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-prod-submit.php");
 
 if ($currentUser && !$currentUser->CanSubmitItems()) {
-    redirect("prod.php?which=".(int)$_GET["which"]);
+    redirect("prod.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -18,15 +18,15 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
 
 
         $this->prod = PouetProd::Spawn($id);
-        $a = array(&$this->prod);
+        $a = [&$this->prod];
         PouetCollectPlatforms($a);
 
-        $this->title = "submit things for this prod: "._html($this->prod->name);
+        $this->title = "submit things for this prod: " . _html($this->prod->name);
     }
     public function Validate($data)
     {
         global $currentUser;
-        $errormessage = array();
+        $errormessage = [];
 
         if (!$currentUser) {
             $errormessage[] = "you need to be logged in first.";
@@ -82,12 +82,12 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
     {
         $this->LoadFromDB();
 
-        $prodID = (int)$this->prod->id;
+        $prodID = (int) $this->prod->id;
 
-        $sql = array();
+        $sql = [];
 
         if ($this->fields["releaseDate"]) {
-            if ($data["releaseDate_month"] && $data["releaseDate_year"] && checkdate((int)$data["releaseDate_month"], 15, (int)$data["releaseDate_year"])) {
+            if ($data["releaseDate_month"] && $data["releaseDate_year"] && checkdate((int) $data["releaseDate_month"], 15, (int) $data["releaseDate_year"])) {
                 $sql["releaseDate"] = sprintf("%04d-%02d-15", $data["releaseDate_year"], $data["releaseDate_month"]);
             } elseif ($data["releaseDate_year"]) {
                 $sql["releaseDate"] = sprintf("%04d-00-15", $data["releaseDate_year"]);
@@ -100,16 +100,16 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
             $sql["party_compo"] = nullify($data["partyCompo"]);
         }
         if ($this->fields["partyRank"]) {
-            $sql["party_place"] = (int)$data["partyRank"];
+            $sql["party_place"] = (int) $data["partyRank"];
         }
 
         if ($sql) {
-            SQLLib::UpdateRow("prods", $sql, "id=".$prodID);
+            SQLLib::UpdateRow("prods", $sql, "id=" . $prodID);
         }
 
         if ($this->fields["screenshot"]) {
             if (is_uploaded_file($_FILES["screenshot"]["tmp_name"])) {
-                foreach (array( "jpg","gif","png" ) as $v) {
+                foreach ([ "jpg","gif","png" ] as $v) {
                     @unlink(get_local_screenshot_path($prodID, $v));
                 }
 
@@ -125,7 +125,7 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
                 }
                 move_uploaded_file_fake($_FILES["screenshot"]["tmp_name"], get_local_screenshot_path($prodID, $extension));
 
-                $a = array();
+                $a = [];
                 $a["prod"] = $prodID;
                 $a["user"] = get_login_id();
                 $a["added"] = date("Y-m-d H:i:s");
@@ -136,14 +136,14 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
             if (is_uploaded_file($_FILES["nfofile"]["tmp_name"])) {
                 move_uploaded_file_fake($_FILES["nfofile"]["tmp_name"], get_local_nfo_path($prodID));
 
-                $a = array();
+                $a = [];
                 $a["prod"] = $prodID;
                 $a["user"] = get_login_id();
                 $a["added"] = date("Y-m-d H:i:s");
                 SQLLib::InsertRow("nfos", $a);
             }
         }
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -151,7 +151,7 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
 
         $prod = $this->prod;
 
-        $a = array();
+        $a = [];
         unset($this->fields["name"]);
         unset($this->fields["download"]);
 
@@ -193,7 +193,7 @@ class PouetBoxSubmitProdInfo extends PouetBoxSubmitProd
 
 $box = new PouetBoxSubmitProdInfo($_GET["which"]);
 
-$TITLE = "submit things for a prod: ".$box->prod->name;
+$TITLE = "submit things for a prod: " . $box->prod->name;
 
 if (!$box->prod) {
     redirect("prodlist.php");
@@ -201,7 +201,7 @@ if (!$box->prod) {
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("prod.php?which=".(int)$_GET["which"], true);
+$form->SetSuccessURL("prod.php?which=" . (int) $_GET["which"], true);
 
 $form->Add("prodInfo", $box);
 

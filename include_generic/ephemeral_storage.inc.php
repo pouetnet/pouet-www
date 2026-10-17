@@ -25,15 +25,15 @@ class SessionStorage implements IEphemeralStorage
     }
     public function get($key)
     {
-        return $_SESSION[EPHEMERALSTORAGE_PREFIX.$key];
+        return $_SESSION[EPHEMERALSTORAGE_PREFIX . $key];
     }
     public function set($key, $value, $ttl = 0)
     {
-        $_SESSION[EPHEMERALSTORAGE_PREFIX.$key] = $value;
+        $_SESSION[EPHEMERALSTORAGE_PREFIX . $key] = $value;
     }
     public function has($key)
     {
-        return isset($_SESSION[EPHEMERALSTORAGE_PREFIX.$key]);
+        return isset($_SESSION[EPHEMERALSTORAGE_PREFIX . $key]);
     }
 }
 
@@ -83,30 +83,30 @@ class RedisStorage implements IEphemeralStorage
     }
     public function get($key)
     {
-        return unserialize($this->redis->get(EPHEMERALSTORAGE_PREFIX.$key));
+        return unserialize($this->redis->get(EPHEMERALSTORAGE_PREFIX . $key));
     }
     public function set($key, $value, $ttl = 0)
     {
         if ($ttl > 0) {
-            $this->redis->setex(EPHEMERALSTORAGE_PREFIX.$key, $ttl, serialize($value));
+            $this->redis->setex(EPHEMERALSTORAGE_PREFIX . $key, $ttl, serialize($value));
         } else {
-            $this->redis->set(EPHEMERALSTORAGE_PREFIX.$key, serialize($value));
+            $this->redis->set(EPHEMERALSTORAGE_PREFIX . $key, serialize($value));
         }
     }
     public function has($key)
     {
-        return $this->redis->exists(EPHEMERALSTORAGE_PREFIX.$key);
+        return $this->redis->exists(EPHEMERALSTORAGE_PREFIX . $key);
     }
 }
 
 // add memcached on demand
 
 $ephemeralStorage = null;
-foreach (array(
-  "RedisStorage",
-  "FileStorage",
-  "SessionStorage",
-  ) as $cls) {
+foreach ([
+    "RedisStorage",
+    "FileStorage",
+    "SessionStorage",
+] as $cls) {
     if ($cls::available()) {
         $ephemeralStorage = new $cls();
         break;

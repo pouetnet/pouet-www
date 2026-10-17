@@ -11,7 +11,7 @@ $sql->AddField("groups.name as groupName");
 $sql->AddJoin("left", "groups", "groups.id = prods.group1");
 $sql->AddTable("prods");
 
-$r = array();
+$r = [];
 if (@$_POST["id"] || preg_match("/id=(\d+)/", @$_POST["search"], $m)) {
     $sql->AddWhere(sprintf_esc("prods.id = %d", $_POST["id"] ?: $m[1]));
     $sql->SetLimit(1);

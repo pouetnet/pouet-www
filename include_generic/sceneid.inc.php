@@ -10,9 +10,7 @@
  *  $data = SceneId::Factory('test', 'test')->getUserInfoByUserLogin('dfox')->asSimpleXML();
  */
 
-class SceneIdException extends Exception
-{
-}
+class SceneIdException extends Exception {}
 
 class SceneId
 {
@@ -23,7 +21,7 @@ class SceneId
     private $method = 'POST';
     private $format = 'xml';
     private $command;
-    private $commandParams = array();
+    private $commandParams = [];
 
     /**
      * Factory
@@ -83,26 +81,26 @@ class SceneId
      */
     private function getData()
     {
-        $params = array(
+        $params = [
             'portalLogin' => $this->login,
             'portalPassword' => $this->password,
-            'command' => $this->command
-        );
+            'command' => $this->command,
+        ];
 
         // GET is deprecated and will be removed in the future
         switch ($this->method) {
             case 'GET':
-                $url = $this->url.'?'.http_build_query(array_merge(array('encoding' => $this->encoding, 'format' => $this->format), $params, $this->commandParams));
+                $url = $this->url . '?' . http_build_query(array_merge(['encoding' => $this->encoding, 'format' => $this->format], $params, $this->commandParams));
                 $content = null;
                 break;
             case 'POST':
-                $url = $this->url.'?'.http_build_query(array('encoding' => $this->encoding, 'format' => $this->format));
+                $url = $this->url . '?' . http_build_query(['encoding' => $this->encoding, 'format' => $this->format]);
                 $content = http_build_query(array_merge($params, $this->commandParams));
                 break;
         }
 
         // Create stream context
-        $options = array('http' => array('method' => $this->method, 'content' => $content, 'header' => 'Content-Type: application/x-www-form-urlencoded'), 'ssl' => array('verify_peer' => false));
+        $options = ['http' => ['method' => $this->method, 'content' => $content, 'header' => 'Content-Type: application/x-www-form-urlencoded'], 'ssl' => ['verify_peer' => false]];
         $context = stream_context_create($options);
 
         // Open the connection with the given stream context
@@ -154,7 +152,7 @@ class SceneId
             if ($out) {
                 return $out;
             } else {
-                throw new SceneIdException('Error in XML: '.$this->getData());
+                throw new SceneIdException('Error in XML: ' . $this->getData());
             }
         }
     }
@@ -163,7 +161,7 @@ class SceneId
     {
         foreach ($xml->children() as $key => $value) {
             if (count($value->children()) == 0 || (count($value->children()) == 1 && count($value->attributes()) > 0)) {
-                $out[$key] = (string)$value;
+                $out[$key] = (string) $value;
             } else {
                 $out[$key] = $this->XML2Array($value);
             }
@@ -191,7 +189,7 @@ class SceneId
     public function getUserInfoById($userID)
     {
         $this->command = 'getUserInfo';
-        $this->commandParams = array('userID' => $userID);
+        $this->commandParams = ['userID' => $userID];
         return $this;
     }
 
@@ -203,7 +201,7 @@ class SceneId
     public function getUserInfoByLogin($login)
     {
         $this->command = 'getUserInfo';
-        $this->commandParams = array('login' => $login);
+        $this->commandParams = ['login' => $login];
         return $this;
     }
 
@@ -215,7 +213,7 @@ class SceneId
     public function getUserInfoByCookie($cookie)
     {
         $this->command = 'getUserInfo';
-        $this->commandParams = array('cookie' => $cookie);
+        $this->commandParams = ['cookie' => $cookie];
         return $this;
     }
 
@@ -226,7 +224,7 @@ class SceneId
     public function getPortalList()
     {
         $this->command = 'getPortalList';
-        $this->commandParams = array();
+        $this->commandParams = [];
         return $this;
     }
 
@@ -240,7 +238,7 @@ class SceneId
      */
     public function login($login, $password, $externalid = null, $permanent = null)
     {
-        $params = array('login' => $login, 'password' => md5($password), 'externalid' => $externalid, 'permanent' => $permanent, 'ip' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1'));
+        $params = ['login' => $login, 'password' => md5($password), 'externalid' => $externalid, 'permanent' => $permanent, 'ip' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1')];
 
         $this->command = 'loginUserMD5';
         $this->commandParams = $params;
@@ -256,7 +254,7 @@ class SceneId
     public function logoutById($userID)
     {
         $this->command = 'logoutUser';
-        $this->commandParams = array('userID' => $userID);
+        $this->commandParams = ['userID' => $userID];
         return $this;
     }
 
@@ -268,7 +266,7 @@ class SceneId
     public function logoutByLogin($login)
     {
         $this->command = 'logoutUser';
-        $this->commandParams = array('login' => $login);
+        $this->commandParams = ['login' => $login];
         return $this;
     }
 
@@ -280,7 +278,7 @@ class SceneId
     public function logoutByCookie($cookie)
     {
         $this->command = 'logoutUser';
-        $this->commandParams = array('cookie' => $cookie);
+        $this->commandParams = ['cookie' => $cookie];
         return $this;
     }
 
@@ -292,7 +290,7 @@ class SceneId
     public function requestPasswordById($userID)
     {
         $this->command = 'requestNewUserPassword';
-        $this->commandParams = array('userID' => $userID);
+        $this->commandParams = ['userID' => $userID];
         return $this;
     }
 
@@ -304,7 +302,7 @@ class SceneId
     public function requestPasswordByLogin($login)
     {
         $this->command = 'requestNewUserPassword';
-        $this->commandParams = array('login' => $login);
+        $this->commandParams = ['login' => $login];
         return $this;
     }
 
@@ -316,7 +314,7 @@ class SceneId
     public function getFileInfo($fileID)
     {
         $this->command = 'getFileInfo';
-        $this->commandParams = array('fileID' => $fileID);
+        $this->commandParams = ['fileID' => $fileID];
         return $this;
     }
 
@@ -329,7 +327,7 @@ class SceneId
     public function setUserInfo($userID, $params)
     {
         // Filter illegal parameters
-        $allowed = array('userID', 'nickname', 'firstname', 'lastname', 'email', 'url', 'password', 'password2', 'showinfo', 'birthdate', 'country');
+        $allowed = ['userID', 'nickname', 'firstname', 'lastname', 'email', 'url', 'password', 'password2', 'showinfo', 'birthdate', 'country'];
         foreach ($params as $param => $value) {
             if (!in_array($param, $allowed)) {
                 unset($params[$param]);
@@ -357,7 +355,7 @@ class SceneId
         }
 
         // Add userid
-        $params = array_merge(array('userID' => $userID), $params);
+        $params = array_merge(['userID' => $userID], $params);
 
         $this->command = 'setUserInfoMD5';
         $this->commandParams = $params;
@@ -372,7 +370,7 @@ class SceneId
     public function registerUser($params)
     {
         // Filter illegal parameters
-        $allowed = array('login', 'nickname', 'firstname', 'lastname', 'email', 'url', 'password', 'password2', 'showinfo', 'birthdate', 'country');
+        $allowed = ['login', 'nickname', 'firstname', 'lastname', 'email', 'url', 'password', 'password2', 'showinfo', 'birthdate', 'country'];
         foreach ($params as $param => $value) {
             if (!in_array($param, $allowed)) {
                 unset($params[$param]);

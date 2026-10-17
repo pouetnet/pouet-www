@@ -16,7 +16,7 @@ class PouetBoxBoardMain extends PouetBox
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_boardmain";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
     }
 
@@ -28,7 +28,7 @@ class PouetBoxBoardMain extends PouetBox
         }
 
         $a = SQLLib::SelectRows(sprintf_esc("select * from boards_platforms where board = %d", $this->id));
-        $this->platforms = array();
+        $this->platforms = [];
         foreach ($a as $v) {
             $this->platforms[] = $v->platform;
         }
@@ -38,7 +38,7 @@ class PouetBoxBoardMain extends PouetBox
         $s = new BM_Query();
         $s->AddTable("affiliatedboards");
         $s->AddField("affiliatedboards.type");
-        $s->Attach(array("affiliatedboards" => "group"), array("groups as group" => "id"));
+        $s->Attach(["affiliatedboards" => "group"], ["groups as group" => "id"]);
         $s->AddWhere(sprintf_esc("affiliatedboards.board = %d", $this->id));
         $this->groups = $s->perform();
 
@@ -53,7 +53,7 @@ class PouetBoxBoardMain extends PouetBox
             return;
         }
         global $currentUser,$PLATFORMS;
-        echo "<div id='".$this->uniqueID."' class='pouettbl'>\n";
+        echo "<div id='" . $this->uniqueID . "' class='pouettbl'>\n";
         echo "<div id='boardname'>\n";
         echo $this->board->RenderLink();
 
@@ -68,11 +68,11 @@ class PouetBoxBoardMain extends PouetBox
         echo "    <table>\n";
         echo "      <tr>\n";
         echo "        <td>sysop :</td>\n";
-        echo "        <td>"._html($this->board->sysop)."</td>\n";
+        echo "        <td>" . _html($this->board->sysop) . "</td>\n";
         echo "      </tr>\n";
         echo "      <tr>\n";
         echo "        <td>number :</td>\n";
-        echo "        <td>"._html($this->board->phonenumber)."</td>\n";
+        echo "        <td>" . _html($this->board->phonenumber) . "</td>\n";
         echo "      </tr>\n";
         if ($this->board->telnetip) {
             echo "      <tr>\n";
@@ -81,19 +81,19 @@ class PouetBoxBoardMain extends PouetBox
             if (strstr($url, "://") === false) {
                 $url = "telnet://" . $url;
             }
-            echo "        <td><a href='"._html($url)."'>"._html($this->board->telnetip)."</a></td>\n";
+            echo "        <td><a href='" . _html($url) . "'>" . _html($this->board->telnetip) . "</a></td>\n";
             echo "      </tr>\n";
         }
         if ($date = renderHalfDate($this->board->started)) {
             echo "      <tr>\n";
             echo "        <td>started :</td>\n";
-            echo "        <td>".$date."</td>\n";
+            echo "        <td>" . $date . "</td>\n";
             echo "      </tr>\n";
         }
         if ($date = renderHalfDate($this->board->closed)) {
             echo "      <tr>\n";
             echo "        <td>closed :</td>\n";
-            echo "        <td>".$date."</td>\n";
+            echo "        <td>" . $date . "</td>\n";
             echo "      </tr>\n";
         }
         if ($this->platforms) {
@@ -103,7 +103,7 @@ class PouetBoxBoardMain extends PouetBox
 
             echo "<ul>";
             foreach ($this->platforms as $t) {
-                echo "<li><a href='prodlist.php?platform[]=".rawurlencode($PLATFORMS[$t]["name"])."'><span class='platform os_".$PLATFORMS[$t]["slug"]."'>".$PLATFORMS[$t]["name"]."</span> ".$PLATFORMS[$t]["name"]."</a></li>\n";
+                echo "<li><a href='prodlist.php?platform[]=" . rawurlencode($PLATFORMS[$t]["name"]) . "'><span class='platform os_" . $PLATFORMS[$t]["slug"] . "'>" . $PLATFORMS[$t]["name"] . "</span> " . $PLATFORMS[$t]["name"] . "</a></li>\n";
             }
             echo "</ul>";
 
@@ -116,7 +116,7 @@ class PouetBoxBoardMain extends PouetBox
             echo "        <td>nfos :</td>\n";
             echo "        <td>";
 
-            $a = array();
+            $a = [];
             $i = 1;
             foreach ($this->nfos as $t) {
                 $a[] = sprintf("<a href='board_nfo.php?which=%d'>%d</a>", $t->id, $i++);
@@ -138,7 +138,7 @@ class PouetBoxBoardMain extends PouetBox
 
             echo "<ul>";
             foreach ($this->bbstros as $p) {
-                echo "<li>".$p->RenderSingleRowShort()."</li>\n";
+                echo "<li>" . $p->RenderSingleRowShort() . "</li>\n";
             }
             echo "</ul>";
 
@@ -152,7 +152,7 @@ class PouetBoxBoardMain extends PouetBox
 
             echo "<ul>";
             foreach ($this->groups as $g) {
-                echo "<li>".$g->group->RenderLong()." ".$g->type."</li>\n";
+                echo "<li>" . $g->group->RenderLong() . " " . $g->type . "</li>\n";
             }
             echo "</ul>";
 
@@ -163,9 +163,9 @@ class PouetBoxBoardMain extends PouetBox
         echo "  </div>\n";
         echo "</div>\n";
 
-        echo " <div class='foot'>added on the ".$this->board->addedDate;
+        echo " <div class='foot'>added on the " . $this->board->addedDate;
         if ($this->board->addedUser) {
-            echo " by ".$this->board->addedUser->PrintLinkedName()." ".$this->board->addedUser->PrintLinkedAvatar();
+            echo " by " . $this->board->addedUser->PrintLinkedName() . " " . $this->board->addedUser->PrintLinkedAvatar();
         }
         echo "</div>\n";
 
@@ -191,25 +191,25 @@ class PouetBoxBoardList extends PouetBox
             $this->letter = "#";
         }
 
-        $a = array();
+        $a = [];
         $a[] = "<a href='boards.php?pattern=%23'>#</a>";
         for ($x = ord("a");$x <= ord("z");$x++) {
             $a[] = sprintf("<a href='boards.php?pattern=%s'>%s</a>", chr($x), chr($x));
         }
 
-        $this->letterselect = "[ ".implode(" |\n", $a)." ]";
+        $this->letterselect = "[ " . implode(" |\n", $a) . " ]";
     }
 
     public function RenderHeader()
     {
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
     }
 
     public function RenderFooter()
     {
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
         echo "</div>\n";
     }
 
@@ -257,9 +257,9 @@ class PouetBoxBoardList extends PouetBox
         echo "</tr>\n";
         foreach ($this->boards as $b) {
             echo "<tr>\n";
-            echo "  <td class='boardname'><a href='boards.php?which=".(int)$b->id."'>"._html($b->name)."</a></td>\n";
-            echo "  <td>"._html($b->sysop)."</td>\n";
-            echo "  <td>"._html($b->phonenumber)."</td>\n";
+            echo "  <td class='boardname'><a href='boards.php?which=" . (int) $b->id . "'>" . _html($b->name) . "</a></td>\n";
+            echo "  <td>" . _html($b->sysop) . "</td>\n";
+            echo "  <td>" . _html($b->phonenumber) . "</td>\n";
             echo "</tr>\n";
         }
         echo "</table>\n";
@@ -267,14 +267,14 @@ class PouetBoxBoardList extends PouetBox
 };
 ///////////////////////////////////////////////////////////////////////////////
 
-$boardID = (int)@$_GET["which"];
+$boardID = (int) @$_GET["which"];
 
 $p = null;
 if (!$boardID) {
     $pattern = @$_GET["pattern"] ? @$_GET["pattern"] : chr(rand(ord("a"), ord("z")));
     $p = new PouetBoxBoardList($pattern);
     $p->Load();
-    $TITLE = "boards: ".$p->letter;
+    $TITLE = "boards: " . $p->letter;
 } else {
     $p = new PouetBoxBoardMain($boardID);
     $p->Load();

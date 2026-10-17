@@ -18,25 +18,25 @@ class PouetBoxListsList extends PouetBox /* pf lol */
             $this->letter = "#";
         }
 
-        $a = array();
+        $a = [];
         $a[] = "<a href='lists.php?pattern=%23'>#</a>";
         for ($x = ord("a");$x <= ord("z");$x++) {
             $a[] = sprintf("<a href='lists.php?pattern=%s'>%s</a>", chr($x), chr($x));
         }
 
-        $this->letterselect = "[ ".implode(" |\n", $a)." ]";
+        $this->letterselect = "[ " . implode(" |\n", $a) . " ]";
     }
 
     public function RenderHeader()
     {
         echo "\n\n";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
     }
 
     public function RenderFooter()
     {
-        echo " <div class='letterselect'>".$this->letterselect."</div>\n";
+        echo " <div class='letterselect'>" . $this->letterselect . "</div>\n";
         echo "</div>\n";
     }
 
@@ -47,7 +47,7 @@ class PouetBoxListsList extends PouetBox /* pf lol */
         $s->AddField("lists.id");
         $s->AddField("lists.name");
         $s->AddField("lists.desc");
-        $s->Attach(array("lists" => "owner"), array("users as owner" => "id"));
+        $s->Attach(["lists" => "owner"], ["users as owner" => "id"]);
         if ($this->letter == "#") {
             $s->AddWhere(sprintf("name regexp '^[^a-z]'"));
         } else {
@@ -68,9 +68,9 @@ class PouetBoxListsList extends PouetBox /* pf lol */
         echo "</tr>\n";
         foreach ($this->lists as $l) {
             echo "<tr>\n";
-            echo "  <td class='listname'><a href='lists.php?which=".(int)$l->id."'>"._html($l->name)."</a></td>\n";
-            echo "  <td>"._html(shortify($l->desc))."</td>\n";
-            echo "  <td>".$l->owner->PrintLinkedAvatar()." ".$l->owner->PrintLinkedName()."</td>\n";
+            echo "  <td class='listname'><a href='lists.php?which=" . (int) $l->id . "'>" . _html($l->name) . "</a></td>\n";
+            echo "  <td>" . _html(shortify($l->desc)) . "</td>\n";
+            echo "  <td>" . $l->owner->PrintLinkedAvatar() . " " . $l->owner->PrintLinkedName() . "</td>\n";
             echo "</tr>\n";
         }
         echo "</table>\n";
@@ -95,7 +95,7 @@ class PouetBoxListsMain extends PouetBox
     {
         parent::__construct();
         $this->uniqueID = "pouetbox_listsmain";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->canEdit = false;
         $this->canDelete = false;
@@ -109,8 +109,8 @@ class PouetBoxListsMain extends PouetBox
         $s->AddField("lists.name");
         $s->AddField("lists.desc");
         $s->AddField("lists.addedDate");
-        $s->Attach(array("lists" => "addedUser"), array("users as addedUser" => "id"));
-        $s->Attach(array("lists" => "owner"), array("users as owner" => "id"));
+        $s->Attach(["lists" => "addedUser"], ["users as addedUser" => "id"]);
+        $s->Attach(["lists" => "owner"], ["users as owner" => "id"]);
         $s->AddWhere(sprintf_esc("lists.id=%d", $this->id));
         list($this->list) = $s->perform();
 
@@ -120,23 +120,28 @@ class PouetBoxListsMain extends PouetBox
 
         $s = new BM_query();
         $s->AddTable("list_items");
-        $s->Attach(array("list_items" => "itemid"), array("prods as prod" => "id"));
+        $s->Attach(["list_items" => "itemid"], ["prods as prod" => "id"]);
         $s->AddWhere(sprintf_esc("list_items.list=%d", $this->id));
         $s->AddWhere("list_items.type='prod'");
 
         $dir = "ASC";
-        if (@$_GET["reverse"]) $dir = "DESC";
-        switch(@$_GET["order"])
-        {
-            case "type": $s->AddOrder("list_items_prod.type ".$dir); break;
-            case "name": $s->AddOrder("list_items_prod.name ".$dir); break;
-            case "party": $s->AddOrder("list_items_prod_party.name ".$dir); break;
-            case "release date": $s->AddOrder("list_items_prod.releaseDate ".$dir); break;
+        if (@$_GET["reverse"]) {
+            $dir = "DESC";
+        }
+        switch (@$_GET["order"]) {
+            case "type": $s->AddOrder("list_items_prod.type " . $dir);
+                break;
+            case "name": $s->AddOrder("list_items_prod.name " . $dir);
+                break;
+            case "party": $s->AddOrder("list_items_prod_party.name " . $dir);
+                break;
+            case "release date": $s->AddOrder("list_items_prod.releaseDate " . $dir);
+                break;
         }
 
         $this->prods = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->prods as $p) {
             $a[] = &$p->prod;
         }
@@ -144,28 +149,28 @@ class PouetBoxListsMain extends PouetBox
 
         $s = new BM_query();
         $s->AddTable("list_items");
-        $s->Attach(array("list_items" => "itemid"), array("groups as group" => "id"));
+        $s->Attach(["list_items" => "itemid"], ["groups as group" => "id"]);
         $s->AddWhere(sprintf_esc("list_items.list=%d", $this->id));
         $s->AddWhere("list_items.type='group'");
         $this->groups = $s->perform();
 
         $s = new BM_query();
         $s->AddTable("list_items");
-        $s->Attach(array("list_items" => "itemid"), array("parties as party" => "id"));
+        $s->Attach(["list_items" => "itemid"], ["parties as party" => "id"]);
         $s->AddWhere(sprintf_esc("list_items.list=%d", $this->id));
         $s->AddWhere("list_items.type='party'");
         $this->parties = $s->perform();
 
         $s = new BM_query();
         $s->AddTable("list_items");
-        $s->Attach(array("list_items" => "itemid"), array("users as user" => "id"));
+        $s->Attach(["list_items" => "itemid"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("list_items.list=%d", $this->id));
         $s->AddWhere("list_items.type='user'");
         $this->users = $s->perform();
 
         $s = new BM_query();
         $s->AddTable("list_maintainers");
-        $s->Attach(array("list_maintainers" => "userID"), array("users as user" => "id"));
+        $s->Attach(["list_maintainers" => "userID"], ["users as user" => "id"]);
         $s->AddWhere(sprintf_esc("list_maintainers.listID = %d", $this->id));
         $this->maintainers = $s->perform();
 
@@ -188,18 +193,18 @@ class PouetBoxListsMain extends PouetBox
     public function Render()
     {
         global $currentUser;
-        echo "<div id='".$this->uniqueID."' class='pouettbl'>\n";
+        echo "<div id='" . $this->uniqueID . "' class='pouettbl'>\n";
         echo "<div id='listsname'>\n";
         echo $this->list->name;
         echo "</div>\n";
 
-        echo " <div class='content' id='description'>".nl2br(_html($this->list->desc), false)."</div>\n";
+        echo " <div class='content' id='description'>" . nl2br(_html($this->list->desc), false) . "</div>\n";
 
         echo "<h2>maintainers</h2>";
         echo "<ul class='boxlist'>\n";
-        echo " <li>".$this->list->owner->PrintLinkedAvatar()." ".$this->list->owner->PrintLinkedName()." <b>(owner)</b></li>\n";
+        echo " <li>" . $this->list->owner->PrintLinkedAvatar() . " " . $this->list->owner->PrintLinkedName() . " <b>(owner)</b></li>\n";
         foreach ($this->maintainers as $user) {
-            echo " <li>".$user->user->PrintLinkedAvatar()." ".$user->user->PrintLinkedName()."</li>\n";
+            echo " <li>" . $user->user->PrintLinkedAvatar() . " " . $user->user->PrintLinkedName() . "</li>\n";
         }
         echo "</ul>\n";
 
@@ -222,25 +227,29 @@ class PouetBoxListsMain extends PouetBox
         if ($this->prods) {
             echo "<h2>prods</h2>";
 
-            echo "<table id='".$this->uniqueID."' class='boxtable pagedtable'>\n";
+            echo "<table id='" . $this->uniqueID . "' class='boxtable pagedtable'>\n";
 
-            $headers = array(
-                "type"=>"type",
-                "name"=>"prodname",
-                "party"=>"release party",
-                "release date"=>"release date"
-            );
+            $headers = [
+                "type" => "type",
+                "name" => "prodname",
+                "party" => "release party",
+                "release date" => "release date",
+            ];
             echo "<tr class='sortable'>\n";
-            foreach($headers as $key=>$text)
-            {
-                $out = sprintf("<th><a href='%s' class='%s%s %s'>%s</a></th>\n",
-                adjust_query_header(array("order"=>$key)),@$_GET["order"]==$key?"selected":"",(@$_GET["order"]==$key && @$_GET["reverse"])?" reverse":"","sort_".$key,$text);
+            foreach ($headers as $key => $text) {
+                $out = sprintf(
+                    "<th><a href='%s' class='%s%s %s'>%s</a></th>\n",
+                    adjust_query_header(["order" => $key]),
+                    @$_GET["order"] == $key ? "selected" : "",
+                    (@$_GET["order"] == $key && @$_GET["reverse"]) ? " reverse" : "",
+                    "sort_" . $key,
+                    $text,
+                );
                 //if ($key == "type" || $key == "name") $out = str_replace("</th>","",$out);
                 //if ($key == "platform" || $key == "name") $out = str_replace("<th>"," ",$out);
                 echo $out;
             }
-            if ($this->CanEdit())
-            {
+            if ($this->CanEdit()) {
                 echo "<th></th>";
             }
             echo "</tr>\n";
@@ -267,7 +276,7 @@ class PouetBoxListsMain extends PouetBox
                 echo $d->prod->RenderReleaseDate();
                 echo "</td>\n";
                 if ($this->CanEdit()) {
-                    printf("  <td class='list-delete'><input type='submit' name='listDeleteProd[%d]' value='delete'></td>",$d->prod->id);
+                    printf("  <td class='list-delete'><input type='submit' name='listDeleteProd[%d]' value='delete'></td>", $d->prod->id);
                 }
                 echo "</tr>\n";
             }
@@ -296,11 +305,11 @@ class PouetBoxListsMain extends PouetBox
             foreach ($this->users as $d) {
                 echo "<li>\n";
                 echo "<span>\n";
-                echo $d->user->PrintLinkedAvatar()." ";
+                echo $d->user->PrintLinkedAvatar() . " ";
                 echo $d->user->PrintLinkedName();
                 echo "</span>\n";
                 echo "<span>\n";
-                echo $d->user->glops." glöps";
+                echo $d->user->glops . " glöps";
                 echo "</span>\n";
                 if ($this->CanEdit()) {
                     printf("  <span class='list-delete'><input type='submit' name='listDeleteUser[%d]' value='delete'></span>", $d->user->id);
@@ -309,7 +318,7 @@ class PouetBoxListsMain extends PouetBox
             }
             echo "</ul>\n";
         }
-        echo " <div class='foot'>added on the ".$this->list->addedDate." by ".$this->list->addedUser->PrintLinkedName()." ".$this->list->addedUser->PrintLinkedAvatar()."</div>\n";
+        echo " <div class='foot'>added on the " . $this->list->addedDate . " by " . $this->list->addedUser->PrintLinkedName() . " " . $this->list->addedUser->PrintLinkedAvatar() . "</div>\n";
         echo "</div>\n";
     }
     public function CanEdit()
@@ -322,27 +331,35 @@ class PouetBoxListsMain extends PouetBox
     }
     public function Validate($post)
     {
-        return $this->CanEdit() ? array() : array("lol no !");
+        return $this->CanEdit() ? [] : ["lol no !"];
     }
     public function Commit($post)
     {
         if ($post["listDeleteParty"]) {
-            $ids = array_map(function ($i) { return (int)$i; }, array_keys($post["listDeleteParty"]));
-            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='party' AND itemid IN (".implode(",", $ids).")", $this->list->id));
+            $ids = array_map(function ($i) {
+                return (int) $i;
+            }, array_keys($post["listDeleteParty"]));
+            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='party' AND itemid IN (" . implode(",", $ids) . ")", $this->list->id));
         }
         if ($post["listDeleteProd"]) {
-            $ids = array_map(function ($i) { return (int)$i; }, array_keys($post["listDeleteProd"]));
-            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='prod' AND itemid IN (".implode(",", $ids).")", $this->list->id));
+            $ids = array_map(function ($i) {
+                return (int) $i;
+            }, array_keys($post["listDeleteProd"]));
+            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='prod' AND itemid IN (" . implode(",", $ids) . ")", $this->list->id));
         }
         if ($post["listDeleteGroup"]) {
-            $ids = array_map(function ($i) { return (int)$i; }, array_keys($post["listDeleteGroup"]));
-            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='group' AND itemid IN (".implode(",", $ids).")", $this->list->id));
+            $ids = array_map(function ($i) {
+                return (int) $i;
+            }, array_keys($post["listDeleteGroup"]));
+            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='group' AND itemid IN (" . implode(",", $ids) . ")", $this->list->id));
         }
         if ($post["listDeleteUser"]) {
-            $ids = array_map(function ($i) { return (int)$i; }, array_keys($post["listDeleteUser"]));
-            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='user' AND itemid IN (".implode(",", $ids).")", $this->list->id));
+            $ids = array_map(function ($i) {
+                return (int) $i;
+            }, array_keys($post["listDeleteUser"]));
+            SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d AND type='user' AND itemid IN (" . implode(",", $ids) . ")", $this->list->id));
         }
-        return array();
+        return [];
     }
 };
 ///////////////////////////////////////////////////////////////////////////////
@@ -361,20 +378,20 @@ class PouetBoxListsAdd extends PouetBox
         $this->box = $box;
         $this->list = $box->list;
         $this->formifier = new Formifier();
-        $this->fields = array(
-          "prodID" => array(
-            "name" => "add prod",
-          ),
-          "groupID" => array(
-            "name" => "add group",
-          ),
-          "partyID" => array(
-            "name" => "add party",
-          ),
-          "userID" => array(
-            "name" => "add user",
-          ),
-        );
+        $this->fields = [
+            "prodID" => [
+                "name" => "add prod",
+            ],
+            "groupID" => [
+                "name" => "add group",
+            ],
+            "partyID" => [
+                "name" => "add party",
+            ],
+            "userID" => [
+                "name" => "add user",
+            ],
+        ];
         $this->title = "add item to list";
     }
     public function Validate($post)
@@ -382,31 +399,31 @@ class PouetBoxListsAdd extends PouetBox
         global $currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in!");
+            return ["you have to be logged in!"];
         }
 
         if (!$this->box->CanEdit()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
-        return array();
+        return [];
     }
 
     public function Commit($post)
     {
-        $items = array("prod","group","party","user");
+        $items = ["prod","group","party","user"];
         $added = false;
         foreach ($items as $v) {
-            if ($post[$v."ID"]) {
-                $a = array();
+            if ($post[$v . "ID"]) {
+                $a = [];
                 $a["list"] = $this->list->id;
                 $a["type"] = $v;
-                $a["itemid"] = $post[$v."ID"];
+                $a["itemid"] = $post[$v . "ID"];
                 try {
                     SQLLib::InsertRow("list_items", $a);
                 } catch (SQLLibException $e) {
                     if ($e->getCode() == 1062) {
-                        return array("that's already added! :o");
+                        return ["that's already added! :o"];
                     } else {
                         throw $e;
                     }
@@ -414,7 +431,7 @@ class PouetBoxListsAdd extends PouetBox
                 $added = true;
             }
         }
-        return $added ? array() : array("you didn't add anything ! :(");
+        return $added ? [] : ["you didn't add anything ! :("];
     }
 
     public function RenderContent()
@@ -469,11 +486,11 @@ class PouetBoxListsAddMaintainer extends PouetBox
         $this->box = $box;
         $this->list = $box->list;
         $this->formifier = new Formifier();
-        $this->fields = array(
-          "maintainerID" => array(
-            "name" => "add maintainer",
-          ),
-        );
+        $this->fields = [
+            "maintainerID" => [
+                "name" => "add maintainer",
+            ],
+        ];
         $this->title = "add maintainer to list";
     }
     public function Validate($post)
@@ -481,27 +498,27 @@ class PouetBoxListsAddMaintainer extends PouetBox
         global $currentUser;
 
         if (!$currentUser) {
-            return array("you have to be logged in!");
+            return ["you have to be logged in!"];
         }
 
         if (!$this->box->CanDelete()) {
-            return array("not allowed lol !");
+            return ["not allowed lol !"];
         }
 
         if (!$post["maintainerID"]) {
-            return array("something is missing ?!");
+            return ["something is missing ?!"];
         }
 
-        return array();
+        return [];
     }
 
     public function Commit($post)
     {
-        $a = array();
+        $a = [];
         $a["listID"] = $this->list->id;
-        $a["userID"] = (int)$post["maintainerID"];
+        $a["userID"] = (int) $post["maintainerID"];
         SQLLib::InsertRow("list_maintainers", $a);
-        return array();
+        return [];
     }
 
     public function RenderContent()
@@ -550,27 +567,27 @@ class PouetBoxListsDelete extends PouetBox
         global $verificationStrings;
         $this->checkString = $verificationStrings[ array_rand($verificationStrings) ];
 
-        $this->title = "delete this list: "._html($this->list->name);
+        $this->title = "delete this list: " . _html($this->list->name);
     }
     public function Validate($data)
     {
         if ($data["check"] != $data["checkOrig"]) {
-            return array("wrong verification string !");
+            return ["wrong verification string !"];
         }
-        return array();
+        return [];
     }
     public function Commit($data)
     {
         SQLLib::Query(sprintf_esc("DELETE FROM list_items WHERE list=%d", $this->list->id));
         SQLLib::Query(sprintf_esc("DELETE FROM list_maintainers WHERE listID=%d", $this->list->id));
         SQLLib::Query(sprintf_esc("DELETE FROM lists WHERE id=%d", $this->list->id));
-        return array();
+        return [];
     }
     public function RenderBody()
     {
         echo "<div class='content'>";
-        echo "  <p>To make sure you want to delete <b>this</b> list, type \"".$this->checkString."\" here:</p>";
-        echo "  <input name='checkOrig' type='hidden' value='"._html($this->checkString)."'>";
+        echo "  <p>To make sure you want to delete <b>this</b> list, type \"" . $this->checkString . "\" here:</p>";
+        echo "  <input name='checkOrig' type='hidden' value='" . _html($this->checkString) . "'>";
         echo "  <input id='check' name='check' autocomplete='no'>";
         echo "</div>";
         echo "<div class='foot'>";
@@ -595,7 +612,7 @@ document.observe("dom:loaded",function(){
     }
 }
 
-$listID = (int)@$_GET["which"];
+$listID = (int) @$_GET["which"];
 
 $form = null;
 $p = null;
@@ -603,7 +620,7 @@ if (!$listID) {
     $pattern = @$_GET["pattern"] ? @$_GET["pattern"] : chr(rand(ord("a"), ord("z")));
     $p = new PouetBoxListsList($pattern);
     $p->Load();
-    $TITLE = "lists: ".$p->letter;
+    $TITLE = "lists: " . $p->letter;
 } else {
     $form = new PouetFormProcessor();
     $main = new PouetBoxListsMain($listID);
@@ -613,7 +630,7 @@ if (!$listID) {
         $TITLE = $main->list->name;
 
         if ($main->CanEdit()) {
-            $form->SetSuccessURL("lists.php?which=".(int)$listID, true);
+            $form->SetSuccessURL("lists.php?which=" . (int) $listID, true);
             $form->Add("list_add", new PouetBoxListsAdd($main));
             if ($main->CanDelete()) {
                 $form->Add("list_addmaintainer", new PouetBoxListsAddMaintainer($main));

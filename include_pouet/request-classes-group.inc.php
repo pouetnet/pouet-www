@@ -13,38 +13,38 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
 
     public static function GetFields($data, &$fields, &$js)
     {
-        $fields = array(
-          "name" => array(
-            "name" => "group name",
-            "required" => true,
-          ),
-          "acronym" => array(
-            "name" => "acronym",
-            "html" => "maxlength='8'",
-          ),
-          "web" => array(
-            "name" => "website url",
-            "type" => "url",
-          ),
-          "disambiguation" => array(
-            "name" => "disambiguation",
-            "infoAfter" => "If there are a multiple groups with the same name, add distinguishing platforms or countries here, otherwise leave it empty.",
-          ),
-          "csdb" => array(
-            "name" => "csdb ID",
-            "type" => "number",
-          ),
-          "demozoo" => array(
-            "name" => "demozoo ID",
-            "type" => "number",
-          ),
+        $fields = [
+            "name" => [
+                "name" => "group name",
+                "required" => true,
+            ],
+            "acronym" => [
+                "name" => "acronym",
+                "html" => "maxlength='8'",
+            ],
+            "web" => [
+                "name" => "website url",
+                "type" => "url",
+            ],
+            "disambiguation" => [
+                "name" => "disambiguation",
+                "infoAfter" => "If there are a multiple groups with the same name, add distinguishing platforms or countries here, otherwise leave it empty.",
+            ],
+            "csdb" => [
+                "name" => "csdb ID",
+                "type" => "number",
+            ],
+            "demozoo" => [
+                "name" => "demozoo ID",
+                "type" => "number",
+            ],
 
-          // Add this if all the other data is collected
-          "finalStep" => array(
-            "type" => "hidden",
-            "value" => 1,
-          ),
-        );
+            // Add this if all the other data is collected
+            "finalStep" => [
+                "type" => "hidden",
+                "value" => 1,
+            ],
+        ];
 
         if (@$data["group"] && $group = PouetGroup::Spawn($data["group"])) {
             foreach (get_object_vars($group) as $k => $v) {
@@ -58,22 +58,22 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
     public static function ValidateRequest($input, &$output)
     {
         if (!trim($input["name"])) {
-            return array("Whitespace groupnames are sooo \t       \t        \t.");
+            return ["Whitespace groupnames are sooo \t       \t        \t."];
         }
         if (@$input["website"]) {
             $url = parse_url($input["website"]);
             if (($url["scheme"] != "http" && $url["scheme"] != "https") || strstr($data["website"], "://") === false) {
-                return array("please only websites with http or https links, kthx");
+                return ["please only websites with http or https links, kthx"];
             }
         }
 
         $group = PouetGroup::Spawn($_REQUEST["group"]);
 
-        $fields = array();
+        $fields = [];
         $js = "";
-        static::GetFields(array(), $fields, $js);
+        static::GetFields([], $fields, $js);
 
-        $_in = array();
+        $_in = [];
         foreach ($fields as $k => $v) {
             $_in[$k] = $input[$k];
         }
@@ -81,14 +81,14 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
 
         unset($output["finalStep"]);
 
-        return $output ? array() : array("you didn't change anything !");
+        return $output ? [] : ["you didn't change anything !"];
     }
 
     public static function Display($itemID, $data)
     {
-        $fields = array();
+        $fields = [];
         $js = "";
-        static::GetFields(array(), $fields, $js);
+        static::GetFields([], $fields, $js);
 
         $group = PouetGroup::Spawn($itemID);
 
@@ -96,10 +96,10 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
         foreach ($data as $k => $v) {
             switch ($k) {
                 default:
-                    $s .= "<b>current ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>current " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($group->{$k});
                     $s .= "<br>";
-                    $s .= "<b>new ".$fields[$k]["name"]."</b>: ";
+                    $s .= "<b>new " . $fields[$k]["name"] . "</b>: ";
                     $s .= _html($v);
                     $s .= "<br>";
                     break;
@@ -111,15 +111,15 @@ class PouetRequest_Group_ChangeInfo extends PouetRequestBase
 
     public static function Process($itemID, $reqData)
     {
-        $sql = array();
+        $sql = [];
         foreach ($reqData as $k => $v) {
             $sql[$k] = $v;
         }
         if ($sql) {
-            SQLLib::UpdateRow("groups", $sql, "id=".(int)$itemID);
+            SQLLib::UpdateRow("groups", $sql, "id=" . (int) $itemID);
         }
 
-        return array();
+        return [];
     }
 };
 

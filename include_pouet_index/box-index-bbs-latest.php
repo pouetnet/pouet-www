@@ -35,10 +35,10 @@ class PouetBoxIndexLatestBBS extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit"      => array("name" => "number of topics visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX),
-          "hideResidue" => array("name" => "hide residue topics","default" => true,"type" => "checkbox"),
-        );
+        return [
+            "limit"      => ["name" => "number of topics visible","default" => 10,"min" => 1,"max" => POUET_CACHE_MAX],
+            "hideResidue" => ["name" => "hide residue topics","default" => true,"type" => "checkbox"],
+        ];
     }
 
     public function LoadFromDB()
@@ -51,8 +51,8 @@ class PouetBoxIndexLatestBBS extends PouetBoxCachable
         $s->AddField("bbs_topics.lastpost as lastpost");
         $s->AddField("bbs_topics.closed as closed");
         $s->AddTable("bbs_topics");
-        $s->attach(array("bbs_topics" => "userfirstpost"), array("users as firstuser" => "id"));
-        $s->attach(array("bbs_topics" => "userlastpost"), array("users as lastuser" => "id"));
+        $s->attach(["bbs_topics" => "userfirstpost"], ["users as firstuser" => "id"]);
+        $s->attach(["bbs_topics" => "userlastpost"], ["users as lastuser" => "id"]);
         $s->AddOrder("lastpost desc");
         $s->SetLimit(POUET_CACHE_MAX);
 
@@ -72,11 +72,11 @@ class PouetBoxIndexLatestBBS extends PouetBoxCachable
                 }
             }
             printf("<tr class='%s'>\n", $r->closed ? "closed" : "");
-            echo "  <td class='avatar'>".$r->firstuser->PrintLinkedAvatar()."</td>\n";
-            echo "  <td class='category'>"._html($r->category)."</td>\n";
-            echo "  <td class='topic'><a href='topic.php?which=".(int)$r->id."'>"._html($r->topic)."</a></td>\n";
-            echo "  <td class='count' title='last post "._html(dateDiffReadable(time(), $r->lastpost))." ago - "._html($r->lastpost)."'>".$r->count."</td>\n";
-            echo "  <td class='avatar'>".$r->lastuser->PrintLinkedAvatar()."</td>\n";
+            echo "  <td class='avatar'>" . $r->firstuser->PrintLinkedAvatar() . "</td>\n";
+            echo "  <td class='category'>" . _html($r->category) . "</td>\n";
+            echo "  <td class='topic'><a href='topic.php?which=" . (int) $r->id . "'>" . _html($r->topic) . "</a></td>\n";
+            echo "  <td class='count' title='last post " . _html(dateDiffReadable(time(), $r->lastpost)) . " ago - " . _html($r->lastpost) . "'>" . $r->count . "</td>\n";
+            echo "  <td class='avatar'>" . $r->lastuser->PrintLinkedAvatar() . "</td>\n";
             echo "</tr>\n";
             if (++$n == $this->limit) {
                 break;

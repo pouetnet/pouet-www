@@ -7,21 +7,21 @@ class Sideload
     public $httpReturnCode;
     public $httpReturnContentType;
     public $httpURL;
-    public $options = array(
-      "connect_timeout" => false,
-      "user_agent" => false,
-      "max_length" => false,
-      "verify_peer" => true,
-      "method" => "GET",
-    );
+    public $options = [
+        "connect_timeout" => false,
+        "user_agent" => false,
+        "max_length" => false,
+        "verify_peer" => true,
+        "method" => "GET",
+    ];
 
-    public function RequestCURL($url, $method = "GET", $contentArray = array(), $headerArray = array())
+    public function RequestCURL($url, $method = "GET", $contentArray = [], $headerArray = [])
     {
         $curl = curl_init();
 
-        $headers = array();
+        $headers = [];
         foreach ($headerArray as $k => $v) {
-            $headers[] = $k.": ".$v;
+            $headers[] = $k . ": " . $v;
         }
 
         curl_setopt($curl, CURLOPT_POST, $method == "POST");
@@ -40,7 +40,7 @@ class Sideload
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if ($this->options["connect_timeout"]) {
-            curl_setopt($curl, CURLOPT_TIMEOUT, (int)$this->options["connect_timeout"]);
+            curl_setopt($curl, CURLOPT_TIMEOUT, (int) $this->options["connect_timeout"]);
         }
         if ($this->options["user_agent"]) {
             curl_setopt($curl, CURLOPT_USERAGENT, $this->options["user_agent"]);
@@ -75,14 +75,14 @@ class Sideload
 
         return $html;
     }
-    public function RequestFGC($url, $method = "GET", $contentArray = array(), $headerArray = array())
+    public function RequestFGC($url, $method = "GET", $contentArray = [], $headerArray = [])
     {
-        $opt = array();
-        $param = array();
+        $opt = [];
+        $param = [];
 
-        $headers = array();
+        $headers = [];
         foreach ($headerArray as $k => $v) {
-            $headers[] = $k.": ".$v;
+            $headers[] = $k . ": " . $v;
         }
 
         if ($this->options["connect_timeout"]) {
@@ -98,11 +98,11 @@ class Sideload
         if ($method == "GET") {
             $url .= (strstr($url, "?") === false ? "?" : "&") . $data;
         }
-        $opt["http"] = array(
-          "method" => $method,
-          "header" => implode("\r\n", $headers),
-          "content" => ($method == "GET" ? null : http_build_query($data)),
-        );
+        $opt["http"] = [
+            "method" => $method,
+            "header" => implode("\r\n", $headers),
+            "content" => ($method == "GET" ? null : http_build_query($data)),
+        ];
 
         $ctx = stream_context_create($opt);
         if ($this->options["max_length"]) {
@@ -117,7 +117,7 @@ class Sideload
             if ($http_response_header) {
                 foreach ($http_response_header as $header) {
                     if (preg_match('/HTTP\/.*\s(\d+)/', $header, $match)) {
-                        $this->httpReturnCode = (int)$match[1];
+                        $this->httpReturnCode = (int) $match[1];
                     }
                     if (preg_match('/Content-type: (.*)/i', $header, $match)) {
                         $this->httpReturnContentType = $match[1];
@@ -132,7 +132,7 @@ class Sideload
 
         return $data;
     }
-    public function Request($url, $method = "GET", $contentArray = array(), $headerArray = array())
+    public function Request($url, $method = "GET", $contentArray = [], $headerArray = [])
     {
         if (function_exists("curl_init")) {
             return $this->RequestCURL($url, $method, $contentArray, $headerArray);

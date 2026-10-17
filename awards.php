@@ -19,7 +19,7 @@ class PouetBoxAwards extends PouetBox
         $s->AddField("awards.awardType");
         $s->AddField("awards.categoryID");
         $s->AddField("COALESCE(awards_categories.year,date_format(awards_prod.releaseDate,'%Y')) AS year");
-        $s->attach(array("awards" => "prodID"), array("prods as prod" => "id"));
+        $s->attach(["awards" => "prodID"], ["prods as prod" => "id"]);
         $s->AddOrder("COALESCE(awards_categories.year,date_format(awards_prod.releaseDate,'%Y')) DESC");
         $s->AddJoin("left", "awards_categories", "awards_categories.id = awards.categoryID");
         $s->AddOrder("awards_categories.series");
@@ -28,7 +28,7 @@ class PouetBoxAwards extends PouetBox
         $s->AddOrder("awards_prod.name");
         $this->prods = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->prods as $v) {
             $a[] = &$v->prod;
         }
@@ -52,7 +52,7 @@ class PouetBoxAwards extends PouetBox
             $category = $AWARDS_CATEGORIES[$row->categoryID];
             if ($lastCategory != $row->categoryID) {
                 $lastCategory = $row->categoryID;
-                printf("<tr id='%s'><th colspan='3' class='category'>%s</th></tr>\n", hashify($category->series." ".$year." ".$category->category), $category->series." - ".$category->category);
+                printf("<tr id='%s'><th colspan='3' class='category'>%s</th></tr>\n", hashify($category->series . " " . $year . " " . $category->category), $category->series . " - " . $category->category);
             }
             $p = $row->prod;
             if (!$p) {
@@ -63,7 +63,7 @@ class PouetBoxAwards extends PouetBox
 
             printf("<span class='icon %s %s'></span>\n", $category->cssClass, $row->awardType);
             echo $p->RenderTypeIcons();
-            echo "<span class='prod'>".$p->RenderLink()."</span>\n";
+            echo "<span class='prod'>" . $p->RenderLink() . "</span>\n";
             echo "</td>\n";
 
             echo "<td>\n";

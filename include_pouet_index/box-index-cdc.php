@@ -26,12 +26,12 @@ class PouetBoxIndexCDC extends PouetBoxCachable
         $s = new BM_Query();
         $s->AddTable("cdc");
         $s->AddField("cdc.addedDate");
-        $s->attach(array("cdc" => "which"), array("prods as prod" => "id"));
+        $s->attach(["cdc" => "which"], ["prods as prod" => "id"]);
         $s->AddOrder("cdc.addedDate desc");
         $s->SetLimit(1);
         list($this->data) = $s->perform();
 
-        $a = array(&$this->data->prod);
+        $a = [&$this->data->prod];
         PouetCollectPlatforms($a);
     }
 
@@ -48,7 +48,7 @@ class PouetBoxIndexCDC extends PouetBoxCachable
         if ($currentUser && $currentUser->IsModerator()) {
             $dif = time() - strtotime($this->data->addedDate);
             if ($dif > 60 * 60 * 24 * 30) {
-                echo "<div class='content notifications'>this current cdc is ".secToReadable($dif, true)." old</div>\n";
+                echo "<div class='content notifications'>this current cdc is " . secToReadable($dif, true) . " old</div>\n";
             }
         }
         echo "  <div class='foot'><a href='awards.php'>awards</a> :: <a href='cdc.php'>more</a>...</div>\n";

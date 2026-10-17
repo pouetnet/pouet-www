@@ -39,7 +39,7 @@ class PouetBoxUserMain extends PouetBox
         parent::__construct();
         $this->uniqueID = "pouetbox_usermain";
         $this->title = "";
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         $this->paginator = new PouetPaginator();
         $this->show = $show;
@@ -66,82 +66,82 @@ class PouetBoxUserMain extends PouetBox
         $s = new BM_Query();
         $s->AddTable("users_cdcs");
         $s->AddWhere(sprintf_esc("users_cdcs.user = %d", $this->id));
-        $s->Attach(array("users_cdcs" => "cdc"), array("prods as prod" => "id"));
+        $s->Attach(["users_cdcs" => "cdc"], ["prods as prod" => "id"]);
         $s->AddOrder("users_cdcs_prod.id");
         $this->cdcProds = $s->perform();
 
-        $this->logos = array();
+        $this->logos = [];
         if ($this->show == "logos") {
             $this->logos = $this->GetLogosAdded($this->show == "logos" ? null : get_setting("userlogos"));
         }
 
-        $this->prods = array();
+        $this->prods = [];
         if ($this->show == "prods") {
             $this->prods = $this->GetProdsAdded($this->show == "prods" ? null : get_setting("userprods"));
         }
 
-        $this->groups = array();
+        $this->groups = [];
         if ($this->show == "groups") {
             $this->groups = $this->GetGroupsAdded($this->show == "groups" ? null : get_setting("usergroups"));
         }
 
-        $this->parties = array();
+        $this->parties = [];
         if ($this->show == "parties") {
             $this->parties = $this->GetPartiesAdded($this->show == "parties" ? null : get_setting("userparties"));
         }
 
-        $this->shots = array();
+        $this->shots = [];
         if ($this->show == "screenshots") {
             $this->shots = $this->GetScreenshotsAdded($this->show == "screenshots" ? null : get_setting("userscreenshots"));
         }
 
-        $this->nfos = array();
+        $this->nfos = [];
         if ($this->show == "nfos") {
             $this->nfos = $this->GetNFOsAdded($this->show == "nfos" ? null : get_setting("usernfos"));
         }
 
-        $this->credits = array();
+        $this->credits = [];
         if (!$this->show || $this->show == "credits") {
             $this->credits = $this->GetCredits($this->show == "credits" ? null : 10);
         }
 
-        $this->firstComments = array();
+        $this->firstComments = [];
         if (!$this->show/* || $this->show=="comments"*/) {
             //$this->firstComments = $this->GetFirstCommentsAdded( /*$this->show=="comments" ? null :*/ get_setting("usercomments") );
         }
 
-        $this->topics = array();
+        $this->topics = [];
         if ($this->show == "topics") {
             $this->topics = $this->GetBBSTopics($this->show == "topics" ? null : get_setting("usercomments"));
         }
 
-        $this->posts = array();
+        $this->posts = [];
         if ($this->show == "posts") {
             $this->posts = $this->GetBBSPosts($this->show == "posts" ? null : get_setting("usercomments"));
         }
 
-        $this->lists = array();
+        $this->lists = [];
         if ($this->show == "lists") {
             $this->lists = $this->GetLists($this->show == "lists" ? null : 10);
         }
 
-        $this->requests = array();
+        $this->requests = [];
         //if ($this->show=="requests")
         {
             $this->requests = $this->GetModRequests($this->show == "requests" ? null : 1);
         }
 
-        $this->comments = array();
+        $this->comments = [];
         if ($this->show == "demoblog") {
             $this->comments = $this->GetDemoblog(@$_GET["page"]);
         }
 
-        $this->agreeRulez = array();
+        $this->agreeRulez = [];
         if ($this->show == "otherstats") {
             $this->agreeRulez = $this->GetThumbAgreers(get_setting("userrulez"), 1);
         }
 
-        $this->agreeSucks = array();
+        $this->agreeSucks = [];
         if ($this->show == "otherstats") {
             $this->agreeSucks = $this->GetThumbAgreers(get_setting("usersucks"), -1);
         }
@@ -152,8 +152,8 @@ class PouetBoxUserMain extends PouetBox
         $s = "";
         if ($value) {
             echo "<li>\n";
-            echo " <span class='field'>".$field.":</span>\n";
-            echo " ".($allowHTML ? $value : _html($value))."\n";
+            echo " <span class='field'>" . $field . ":</span>\n";
+            echo " " . ($allowHTML ? $value : _html($value)) . "\n";
             echo "</li>\n";
         }
         return $s;
@@ -164,10 +164,10 @@ class PouetBoxUserMain extends PouetBox
         global $currentUser;
 
         $s = "";
-        echo "<div class='pouettbl' id='".$this->uniqueID."'>\n";
+        echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
         echo " <h2>";
-        echo "<img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='avatar'> ";
-        echo "<span>"._html($this->user->nickname)."</span> information";
+        echo "<img src='" . POUET_CONTENT_URL . "avatars/" . _html($this->user->avatar) . "' alt='avatar'> ";
+        echo "<span>" . _html($this->user->nickname) . "</span> information";
 
         if ($currentUser && $currentUser->id == $this->user->id) {
             printf(" [<a href='account.php' class='adminlink'>edit profile</a>]\n");
@@ -181,11 +181,11 @@ class PouetBoxUserMain extends PouetBox
             printf(
                 " [<a href='login.php?as=%d&amp;return=%s' class='adminlink'>log in as</a>]\n",
                 $this->id,
-                rawurlencode("user.php?who=".$this->id)
+                rawurlencode("user.php?who=" . $this->id),
             );
         }
 
-        echo " <span id='glops'><span>".$this->user->glops."</span> glöps</span>";
+        echo " <span id='glops'><span>" . $this->user->glops . "</span> glöps</span>";
         echo "</h2>\n";
         return $s;
     }
@@ -212,7 +212,7 @@ class PouetBoxUserMain extends PouetBox
         if ($limit) {
             $s->SetLimit($limit);
         } else {
-            $this->paginator->SetData("user.php?who=".$this->id."&show=prods", $this->user->stats["prods"], 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=prods", $this->user->stats["prods"], 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
         $data = $s->perform();
@@ -228,7 +228,7 @@ class PouetBoxUserMain extends PouetBox
         if ($limit) {
             $s->SetLimit($limit);
         } else {
-            $this->paginator->SetData("user.php?who=".$this->id."&show=groups", $this->user->stats["groups"], 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=groups", $this->user->stats["groups"], 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
         $data = $s->perform();
@@ -243,7 +243,7 @@ class PouetBoxUserMain extends PouetBox
         if ($limit) {
             $s->SetLimit($limit);
         } else {
-            $this->paginator->SetData("user.php?who=".$this->id."&show=parties", $this->user->stats["parties"], 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=parties", $this->user->stats["parties"], 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
         $data = $s->perform();
@@ -259,7 +259,7 @@ class PouetBoxUserMain extends PouetBox
         if ($limit) {
             $s->SetLimit($limit);
         } else {
-            $this->paginator->SetData("user.php?who=".$this->id."&show=screenshots", $this->user->stats["screenshots"], 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=screenshots", $this->user->stats["screenshots"], 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
         $data = $s->perform();
@@ -276,7 +276,7 @@ class PouetBoxUserMain extends PouetBox
         if ($limit) {
             $s->SetLimit($limit);
         } else {
-            $this->paginator->SetData("user.php?who=".$this->id."&show=nfos", $this->user->stats["nfos"], 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=nfos", $this->user->stats["nfos"], 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
         $data = $s->perform();
@@ -289,7 +289,7 @@ class PouetBoxUserMain extends PouetBox
         $s = new BM_Query();
         $s->AddTable("credits");
         $s->AddField("credits.role");
-        $s->Attach(array("credits" => "prodID"), array("prods as prod" => "id"));
+        $s->Attach(["credits" => "prodID"], ["prods as prod" => "id"]);
         $s->AddWhere(sprintf("credits.userID = %d", $this->id));
         $s->AddOrder("credits_prod.releaseDate desc");
         if ($limit) {
@@ -298,7 +298,7 @@ class PouetBoxUserMain extends PouetBox
 
         $data = $s->performWithCalcRows($this->totalProds);
 
-        $a = array();
+        $a = [];
         foreach ($data as $v) {
             $a[] = &$v->prod;
         }
@@ -309,7 +309,7 @@ class PouetBoxUserMain extends PouetBox
         $s->AddTable("credits");
         $s->AddField("sum(voteup) as up");
         $s->AddField("sum(votedown) as down");
-        $s->Attach(array("credits" => "prodID"), array("prods as prod" => "id"));
+        $s->Attach(["credits" => "prodID"], ["prods as prod" => "id"]);
         $s->AddWhere(sprintf("credits.userID = %d", $this->id));
         $s->AddOrder("credits_prod.addedDate desc");
         $data2 = $s->perform();
@@ -343,7 +343,7 @@ class PouetBoxUserMain extends PouetBox
         $s->AddTable("comments AS c1");
         $s->AddTable("comments AS c2");
         //$s->Attach(array("c1"=>"who"),array("users as u1"=>"id"));
-        $s->Attach(array("c2" => "who"), array("users as u2" => "id"));
+        $s->Attach(["c2" => "who"], ["users as u2" => "id"]);
         $s->AddWhere(sprintf_esc("c1.rating = %d", $thumb));
         $s->AddWhere("c1.rating = c2.rating");
         $s->AddWhere("c1.which = c2.which");
@@ -374,7 +374,7 @@ class PouetBoxUserMain extends PouetBox
         } else {
             $this->topicCount = SQLLib::SelectRow(sprintf_esc("select count(*) as c from bbs_topics where bbs_topics.userfirstpost = %d", $this->id))->c;
 
-            $this->paginator->SetData("user.php?who=".$this->id."&show=topics", $this->topicCount, 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=topics", $this->topicCount, 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
 
@@ -399,7 +399,7 @@ class PouetBoxUserMain extends PouetBox
         } else {
             $this->postCount = SQLLib::SelectRow(sprintf_esc("select count(*) as c from bbs_posts where bbs_posts.author = %d", $this->id))->c;
 
-            $this->paginator->SetData("user.php?who=".$this->id."&show=posts", $this->postCount, 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=posts", $this->postCount, 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
 
@@ -420,7 +420,7 @@ class PouetBoxUserMain extends PouetBox
         } else {
             $this->listCount = SQLLib::SelectRow(sprintf_esc("select count(*) as c from lists where owner = %d", $this->id))->c;
 
-            $this->paginator->SetData("user.php?who=".$this->id."&show=lists", $this->listCount, 50, @$_GET["page"], false);
+            $this->paginator->SetData("user.php?who=" . $this->id . "&show=lists", $this->listCount, 50, @$_GET["page"], false);
             $this->paginator->SetLimitOnQuery($s);
         }
 
@@ -459,7 +459,7 @@ class PouetBoxUserMain extends PouetBox
         $s->AddField("comments.comment");
         $s->AddOrder("comments.addedDate desc");
         //$s->AddJoin("left","comments","prods.id = comments.which");
-        $s->Attach(array("comments" => "which"), array("prods as prod" => "id"));
+        $s->Attach(["comments" => "which"], ["prods as prod" => "id"]);
         $s->AddWhere(sprintf_esc("comments.who = %d", $this->id));
         if (@$_GET["nothumbsup"]) {
             $s->AddWhere("comments.rating != 1");
@@ -473,7 +473,7 @@ class PouetBoxUserMain extends PouetBox
 
         $limit = 10;
         if (@$_GET["com"]) {
-            $limit = (int)$_GET["com"];
+            $limit = (int) $_GET["com"];
         }
         $limit = min($limit, 100);
         $limit = max($limit, 1);
@@ -481,11 +481,11 @@ class PouetBoxUserMain extends PouetBox
             $limit = $this->postCount;
         }
 
-        $this->paginator->SetData("user.php?who=".$this->id."&show=demoblog", $this->postCount, $limit, $page, false);
+        $this->paginator->SetData("user.php?who=" . $this->id . "&show=demoblog", $this->postCount, $limit, $page, false);
         $this->paginator->SetLimitOnQuery($s);
 
         $data = $s->perform();
-        $prods = array();
+        $prods = [];
         foreach ($data as $v) {
             $prods[] = &$v->prod;
         }
@@ -499,7 +499,7 @@ class PouetBoxUserMain extends PouetBox
         global $currentUser;
         $s = "";
         echo "<div class='content'>\n";
-        echo "<div class='bigavatar'><img src='".POUET_CONTENT_URL."avatars/"._html($this->user->avatar)."' alt='big avatar'></div>\n";
+        echo "<div class='bigavatar'><img src='" . POUET_CONTENT_URL . "avatars/" . _html($this->user->avatar) . "' alt='big avatar'></div>\n";
         echo "<ul id='userdata'>\n";
 
         echo "<li class='header'>general:</li>\n";
@@ -514,7 +514,7 @@ class PouetBoxUserMain extends PouetBox
         if ($currentUser) {
             global $IM_TYPES;
             foreach ($this->ims as $im) {
-                if ($im->im_type && @$IM_TYPES[$im->im_type] && @$IM_TYPES[$im->im_type]["display"] && preg_match("/".$IM_TYPES[$im->im_type]["capture"]."/", $im->im_id)) {
+                if ($im->im_type && @$IM_TYPES[$im->im_type] && @$IM_TYPES[$im->im_type]["display"] && preg_match("/" . $IM_TYPES[$im->im_type]["capture"] . "/", $im->im_id)) {
                     $func = $IM_TYPES[$im->im_type]["display"];
                     $imID = $func($im->im_id);
                     $this->AddRow($im->im_type, $imID, true);
@@ -527,16 +527,16 @@ class PouetBoxUserMain extends PouetBox
         if ($this->user->csdb || $this->user->slengpung || $this->user->zxdemo || $this->user->demozoo) {
             echo "<li class='header'>portals:</li>\n";
             if ($this->user->csdb) {
-                echo $this->AddRow("csdb", "<a href='https://csdb.dk/scener/?id=".(int)$this->user->csdb."'>profile</a>", true);
+                echo $this->AddRow("csdb", "<a href='https://csdb.dk/scener/?id=" . (int) $this->user->csdb . "'>profile</a>", true);
             }
             if ($this->user->slengpung) {
-                echo $this->AddRow("slengpung", "<a href='http://www.slengpung.com/?userid=".$this->user->slengpung."'>pictures</a>", true);
+                echo $this->AddRow("slengpung", "<a href='http://www.slengpung.com/?userid=" . $this->user->slengpung . "'>pictures</a>", true);
             }
             if ($this->user->zxdemo) {
-                echo $this->AddRow("zxdemo", "<a href='http://zxdemo.org/author.php?id=".$this->user->zxdemo."'>profile</a>", true);
+                echo $this->AddRow("zxdemo", "<a href='http://zxdemo.org/author.php?id=" . $this->user->zxdemo . "'>profile</a>", true);
             }
             if ($this->user->demozoo) {
-                echo $this->AddRow("demozoo", "<a href='http://demozoo.org/sceners/".$this->user->demozoo."/'>profile</a>", true);
+                echo $this->AddRow("demozoo", "<a href='http://demozoo.org/sceners/" . $this->user->demozoo . "/'>profile</a>", true);
             }
         }
 
@@ -545,7 +545,7 @@ class PouetBoxUserMain extends PouetBox
             $x = 1;
             foreach ($this->cdcProds as $v) {
                 if ($v->prod) {
-                    $this->AddRow("cdc #".($x++), $v->prod->RenderSingleRow(), true);
+                    $this->AddRow("cdc #" . ($x++), $v->prod->RenderSingleRow(), true);
                 }
             }
         }
@@ -555,36 +555,36 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->credits && $this->totalProds) {
             echo "<div class='contribheader'>contributions to prods ";
-            echo "<span>".$this->totalProds." prods (".$this->user->thumbups." thumbs up, ".$this->user->thumbdowns." thumbs down)</span>";
+            echo "<span>" . $this->totalProds . " prods (" . $this->user->thumbups . " thumbs up, " . $this->user->thumbdowns . " thumbs down)</span>";
             if ($this->show != "credits") {
-                echo " [<a href='user.php?who=".$this->id."&amp;show=credits'>show all</a>]";
+                echo " [<a href='user.php?who=" . $this->id . "&amp;show=credits'>show all</a>]";
             }
             echo "</div>\n";
             echo "<ul class='boxlist' id='contriblist'>";
             foreach ($this->credits as $p) {
                 echo "<li>";
                 if ($p->prod->releaseDate) {
-                    echo "<span class='releaseYear'>".substr($p->prod->releaseDate, 0, 4)."</span> ";
+                    echo "<span class='releaseYear'>" . substr($p->prod->releaseDate, 0, 4) . "</span> ";
                 }
                 echo $p->prod->RenderTypeIcons();
                 echo $p->prod->RenderPlatformIcons();
-                echo $p->prod->RenderSingleRow()." ";
+                echo $p->prod->RenderSingleRow() . " ";
                 echo $p->prod->RenderAccolades();
-                echo " [".$p->role."]";
+                echo " [" . $p->role . "]";
                 echo "</li>";
             }
             echo "</ul>";
         }
 
         if (!$this->show && $this->user->stats["ud"]) {
-            echo "<div class='contribheader'>United Devices contribution <span>".$this->user->stats["ud"]." glöps</span></div>\n";
+            echo "<div class='contribheader'>United Devices contribution <span>" . $this->user->stats["ud"] . " glöps</span></div>\n";
         }
 
         if ($this->user->stats["logos"]) {
             if (!$this->show || $this->logos) {
-                echo "<div class='contribheader'>logos added <span>".$this->user->stats["logosVote"]." x 20 = ".($this->user->stats["logosVote"] * 20)." glöps - downvoted logos don't get glöps</span>";
+                echo "<div class='contribheader'>logos added <span>" . $this->user->stats["logosVote"] . " x 20 = " . ($this->user->stats["logosVote"] * 20) . " glöps - downvoted logos don't get glöps</span>";
                 if ($this->show != "logos") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=logos'>show</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=logos'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -593,8 +593,8 @@ class PouetBoxUserMain extends PouetBox
                 foreach ($this->logos as $l) {
                     echo "<li>";
                     echo "<div class='logo'>";
-                    echo "<img src='".POUET_CONTENT_URL."logos/"._html($l->file)."' alt=''>";
-                    echo "<span class='logovotes'>current votes: "._html($l->vote_count)."</span>";
+                    echo "<img src='" . POUET_CONTENT_URL . "logos/" . _html($l->file) . "' alt=''>";
+                    echo "<span class='logovotes'>current votes: " . _html($l->vote_count) . "</span>";
                     echo "</div>";
                     echo "</li>";
                 }
@@ -604,9 +604,9 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["prods"]) {
             if (!$this->show || $this->prods) {
-                echo "<div class='contribheader'>prods added <span>".$this->user->stats["prods"]." x 2 = ".($this->user->stats["prods"] * 2)." glöps</span> ";
+                echo "<div class='contribheader'>prods added <span>" . $this->user->stats["prods"] . " x 2 = " . ($this->user->stats["prods"] * 2) . " glöps</span> ";
                 if ($this->show != "prods") {
-                    echo "[<a href='user.php?who=".$this->id."&amp;show=prods'>show</a>]";
+                    echo "[<a href='user.php?who=" . $this->id . "&amp;show=prods'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -627,9 +627,9 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["groups"]) {
             if (!$this->show || $this->groups) {
-                echo "<div class='contribheader'>groups added <span>".$this->user->stats["groups"]." glöps</span> ";
+                echo "<div class='contribheader'>groups added <span>" . $this->user->stats["groups"] . " glöps</span> ";
                 if ($this->show != "groups") {
-                    echo "[<a href='user.php?who=".$this->id."&amp;show=groups'>show</a>]";
+                    echo "[<a href='user.php?who=" . $this->id . "&amp;show=groups'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -647,9 +647,9 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["parties"]) {
             if (!$this->show || $this->parties) {
-                echo "<div class='contribheader'>parties added <span>".$this->user->stats["parties"]." glöps</span> ";
+                echo "<div class='contribheader'>parties added <span>" . $this->user->stats["parties"] . " glöps</span> ";
                 if ($this->show != "parties") {
-                    echo "[<a href='user.php?who=".$this->id."&amp;show=parties'>show</a>]";
+                    echo "[<a href='user.php?who=" . $this->id . "&amp;show=parties'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -667,9 +667,9 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["screenshots"]) {
             if (!$this->show || $this->shots) {
-                echo "<div class='contribheader'>screenshots added <span>".$this->user->stats["screenshots"]." glöps</span> ";
+                echo "<div class='contribheader'>screenshots added <span>" . $this->user->stats["screenshots"] . " glöps</span> ";
                 if ($this->show != "screenshots") {
-                    echo "[<a href='user.php?who=".$this->id."&amp;show=screenshots'>show</a>]";
+                    echo "[<a href='user.php?who=" . $this->id . "&amp;show=screenshots'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -690,9 +690,9 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["nfos"]) {
             if (!$this->show || $this->nfos) {
-                echo "<div class='contribheader'>nfos added <span>".$this->user->stats["nfos"]." glöps</span> ";
+                echo "<div class='contribheader'>nfos added <span>" . $this->user->stats["nfos"] . " glöps</span> ";
                 if ($this->show != "nfos") {
-                    echo "[<a href='user.php?who=".$this->id."&amp;show=nfos'>show</a>]";
+                    echo "[<a href='user.php?who=" . $this->id . "&amp;show=nfos'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -712,13 +712,13 @@ class PouetBoxUserMain extends PouetBox
         }
         if ($this->user->stats["comments"]) {
             if (!$this->show || $this->firstComments) {
-                echo "<div class='contribheader'>comments <span>".$this->user->stats["comments"]." glöps</span>";
+                echo "<div class='contribheader'>comments <span>" . $this->user->stats["comments"] . " glöps</span>";
                 //echo " [<a href='user.php?who=".$this->id."&amp;show=comments'>show</a>]";
                 if ($this->show != "demoblog") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=demoblog'>demoblog</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=demoblog'>demoblog</a>]";
                 }
                 if ($this->show != "otherstats") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=otherstats'>other stats</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=otherstats'>other stats</a>]";
                 }
                 echo "</div>\n";
             }
@@ -727,7 +727,7 @@ class PouetBoxUserMain extends PouetBox
                 foreach ($this->firstComments as $p) {
                     $rating = $p->rating > 0 ? "rulez" : ($p->rating < 0 ? "sucks" : "isok");
                     echo "<li>";
-                    echo "<span class='vote ".$rating."'>".$rating."</span>";
+                    echo "<span class='vote " . $rating . "'>" . $rating . "</span>";
                     echo $p->RenderTypeIcons();
                     echo $p->RenderPlatformIcons();
                     echo $p->RenderSingleRow();
@@ -740,7 +740,7 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["requestGlops"]) {
             if (!$this->show) {
-                echo "<div class='contribheader'>requests made <span>".(int)$this->totalRequests." requests, ".$this->user->stats["requestGlops"]." glöps</span> ";
+                echo "<div class='contribheader'>requests made <span>" . (int) $this->totalRequests . " requests, " . $this->user->stats["requestGlops"] . " glöps</span> ";
                 //if ($this->show!="requests")
                 //  echo "[<a href='user.php?who=".$this->id."&amp;show=requests'>show</a>]";
                 echo "</div>\n";
@@ -766,8 +766,8 @@ class PouetBoxUserMain extends PouetBox
 
         if ($this->user->stats["oneliners"]) {
             if (!$this->show) {
-                echo "<div class='contribheader'>oneliners posted <span>".(int)$this->user->stats["oneliners"]." oneliners</span> ";
-                echo "[<a href='oneliner.php?who=".$this->id."'>show</a>]";
+                echo "<div class='contribheader'>oneliners posted <span>" . (int) $this->user->stats["oneliners"] . " oneliners</span> ";
+                echo "[<a href='oneliner.php?who=" . $this->id . "'>show</a>]";
                 echo "</div>\n";
             }
             /*
@@ -793,10 +793,10 @@ class PouetBoxUserMain extends PouetBox
             if (!$this->show || $this->topics) {
                 echo "<div class='contribheader'>bbs topics opened";
                 if ($this->user->stats["topics"]) {
-                    echo " <span>".$this->user->stats["topics"]." topics</span>";
+                    echo " <span>" . $this->user->stats["topics"] . " topics</span>";
                 }
                 if ($this->show != "topics") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=topics'>show</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=topics'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -804,7 +804,7 @@ class PouetBoxUserMain extends PouetBox
                 echo "<ul class='boxlist'>";
                 foreach ($this->topics as $t) {
                     echo "<li>";
-                    echo "<a href='topic.php?which=".$t->id."'>"._html($t->topic)."</a> ("._html($t->category).")";
+                    echo "<a href='topic.php?which=" . $t->id . "'>" . _html($t->topic) . "</a> (" . _html($t->category) . ")";
                     echo "</li>";
                 }
                 echo "</ul>";
@@ -816,10 +816,10 @@ class PouetBoxUserMain extends PouetBox
             if (!$this->show || $this->posts) {
                 echo "<div class='contribheader'>bbs posts";
                 if ($this->user->stats["posts"]) {
-                    echo " <span>".$this->user->stats["posts"]." posts</span>";
+                    echo " <span>" . $this->user->stats["posts"] . " posts</span>";
                 }
                 if ($this->show != "posts") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=posts'>show</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=posts'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -828,7 +828,7 @@ class PouetBoxUserMain extends PouetBox
                 foreach ($this->posts as $p) {
                     echo "<li>";
                     //echo "<a href='topic.php?which=".$p->id."'>"._html($p->topic)."</a> ("._html($p->category).")";
-                    echo "<a href='topic.php?post=".$p->postID."'>"._html($p->topic)."</a> ("._html($p->category).")";
+                    echo "<a href='topic.php?post=" . $p->postID . "'>" . _html($p->topic) . "</a> (" . _html($p->category) . ")";
                     echo "</li>";
                 }
                 echo "</ul>";
@@ -840,10 +840,10 @@ class PouetBoxUserMain extends PouetBox
             if (!$this->show || $this->lists) {
                 echo "<div class='contribheader'>lists";
                 if ($this->user->stats["lists"]) {
-                    echo " <span>".$this->user->stats["lists"]." lists</span>";
+                    echo " <span>" . $this->user->stats["lists"] . " lists</span>";
                 }
                 if ($this->show != "lists") {
-                    echo " [<a href='user.php?who=".$this->id."&amp;show=lists'>show</a>]";
+                    echo " [<a href='user.php?who=" . $this->id . "&amp;show=lists'>show</a>]";
                 }
                 echo "</div>\n";
             }
@@ -851,7 +851,7 @@ class PouetBoxUserMain extends PouetBox
                 echo "<ul class='boxlist'>";
                 foreach ($this->lists as $l) {
                     echo "<li>";
-                    echo "<a href='lists.php?which=".$l->listID."'>"._html($l->name)."</a>";
+                    echo "<a href='lists.php?which=" . $l->listID . "'>" . _html($l->name) . "</a>";
                     echo "</li>";
                 }
                 echo "</ul>";
@@ -866,9 +866,9 @@ class PouetBoxUserMain extends PouetBox
                 echo "<ul class='boxlist'>";
                 foreach ($this->agreeRulez as $p) {
                     echo "<li>";
-                    echo $p->u2->PrintLinkedAvatar()." ";
-                    echo $p->u2->PrintLinkedName()." ";
-                    echo "(".$p->c." prods)";
+                    echo $p->u2->PrintLinkedAvatar() . " ";
+                    echo $p->u2->PrintLinkedName() . " ";
+                    echo "(" . $p->c . " prods)";
                     echo "</li>";
                 }
                 echo "</ul>";
@@ -880,9 +880,9 @@ class PouetBoxUserMain extends PouetBox
                 echo "<ul class='boxlist'>";
                 foreach ($this->agreeSucks as $p) {
                     echo "<li>";
-                    echo $p->u2->PrintLinkedAvatar()." ";
-                    echo $p->u2->PrintLinkedName()." ";
-                    echo "(".$p->c." prods)";
+                    echo $p->u2->PrintLinkedAvatar() . " ";
+                    echo $p->u2->PrintLinkedName() . " ";
+                    echo "(" . $p->c . " prods)";
                     echo "</li>";
                 }
                 echo "</ul>";
@@ -906,8 +906,8 @@ class PouetBoxUserMain extends PouetBox
                 echo parse_message($c->comment);
                 echo "</li>";
                 echo "<li class='blogvote'>";
-                echo "<span class='vote ".$rating."'>".$rating."</span>";
-                echo "added on the <a href='prod.php?post=".$c->commentID."'>".$c->commentDate."</a>";
+                echo "<span class='vote " . $rating . "'>" . $rating . "</span>";
+                echo "added on the <a href='prod.php?post=" . $c->commentID . "'>" . $c->commentDate . "</a>";
                 echo "</li>";
             }
             echo "</ul>";
@@ -918,12 +918,12 @@ class PouetBoxUserMain extends PouetBox
 
     public function RenderFooter()
     {
-        echo "  <div class='foot'>account created on the ".$this->user->registerDate."</div>\n";
+        echo "  <div class='foot'>account created on the " . $this->user->registerDate . "</div>\n";
         echo "</div>\n";
     }
 };
 
-$p = new PouetBoxUserMain((int)@$_GET["who"], @$_GET["show"]);
+$p = new PouetBoxUserMain((int) @$_GET["who"], @$_GET["show"]);
 $p->Load();
 
 if ($p->user) {

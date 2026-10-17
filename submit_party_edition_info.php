@@ -6,7 +6,7 @@ require_once("include_pouet/box-prod-submit.php");
 require_once("include_pouet/box-party-edition-submit.php");
 
 if ($currentUser && !$currentUser->CanSubmitItems()) {
-    redirect("party.php?which=".(int)$_GET["which"]);
+    redirect("party.php?which=" . (int) $_GET["which"]);
     exit();
 }
 
@@ -22,8 +22,8 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
     {
         parent::__construct();
 
-        $this->id = (int)$id;
-        $this->year = (int)$year;
+        $this->id = (int) $id;
+        $this->year = (int) $year;
 
         $this->party = PouetParty::Spawn($this->id);
 
@@ -41,22 +41,22 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
 
         $this->LoadFromDB();
 
-        $sql = array();
+        $sql = [];
         if ($this->fields["download"]) {
             $sql["download"] = $data["download"];
         }
         if ($this->fields["csdbID"]) {
-            $sql["csdb"] = (int)$data["csdbID"];
+            $sql["csdb"] = (int) $data["csdbID"];
         }
         if ($this->fields["slengpungID"]) {
-            $sql["slengpung"] = (int)$data["slengpungID"];
+            $sql["slengpung"] = (int) $data["slengpungID"];
         }
         /*
             if ($this->fields["zxdemoID"])
               $sql["zxdemo"] = $data["zxdemoID"];
         */
         if ($this->fields["demozooID"]) {
-            $sql["demozoo"] = (int)$data["demozooID"];
+            $sql["demozoo"] = (int) $data["demozooID"];
         }
         if ($this->fields["artcity"]) {
             $sql["artcity"] = $data["artcity"];
@@ -76,7 +76,7 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
         if (is_uploaded_file($_FILES["results"]["tmp_name"])) {
             move_uploaded_file_fake($_FILES["results"]["tmp_name"], get_local_partyresult_path($this->id, $this->year));
         }
-        return array();
+        return [];
     }
     public function LoadFromDB()
     {
@@ -126,7 +126,7 @@ $TITLE = sprintf("submit links for a party edition: %s %04d", $box->party->name,
 
 $form = new PouetFormProcessor();
 
-$form->SetSuccessURL("party.php?which=".(int)$_GET["which"]."&when=".(int)$_GET["when"], true);
+$form->SetSuccessURL("party.php?which=" . (int) $_GET["which"] . "&when=" . (int) $_GET["when"], true);
 
 $form->Add("partyInfo", $box);
 

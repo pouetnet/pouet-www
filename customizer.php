@@ -21,7 +21,7 @@ class PouetBoxCustomizer extends PouetBox
         global $currentUser;
         $row = SQLLib::selectRow(sprintf_esc("select customizerJSON from usersettings where id = %d", $currentUser->id));
         $customizerJSON = $row ? $row->customizerJSON : null;
-        $customizer = $customizerJSON ? json_decode($customizerJSON, true) : array();
+        $customizer = $customizerJSON ? json_decode($customizerJSON, true) : [];
         if (!@$customizer["frontpage"]) {
             require_once("include_pouet/default_usersettings.php");
             $customizer = json_decode($DEFAULT_USERSETTINGS->customizerJSON, true);
@@ -46,7 +46,7 @@ class PouetBoxCustomizer extends PouetBox
                 foreach ($data["parameter"] as $col => $boxen) {
                     foreach ($boxen as $boxIdx => $box) {
                         $_box = &$this->boxes[$col][$boxIdx];
-                        $class = "PouetBoxIndex".$_box["box"];
+                        $class = "PouetBoxIndex" . $_box["box"];
                         $p = new $class();
                         if (has_trait($p, "PouetFrontPage")) {
                             $params = $p->GetParameterSettings();
@@ -72,8 +72,8 @@ class PouetBoxCustomizer extends PouetBox
             }
             if ($data["addBox"]) {
                 $col = key($this->boxes);
-                if (class_exists("PouetBoxIndex".$_POST["newBox"])) {
-                    $this->boxes[$col][] = array("box" => $_POST["newBox"]);
+                if (class_exists("PouetBoxIndex" . $_POST["newBox"])) {
+                    $this->boxes[$col][] = ["box" => $_POST["newBox"]];
                 }
             }
             if ($data["delete"]) {
@@ -93,7 +93,7 @@ class PouetBoxCustomizer extends PouetBox
                 $selBox = $this->boxes[$col][$boxIdx];
                 $post   = array_slice($this->boxes[$col], $boxIdx + 1);
 
-                $this->boxes[$col] = array_merge($pre, array($selBox), array($swap), $post);
+                $this->boxes[$col] = array_merge($pre, [$selBox], [$swap], $post);
             } elseif ($data["down"]) {
                 $col = key($data["down"]);
                 $boxIdx = key($data["down"][$col]);
@@ -103,7 +103,7 @@ class PouetBoxCustomizer extends PouetBox
                 $swap   = $this->boxes[$col][$boxIdx + 1];
                 $post   = array_slice($this->boxes[$col], $boxIdx + 2);
 
-                $this->boxes[$col] = array_merge($pre, array($swap), array($selBox), $post);
+                $this->boxes[$col] = array_merge($pre, [$swap], [$selBox], $post);
             } elseif ($data["left"]) {
                 $col = key($data["left"]);
                 $boxIdx = key($data["left"][$col]);
@@ -146,16 +146,16 @@ class PouetBoxCustomizer extends PouetBox
         global $currentUserSettings;
         global $ephemeralStorage;
 
-        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id=%d", (int)$currentUser->id))) {
-            SQLLib::UpdateRow("usersettings", array("customizerJSON" => $json), "id=".(int)$currentUser->id);
+        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id=%d", (int) $currentUser->id))) {
+            SQLLib::UpdateRow("usersettings", ["customizerJSON" => $json], "id=" . (int) $currentUser->id);
         } else {
-            SQLLib::InsertRow("usersettings", array("customizerJSON" => $json,"id" => (int)$currentUser->id));
+            SQLLib::InsertRow("usersettings", ["customizerJSON" => $json,"id" => (int) $currentUser->id]);
         }
         $currentUserSettings->customizerJSON = $json;
 
-        $ephemeralStorage->set("settings:".$currentUser->id, $currentUserSettings);
+        $ephemeralStorage->set("settings:" . $currentUser->id, $currentUserSettings);
 
-        return array();
+        return [];
     }
 
     public function RenderBody()
@@ -166,7 +166,7 @@ class PouetBoxCustomizer extends PouetBox
         printf("<option value=''>---</option>\n");
         global $indexAvailableBoxes;
         foreach ($indexAvailableBoxes as $v) {
-            $class = "PouetBoxIndex".$v;
+            $class = "PouetBoxIndex" . $v;
             $p = new $class();
             printf("<option value='%s'>%s</option>\n", $v, _html($p->title));
         }
@@ -176,16 +176,16 @@ class PouetBoxCustomizer extends PouetBox
         echo " <div class='content'>\n";
         $x = 0;
         foreach ($this->boxes as $bar => $boxlist) {
-            echo "  <div id='"._html($bar)."' class='column'>\n";
+            echo "  <div id='" . _html($bar) . "' class='column'>\n";
             $y = 0;
             foreach ($boxlist as $box) {
-                $class = "PouetBoxIndex".$box["box"];
+                $class = "PouetBoxIndex" . $box["box"];
                 if (!class_exists($class)) {
                     continue;
                 }
                 $p = new $class();
 
-                echo "  <div class='customizerBox' data-class='"._html($box["box"])."'>\n";
+                echo "  <div class='customizerBox' data-class='" . _html($box["box"]) . "'>\n";
                 echo "    <h2>";
                 echo _html($p->title);
                 echo "<span class='controls'>";
@@ -392,9 +392,9 @@ class PouetBoxCustomizerSitewide extends PouetBox
 
         $this->title = "sitewide settings";
 
-        $this->namesNumeric = array(
-          // numbers
-/*
+        $this->namesNumeric = [
+            // numbers
+            /*
           "indextopglops" => "front page - top glops",
           "indextopprods" => "front page - top prods (recent)",
           "indextopkeops" => "front page - top prods (all-time)",
@@ -407,50 +407,50 @@ class PouetBoxCustomizerSitewide extends PouetBox
           "indexbbstopics" => "front page - bbs topics",
           "indexwatchlist" => "front page - watchlist",
 */
-          "bbsbbstopics" => "bbs page - bbs topics",
-          "prodlistprods" => "prodlist page - prods",
-          "userlistusers" => "userlist page - users",
-          "searchprods" => "search page - prods",
-          "userlogos" => "user page - logos",
-          "userprods" => "user page - prods",
-          "usergroups" => "user page - groups",
-          "userparties" => "user page - parties",
-          "userscreenshots" => "user page - screenshots",
-          "usernfos" => "user page - nfos",
-          "usercomments" => "user page - comments",
-          "userrulez" => "user page - rulez",
-          "usersucks" => "user page - sucks",
-          "commentshours" => "comments page - hours",
-          "topicposts" => "topic page - posts",
-        );
-        $this->namesSwitch = array(
-          //select
-          "logos" => "logos",
-          "topbar" => "top bar",
-          "bottombar" => "bottom bar",
-/*
+            "bbsbbstopics" => "bbs page - bbs topics",
+            "prodlistprods" => "prodlist page - prods",
+            "userlistusers" => "userlist page - users",
+            "searchprods" => "search page - prods",
+            "userlogos" => "user page - logos",
+            "userprods" => "user page - prods",
+            "usergroups" => "user page - groups",
+            "userparties" => "user page - parties",
+            "userscreenshots" => "user page - screenshots",
+            "usernfos" => "user page - nfos",
+            "usercomments" => "user page - comments",
+            "userrulez" => "user page - rulez",
+            "usersucks" => "user page - sucks",
+            "commentshours" => "comments page - hours",
+            "topicposts" => "topic page - posts",
+        ];
+        $this->namesSwitch = [
+            //select
+            "logos" => "logos",
+            "topbar" => "top bar",
+            "bottombar" => "bottom bar",
+            /*
           "indexcdc" => "front page - cdc",
           "indexsearch" => "front page - search",
           "indexstats" => "front page - stats",
           "indexlinks" => "front page - links",
 */
-          "indexplatform" => "front page - show platform icons",
-          "indextype" => "front page - show type icons",
-          "indexwhoaddedprods" => "front page - who added prods",
-//      "indexwhocommentedprods" => "front page - who commented prods",
-          "topichidefakeuser" => "bbs page - hide fakeuser",
-          "prodhidefakeuser" => "prod page - hide fakeuser",
-          "displayimages" => "[img][/img] tags should be displayed as...",
-//      "indexbbsnoresidue" => "residue threads on the front page are...",
-        );
+            "indexplatform" => "front page - show platform icons",
+            "indextype" => "front page - show type icons",
+            "indexwhoaddedprods" => "front page - who added prods",
+            //      "indexwhocommentedprods" => "front page - who commented prods",
+            "topichidefakeuser" => "bbs page - hide fakeuser",
+            "prodhidefakeuser" => "prod page - hide fakeuser",
+            "displayimages" => "[img][/img] tags should be displayed as...",
+            //      "indexbbsnoresidue" => "residue threads on the front page are...",
+        ];
 
         $this->formifier = new Formifier();
 
         global $currentUserSettings;
-        $this->fieldsSettings = array();
+        $this->fieldsSettings = [];
         $a = array_merge($this->namesNumeric, $this->namesSwitch);
         foreach ($a as $k => $v) {
-            $this->fieldsSettings[$k] = array();
+            $this->fieldsSettings[$k] = [];
             $this->fieldsSettings[$k]["value"] = $currentUserSettings ? $currentUserSettings->$k : $v;
             if (@$this->namesNumeric[$k]) {
                 $this->fieldsSettings[$k]["name"] = $this->namesNumeric[$k];
@@ -462,19 +462,19 @@ class PouetBoxCustomizerSitewide extends PouetBox
                 $this->fieldsSettings[$k]["name"] = $this->namesSwitch[$k];
                 $this->fieldsSettings[$k]["type"] = "select";
                 $this->fieldsSettings[$k]["assoc"] = true;
-                $this->fieldsSettings[$k]["fields"] = array(0 => "hidden",1 => "displayed");
+                $this->fieldsSettings[$k]["fields"] = [0 => "hidden",1 => "displayed"];
             }
         }
         // exceptions!
         $this->fieldsSettings["commentshours"]["max"] = 24 * 7;
         $this->fieldsSettings["topicposts"]["min"] = 1;
         //$this->fieldsSettings["indexojnews"]["max"] = 10;
-        $this->fieldsSettings["displayimages"]["fields"] = array(0 => "links",1 => "images");
+        $this->fieldsSettings["displayimages"]["fields"] = [0 => "links",1 => "images"];
         //$this->fieldsSettings["indexbbsnoresidue"]["fields"] = array(0=>"shown",1=>"hidden");
         $this->fieldsSettings["prodcomments"]["name"] = "prod page - number of comments";
         $this->fieldsSettings["prodcomments"]["type"] = "select";
         $this->fieldsSettings["prodcomments"]["assoc"] = true;
-        $this->fieldsSettings["prodcomments"]["fields"] = array(-1 => "all",0 => "hide",5 => "5",10 => "10",25 => "25",50 => "50",100 => "100");
+        $this->fieldsSettings["prodcomments"]["fields"] = [-1 => "all",0 => "hide",5 => "5",10 => "10",25 => "25",50 => "50",100 => "100"];
         $this->fieldsSettings["prodcomments"]["value"] = $currentUserSettings ? $currentUserSettings->prodcomments : $DEFAULT_USERSETTINGS->prodcomments;
 
 
@@ -498,22 +498,22 @@ class PouetBoxCustomizerSitewide extends PouetBox
         global $currentUser;
         global $currentUserSettings;
         global $ephemeralStorage;
-        $sql = array();
+        $sql = [];
         foreach ($this->fieldsSettings as $k => $v) {
             if ($v["type"] == "number") {
-                $sql[$k] = min($v["max"], max($v["min"], (int)($data[$k])));
+                $sql[$k] = min($v["max"], max($v["min"], (int) ($data[$k])));
             } else {
-                $sql[$k] = (int)$data[$k];
+                $sql[$k] = (int) $data[$k];
             }
-            $currentUserSettings->$k = (int)$sql[$k];
+            $currentUserSettings->$k = (int) $sql[$k];
         }
-        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id = %d", (int)get_login_id()))) {
-            SQLLib::UpdateRow("usersettings", $sql, "id=".(int)get_login_id());
+        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id = %d", (int) get_login_id()))) {
+            SQLLib::UpdateRow("usersettings", $sql, "id=" . (int) get_login_id());
         } else {
-            $sql["id"] = (int)get_login_id();
+            $sql["id"] = (int) get_login_id();
             SQLLib::InsertRow("usersettings", $sql);
         }
-        $ephemeralStorage->set("settings:".$currentUser->id, $currentUserSettings);
+        $ephemeralStorage->set("settings:" . $currentUser->id, $currentUserSettings);
     }
     public function RenderContent()
     {
@@ -544,15 +544,15 @@ class PouetBoxCustomizerPanic extends PouetBox
         require_once("include_pouet/default_usersettings.php");
         $a = get_object_vars($DEFAULT_USERSETTINGS);
 
-        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id=%d", (int)$currentUser->id))) {
-            SQLLib::UpdateRow("usersettings", $a, "id=".(int)$currentUser->id);
+        if (SQLLib::SelectRow(sprintf_esc("select id from usersettings where id=%d", (int) $currentUser->id))) {
+            SQLLib::UpdateRow("usersettings", $a, "id=" . (int) $currentUser->id);
         } else {
-            SQLLib::InsertRow("usersettings", array_merge(array("id" => (int)$currentUser->id), $a));
+            SQLLib::InsertRow("usersettings", array_merge(["id" => (int) $currentUser->id], $a));
         }
         $currentUserSettings = $DEFAULT_USERSETTINGS;
-        $ephemeralStorage->set("settings:".$currentUser->id, $currentUserSettings);
+        $ephemeralStorage->set("settings:" . $currentUser->id, $currentUserSettings);
 
-        return array();
+        return [];
     }
     public function RenderContent()
     {

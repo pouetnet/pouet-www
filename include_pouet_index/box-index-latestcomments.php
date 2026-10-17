@@ -42,26 +42,26 @@ class PouetBoxIndexLatestComments extends PouetBoxCachable
     }
     public function GetParameterSettings()
     {
-        return array(
-          "limit" => array("name" => "number of comments visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX),
-          "showUser" => array("name" => "show user avatar","default" => true,"type" => "checkbox"),
-          "showVote" => array("name" => "show vote with comment","default" => false,"type" => "checkbox"),
-        );
+        return [
+            "limit" => ["name" => "number of comments visible","default" => 5,"min" => 1,"max" => POUET_CACHE_MAX],
+            "showUser" => ["name" => "show user avatar","default" => true,"type" => "checkbox"],
+            "showVote" => ["name" => "show vote with comment","default" => false,"type" => "checkbox"],
+        ];
     }
 
     public function LoadFromDB()
     {
         $s = new BM_Query();
         $s->AddTable("(select * from comments order by comments.addedDate desc limit 25) as c");
-        $s->attach(array("c" => "which"), array("prods as prod" => "id"));
-        $s->attach(array("c" => "who"), array("users as user" => "id"));
+        $s->attach(["c" => "which"], ["prods as prod" => "id"]);
+        $s->attach(["c" => "who"], ["users as user" => "id"]);
         $s->AddOrder("c.addedDate desc");
         $s->AddField("c.id as commentID");
         $s->AddField("c.rating as rating");
         $s->SetLimit(POUET_CACHE_MAX);
         $this->data = $s->perform();
 
-        $a = array();
+        $a = [];
         foreach ($this->data as $p) {
             $a[] = &$p->prod;
         }
@@ -90,7 +90,7 @@ class PouetBoxIndexLatestComments extends PouetBoxCachable
                 if ($d->rating > 0) {
                     $p = "rulez";
                 }
-                echo "<span class='rowvote ".$p."' title='".$p."'>".$p."</span>\n";
+                echo "<span class='rowvote " . $p . "' title='" . $p . "'>" . $p . "</span>\n";
             }
             echo "</li>\n";
             if (++$n == $this->limit) {
