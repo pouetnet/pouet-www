@@ -26,6 +26,10 @@ passes, and a merged PR is live on www.pouet.net within a minute.
 If your change alters the database schema, update `pouet.sql` in the same
 PR.
 
+PHP follows [PER Coding Style 3.0](https://www.php-fig.org/per/coding-style/).
+CI flags style issues without blocking the merge; `php-cs-fixer fix`
+(3.95.27) fixes them.
+
 ## Team
 
 ### Former maintainers

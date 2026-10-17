@@ -1,0 +1,26 @@
+# PER-CS style check. Also called by the other pouet-* site repos
+# (workflow_call), each with its own .php-cs-fixer.dist.php. Advisory: not a
+# required check. Fix what it reports with `php-cs-fixer fix`.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          # Same version as pouet-infra's `just fix-php`
+          tools: php-cs-fixer:3.95.27
+      - name: Check style
+        run: php-cs-fixer fix --dry-run --diff --using-cache=no
