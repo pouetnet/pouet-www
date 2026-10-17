@@ -4,7 +4,8 @@ interface IEphemeralStorage
 {
     public static function available();
     public function get($key);
-    public function set($key, $value);
+    // $ttl: seconds until the key expires, 0 for never. Only Redis honours it
+    public function set($key, $value, $ttl = 0);
     public function has($key);
 }
 define("EPHEMERALSTORAGE_PREFIX", "POUET:EPHSTOR:");
@@ -26,7 +27,7 @@ class SessionStorage implements IEphemeralStorage
     {
         return $_SESSION[EPHEMERALSTORAGE_PREFIX.$key];
     }
-    public function set($key, $value)
+    public function set($key, $value, $ttl = 0)
     {
         $_SESSION[EPHEMERALSTORAGE_PREFIX.$key] = $value;
     }
@@ -58,7 +59,7 @@ class FileStorage implements IEphemeralStorage
     {
         return unserialize(file_get_contents($this->keyToFilename($key)));
     }
-    public function set($key, $value)
+    public function set($key, $value, $ttl = 0)
     {
         @file_put_contents($this->keyToFilename($key), serialize($value));
     }
@@ -84,9 +85,13 @@ class RedisStorage implements IEphemeralStorage
     {
         return unserialize($this->redis->get(EPHEMERALSTORAGE_PREFIX.$key));
     }
-    public function set($key, $value)
+    public function set($key, $value, $ttl = 0)
     {
-        $this->redis->set(EPHEMERALSTORAGE_PREFIX.$key, serialize($value));
+        if ($ttl > 0) {
+            $this->redis->setex(EPHEMERALSTORAGE_PREFIX.$key, $ttl, serialize($value));
+        } else {
+            $this->redis->set(EPHEMERALSTORAGE_PREFIX.$key, serialize($value));
+        }
     }
     public function has($key)
     {
