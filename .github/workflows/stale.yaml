@@ -8,13 +8,12 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       issues: write
       pull-requests: write
     steps:
       - uses: actions/stale@v9
         with:
-          delete-branch: true
           remove-stale-when-updated: true
           days-before-issue-stale: -1 # Disables stale issues
           stale-pr-message: 'This pull request has not had activity in 30 days. If there is no activity by the next day it will be closed. Closing old PRs keeps the repository clean, reduces clutter, and focuses efforts on active contributions. It prevents confusion, ensures relevance, and improves project maintainability.'
