@@ -628,6 +628,17 @@ function redirect($path)
     exit();
 }
 
+// Sessions start only when needed: bootstrap starts one for visitors with a
+// session cookie, login.php and CSRF tokens start their own. Starting one on
+// every request left a session in Redis for each cookieless bot and API call
+// (pouet-infra#55).
+function start_session()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+}
+
 function get_login_id()
 {
     return @$_SESSION["user"] ? $_SESSION["user"]->id : 0;

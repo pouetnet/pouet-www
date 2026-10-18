@@ -3,6 +3,10 @@
 require_once("bootstrap.inc.php");
 require_once("include_pouet/pouet-user.php");
 
+// A first visit has no session cookie yet, but the return URL and SceneID's
+// OAuth state must survive the round trip to SceneID
+start_session();
+
 //$csrf = new CSRFProtect();
 if (@$_GET["error"]) {
     redirect("error.php?e=" . rawurlencode($_GET["error_description"]));
