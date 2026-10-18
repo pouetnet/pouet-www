@@ -1,0 +1,6 @@
+# Logging in and out only redirects (to SceneID, or back to the front page),
+# yet crawlers followed the "log in" link on every page ~260k times a day in
+# Oct 2026 (pouet-infra#55)
+User-agent: *
+Disallow: /login.php
+Disallow: /logout.php
