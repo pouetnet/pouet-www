@@ -91,7 +91,7 @@ class PouetParty extends BM_Class
     }
     public function RenderResultsLink($year)
     {
-        return "[<a href='party_results.php?which=" . $this->id . "&amp;when=" . $year . "'>results</a>] ";
+        return sprintf("[<a href='party_results.php?which=%d&amp;when=%d'>results</a>] ", $this->id, $year);
     }
 };
 

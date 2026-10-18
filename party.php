@@ -126,8 +126,8 @@ class PouetBoxPartyView extends PouetBox
 
         $this->party->addedUser = PouetUser::spawn($this->party->addedUser);
 
-        if (isset($_GET["when"])) {
-            $this->year = $_GET["when"];
+        if (!empty($_GET["when"])) {
+            $this->year = (int) $_GET["when"];
         } else {
             $r = SQLLib::selectRow(sprintf_esc("select party_year from prods where party = %d order by rand() limit 1", $_GET["which"]));
             if (!$r) {
