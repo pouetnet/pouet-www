@@ -9,6 +9,14 @@ if (!file_exists(POUET_ROOT_LOCAL . "/include_generic/credentials.inc.php")) {
 
 require_once(POUET_ROOT_LOCAL . "/include_generic/credentials.inc.php");
 
+// Credentials files that predate these get the prod URLs
+if (!defined("POUET_API_URL")) {
+    define("POUET_API_URL", "https://api.pouet.net/");
+}
+if (!defined("POUET_CARDBOARD_URL")) {
+    define("POUET_CARDBOARD_URL", "https://cardboard.pouet.net/");
+}
+
 if (@$_SERVER['PATH_INFO']) {
     $path = strrchr($_SERVER['PATH_INFO'], "/");
     if ($path === false) {

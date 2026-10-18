@@ -268,7 +268,7 @@ class PouetBoxSubmitProd extends PouetBox
                 "infoAfter" => "<b>important !</b><br>this has to be a link to a downloadable file, not to a website or a video version !"
                     . " ad-ridden \"one-click\" hosting links will be dealt with extreme prejudice -"
                     . " if it's not a direct link to the file on the first click, it will get deleted !"
-                    . " (scene.org links are an exception - <a href='http://www.pouet.net/faq.php#faq37'>read the faq</a> if you're confused)",
+                    . " (scene.org links are an exception - <a href='faq.php#faq37'>read the faq</a> if you're confused)",
                 "info" => " ",
                 "required" => true,
                 "maxlength" => 256,
