@@ -4,10 +4,7 @@ class CSRFProtect
 {
     public function __construct()
     {
-        if (session_id() == '') {
-            die("Initialize sessions please!");
-        }
-
+        // Without a session there are no tokens yet: GenerateTokens starts one
         if (@$_SESSION["CSRFProtect"]) {
             // garbage collect
             foreach ($_SESSION["CSRFProtect"] as $k => $v) {
@@ -19,6 +16,7 @@ class CSRFProtect
     }
     public function GenerateTokens()
     {
+        start_session();
         $name  = "Protect" . bin2hex(random_bytes(4));
         $token = bin2hex(random_bytes(32));
         $_SESSION["CSRFProtect"][$name]["token"] = $token;

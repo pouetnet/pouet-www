@@ -3,6 +3,15 @@
 require_once("bootstrap.inc.php");
 require_once("include_pouet/pouet-user.php");
 
+// A first visit has no session cookie yet, but the return URL and SceneID's
+// OAuth state must survive the round trip to SceneID. Crawlers follow the
+// "log in" link on every page too (~260k hits a day in Oct 2026, nearly none
+// coming back logged in), so this session only lasts an hour: the first page
+// after a successful login extends it to bootstrap's year. If a session is
+// already active, PHP refuses the change and the session keeps its year.
+@ini_set('session.gc_maxlifetime', 60 * 60);
+start_session();
+
 //$csrf = new CSRFProtect();
 if (@$_GET["error"]) {
     redirect("error.php?e=" . rawurlencode($_GET["error_description"]));

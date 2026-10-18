@@ -49,6 +49,7 @@ require_once(POUET_ROOT_LOCAL . "/include_pouet/request-classes-base.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet/request-classes-prod.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet/request-classes-group.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet/pouet-box.php");
+require_once(POUET_ROOT_LOCAL . "/include_pouet/pouet-sceneid.php");
 
 require_once(POUET_ROOT_LOCAL . "/include_pouet/pouet-api.php");
 require_once(POUET_ROOT_LOCAL . "/include_pouet/pouet-prod.php");
@@ -69,6 +70,9 @@ if (POUET_TEST) {
 
 $lifetime = 60 * 60 * 24 * 365;
 @ini_set('session.cookie_lifetime', $lifetime);
+// How long Redis keeps a session after its last use. The server-wide default
+// is 7 days, which logged people out long before their cookie expired.
+@ini_set('session.gc_maxlifetime', $lifetime);
 
 session_name("POUETSESS4");
 session_set_cookie_params([
@@ -79,7 +83,11 @@ session_set_cookie_params([
     "httponly" => true,
     "samesite" => "Lax",
 ]);
-@session_start();
+// Without a session cookie, the session waits until something needs it
+// (login.php, a CSRF token): see start_session()
+if (isset($_COOKIE[session_name()])) {
+    start_session();
+}
 
 $sceneID = null;
 if (POUET_TEST && class_exists("MySceneID")) {
@@ -88,8 +96,8 @@ if (POUET_TEST && class_exists("MySceneID")) {
         "clientSecret" => SCENEID_PASS,
         "redirectURI" => POUET_ROOT_URL . "login.php",
     ]);
-} elseif (class_exists("SceneID3")) {
-    $sceneID = new SceneID3([
+} elseif (class_exists("PouetSceneID")) {
+    $sceneID = new PouetSceneID([
         "clientID" => SCENEID_USER,
         "clientSecret" => SCENEID_PASS,
         "redirectURI" => POUET_ROOT_URL_SECURE . "login.php",
@@ -125,8 +133,6 @@ if (defined("POUET_EXCEPTION_LOG")) {
 if ($currentUser && $currentUser->IsBanned()) {
     $_SESSION = $currentUser = null;
 }
-
-$_SESSION["keepalive"] = str_pad("", rand(1, 10), "x") . rand(1, 10000);
 
 $timer["page"]["start"] = microtime_float();
 
