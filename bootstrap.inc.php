@@ -70,6 +70,9 @@ if (POUET_TEST) {
 
 $lifetime = 60 * 60 * 24 * 365;
 @ini_set('session.cookie_lifetime', $lifetime);
+// How long Redis keeps a session after its last use. The server-wide default
+// is 7 days, which logged people out long before their cookie expired.
+@ini_set('session.gc_maxlifetime', $lifetime);
 
 session_name("POUETSESS4");
 session_set_cookie_params([
