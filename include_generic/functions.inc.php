@@ -84,18 +84,19 @@ function secToReadable($dif, $toDays)
 {
     $s = "";
     if ($toDays) {
-        $dif = (int) ($dif / (60 * 60 * 24));
-        $s = ($dif % 30) . "d"      ;
-        $dif = (int) ($dif / 30);
-        if (!$dif) {
+        // count calendar months and years back from now, rather than
+        // fixed 30-day months and 360-day years
+        $now = new DateTimeImmutable();
+        $diff = $now->modify("-" . (int) $dif . " seconds")->diff($now);
+        $s = $diff->d . "d";
+        if (!$diff->y && !$diff->m) {
             return $s;
         }
-        $s = ($dif % 12) . "m " . $s;
-        $dif = (int) ($dif / 12);
-        if (!$dif) {
+        $s = $diff->m . "m " . $s;
+        if (!$diff->y) {
             return $s;
         }
-        $s = $dif . "y " . $s;
+        $s = $diff->y . "y " . $s;
     } else {
         $s = ($dif % 60) . "s"      ;
         $dif = (int) ($dif / 60);
