@@ -54,4 +54,13 @@ echo "</header>\n";
 if (POUET_TEST) {
     echo "<div id='testbanner'>THIS POUET IS IN TEST MODE!</div>\n";
 }
+
+// TEMPORARY: remove with the read-only block in .htaccess
 ?>
+<div id="readonlybanner">
+  <strong>pouët is read-only for now.</strong>
+  A <a href="https://www.php.net/archive/2026.php#2026-10-20-1">critical security fix for PHP</a>,
+  the language pouët runs on, comes out today, 21 October 2026. Until it's installed on our server,
+  we refuse everything that sends data to the site: you can browse and log in as usual, but you can't
+  comment, vote, post on the BBS or the oneliner, submit or edit anything, or upload files.
+</div>
