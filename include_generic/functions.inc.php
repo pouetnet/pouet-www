@@ -87,7 +87,7 @@ function secToReadable($dif, $toDays)
         // count calendar months and years back from now, rather than
         // fixed 30-day months and 360-day years
         $now = new DateTimeImmutable();
-        $diff = $now->modify("-" . (int) $dif . " seconds")->diff($now);
+        $diff = $now->setTimestamp($now->getTimestamp() - (int) $dif)->diff($now);
         $s = $diff->d . "d";
         if (!$diff->y && !$diff->m) {
             return $s;
