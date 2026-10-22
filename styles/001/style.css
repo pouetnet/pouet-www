@@ -2199,22 +2199,6 @@ input.autocompleteSearch {
   font-weight: bold;
 }
 
-/* TEMPORARY: remove with the read-only banner in include_pouet/header.php */
-#readonlybanner {
-  background: #AA5555;
-  border: 2px solid black;
-  color: #FFFFFF;
-  margin: 10px auto;
-  max-width: 900px;
-  padding: 10px;
-  text-align: center;
-}
-
-#readonlybanner a {
-  color: #FFFFFF;
-  text-decoration: underline;
-}
-
 #testbanner {
   background: none repeat scroll 0 0 #AA5555;
   border: 2px solid black;
