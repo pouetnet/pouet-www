@@ -1,15 +1,3 @@
-# TEMPORARY: remove once prod runs the PHP security release of 2026-10-21
-# (https://www.php.net/archive/2026.php#2026-10-20-1). Pouet is read-only
-# until then: PHP parses request bodies (form posts, file uploads) before
-# any of our code runs, so refuse them here, before they reach PHP
-RewriteEngine On
-RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$ [OR]
-RewriteCond %{HTTP:Content-Type} multipart/ [NC]
-RewriteRule ^ - [F]
-<If "! (%{REQUEST_METHOD} in {'GET', 'HEAD'}) || %{HTTP:Content-Type} =~ m#multipart/#i">
-  ErrorDocument 403 "pouet.net is read-only for now: we're waiting for a critical PHP security fix to be installed on our server. Posting, voting and uploading will be back soon."
-</If>
-
 <IfModule mod_rewrite.c>
 
 RewriteEngine On
