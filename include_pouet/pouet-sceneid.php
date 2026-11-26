@@ -80,4 +80,24 @@ class PouetSceneID extends SceneID3
 
         $this->storage = new PouetSceneIDStorage();
     }
+
+    public function GenerateState()
+    {
+        return bin2hex(random_bytes(32));
+    }
+
+    public function ProcessAuthResponse($code = null, $state = null)
+    {
+        $state = $state ?? ($_GET["state"] ?? null);
+        $expected = $this->storage->Get("state");
+        if (!is_string($state) || !is_string($expected) || !hash_equals($expected, $state)) {
+            throw new SceneID3Exception("State mismatch - try clearing your browser cookies!");
+        }
+        try {
+            return parent::ProcessAuthResponse($code, $state);
+        } finally {
+            $this->storage->Set("state", null);
+        }
+    }
+
 }
