@@ -25,6 +25,7 @@ if (@$_SERVER['PATH_INFO']) {
     } else {
         $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
         header("HTTP/1.1 404 Not Found");
+        $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
         printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
         exit();
     }
