@@ -17,6 +17,9 @@ if (!defined("POUET_CARDBOARD_URL")) {
     define("POUET_CARDBOARD_URL", "https://cardboard.pouet.net/");
 }
 
+// Before the PATH_INFO check, which uses _html()
+require_once(POUET_ROOT_LOCAL . "/include_generic/functions.inc.php");
+
 if (@$_SERVER['PATH_INFO']) {
     $path = strrchr($_SERVER['PATH_INFO'], "/");
     if ($path === false) {
@@ -25,7 +28,7 @@ if (@$_SERVER['PATH_INFO']) {
     } else {
         $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
         header("HTTP/1.1 404 Not Found");
-        $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
+        $urlGuess = _html($urlGuess);
         printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
         exit();
     }
@@ -34,7 +37,6 @@ if (@$_SERVER['PATH_INFO']) {
 
 require_once(POUET_ROOT_LOCAL . "/include_generic/sqllib.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_generic/sceneid3/sceneid3.inc.php");
-require_once(POUET_ROOT_LOCAL . "/include_generic/functions.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_generic/libbb.php");
 require_once(POUET_ROOT_LOCAL . "/include_generic/orm.inc.php");
 require_once(POUET_ROOT_LOCAL . "/include_generic/formifier.inc.php");
