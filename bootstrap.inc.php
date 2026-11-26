@@ -23,6 +23,9 @@ if (@$_SERVER['PATH_INFO']) {
         header("HTTP/1.1 404 Not Found");
         die("Invalid path");
     } else {
+        // PATH_INFO comes URL-decoded: encode the name again, or a %3F, %23
+        // or %25 in it would turn into a real ?, # or % in the link
+        $path = "/" . rawurlencode(substr($path, 1));
         $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
         header("HTTP/1.1 404 Not Found");
         $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
