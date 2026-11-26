@@ -42,6 +42,37 @@ class PouetSceneID extends SceneID3
         $this->storage = new PouetSceneIDStorage();
     }
 
+    // Same as SceneID3's RequestCURL(), but with TLS certificate checks on:
+    // the library turns them off, so anyone on the network path to
+    // id.scene.org could read our client secret and the login codes, and
+    // answer /me with any user. No fallback without curl, since the
+    // library's file_get_contents() one turns the checks off too.
+    protected function Request($url, $method = "GET", $contentArray = [], $headerArray = [])
+    {
+        $headers = [];
+        foreach ($headerArray as $k => $v) {
+            $headers[] = $k . ": " . $v;
+        }
+
+        $getArray = $method == "GET" ? $contentArray : [];
+        $getArray["format"] = $this->format;
+        $url .= "?" . http_build_query($getArray);
+
+        $ch = curl_init();
+        if ($method == "POST") {
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($contentArray));
+        }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        return curl_exec($ch);
+    }
+
     public function GenerateState()
     {
         return bin2hex(random_bytes(32));
