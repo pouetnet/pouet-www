@@ -29,43 +29,90 @@ class PouetSceneIDStorage implements SceneID3StorageInterface
 
 class PouetSceneID extends SceneID3
 {
+    // Time spent waiting on the network doesn't count toward
+    // max_execution_time, so a hung id.scene.org would hold PHP-FPM workers
+    private const CONNECT_TIMEOUT = 5;
+    private const TIMEOUT = 10;
+
+    // Replaces SceneID3's, which didn't check certificates, had no timeouts,
+    // and returned false when the request failed: callers took that for an
+    // empty answer. This throws instead, so login.php shows the cause and
+    // GetSceneIDData falls back to its cache. 4xx answers still come back,
+    // since SceneID3 reads the OAuth errors in their JSON bodies.
     protected function Request($url, $method = "GET", $contentArray = [], $headerArray = [])
     {
         $query = ["format" => $this->format];
+        $body = null;
         if ($method === "GET") {
             $query = array_merge($contentArray, $query);
+        } else {
+            $body = http_build_query($contentArray);
+            $headerArray["Content-Type"] = "application/x-www-form-urlencoded";
         }
-        $url .= "?" . http_build_query($query);
+        // SceneID3::User() passes a URL that already has "?id=N"
+        $fullURL = $url . (str_contains($url, "?") ? "&" : "?") . http_build_query($query);
         $headers = [];
         foreach ($headerArray as $key => $value) {
             $headers[] = $key . ": " . $value;
         }
+
         if (function_exists("curl_init")) {
-            $curl = curl_init($url);
-            curl_setopt_array($curl, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => false,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER => $headers,
-            ]);
-            if ($method === "POST") {
-                curl_setopt($curl, CURLOPT_POST, true);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($contentArray));
-            }
-            $data = curl_exec($curl);
-            curl_close($curl);
-            return $data;
+            [$status, $data] = $this->SendCurl($fullURL, $method, $headers, $body);
+        } else {
+            [$status, $data] = $this->SendStream($fullURL, $method, $headers, $body);
         }
-        return file_get_contents($url, false, stream_context_create([
+
+        // Redirects aren't followed, so the Authorization header can't leave
+        // for another host, and neither a 3xx nor a 5xx body is a SceneID answer
+        $class = intdiv($status, 100);
+        if ($class !== 2 && $class !== 4) {
+            throw new SceneID3Exception("SceneID answered HTTP " . $status . " for " . $url);
+        }
+        return $data;
+    }
+
+    private function SendCurl($url, $method, $headers, $body)
+    {
+        $curl = curl_init($url);
+        curl_setopt_array($curl, [
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+            CURLOPT_TIMEOUT => self::TIMEOUT,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        if ($body !== null) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+        }
+        $data = curl_exec($curl);
+        if ($data === false) {
+            throw new SceneID3Exception("SceneID request failed: " . curl_error($curl));
+        }
+        return [curl_getinfo($curl, CURLINFO_RESPONSE_CODE), $data];
+    }
+
+    private function SendStream($url, $method, $headers, $body)
+    {
+        $data = @file_get_contents($url, false, stream_context_create([
             "http" => [
                 "method" => $method,
                 "header" => implode("\r\n", $headers),
-                "content" => $method === "POST" ? http_build_query($contentArray) : "",
+                "content" => $body ?? "",
                 "follow_location" => 0,
+                // Return 4xx and 5xx bodies, not false and a warning
+                "ignore_errors" => true,
+                "timeout" => self::TIMEOUT,
             ],
             "ssl" => ["verify_peer" => true, "verify_peer_name" => true],
         ]));
+        if ($data === false) {
+            throw new SceneID3Exception("SceneID request failed: " . (error_get_last()["message"] ?? "unknown error"));
+        }
+        preg_match('{^HTTP/\S+ (\d{3})}', $http_response_header[0] ?? "", $match);
+        return [(int) ($match[1] ?? 0), $data];
     }
 
     // Same as SceneID3's, minus the session storage
