@@ -51,7 +51,13 @@ class PouetSceneID extends SceneID3
     {
         $state = $state ?? ($_GET["state"] ?? null);
         $expected = $this->storage->Get("state");
-        if (!is_string($state) || !is_string($expected) || !hash_equals($expected, $state)) {
+        // No state stored: this login already went through, or the session
+        // it was started in is gone. Clearing cookies wouldn't help, and
+        // would log out whoever already logged in with it.
+        if (!is_string($expected)) {
+            throw new SceneID3Exception("This login has expired or was already used - please log in again!");
+        }
+        if (!is_string($state) || !hash_equals($expected, $state)) {
             throw new SceneID3Exception("State mismatch - try clearing your browser cookies!");
         }
         try {
