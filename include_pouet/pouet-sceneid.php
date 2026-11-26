@@ -29,6 +29,10 @@ class PouetSceneIDStorage implements SceneID3StorageInterface
 
 class PouetSceneID extends SceneID3
 {
+    // How long a login started on pouet can take at SceneID: the hour a
+    // first visitor's session lasts (login.php)
+    private const STATE_LIFETIME = 60 * 60;
+
     // Same as SceneID3's, minus the session storage
     public function __construct($options = [])
     {
@@ -47,6 +51,16 @@ class PouetSceneID extends SceneID3
         return bin2hex(random_bytes(32));
     }
 
+    // The session can last a year, and so would a state nobody came back
+    // with: note when it was handed out, so ProcessAuthResponse() can let
+    // it expire
+    public function GetAuthURL()
+    {
+        $url = parent::GetAuthURL();
+        $this->storage->Set("stateTime", time());
+        return $url;
+    }
+
     public function ProcessAuthResponse($code = null, $state = null)
     {
         $state = $state ?? ($_GET["state"] ?? null);
@@ -55,9 +69,14 @@ class PouetSceneID extends SceneID3
             throw new SceneID3Exception("State mismatch - try clearing your browser cookies!");
         }
         try {
+            $stateTime = $this->storage->Get("stateTime");
+            if (!is_int($stateTime) || time() - $stateTime > self::STATE_LIFETIME) {
+                throw new SceneID3Exception("Your login took too long - please log in again!");
+            }
             return parent::ProcessAuthResponse($code, $state);
         } finally {
             $this->storage->Set("state", null);
+            $this->storage->Set("stateTime", null);
         }
     }
 
