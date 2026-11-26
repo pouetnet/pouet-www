@@ -124,13 +124,13 @@ class PouetBoxModificationRequest extends PouetBox
             echo "<ul>\n";
             foreach ($REQUESTTYPES as $k => $v) {
                 if (@$_REQUEST["prod"] && $v::GetItemType() == "prod") {
-                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html($k), _html($v::Describe()));
+                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", _html(selfPath()), _html($k), _html($v::Describe()));
                 }
                 if (@$_REQUEST["group"] && $v::GetItemType() == "group") {
-                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html($k), _html($v::Describe()));
+                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", _html(selfPath()), _html($k), _html($v::Describe()));
                 }
             }
-            printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html("other"), _html("other request..."));
+            printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", _html(selfPath()), _html("other"), _html("other request..."));
             echo "</ul>\n";
             $error = " ";
             echo "  </div>\n";

@@ -21,7 +21,7 @@ class PouetBoxLogoVote extends PouetBox
     public function RenderFooter()
     {
         echo "  <div class='foot'>";
-        echo "    <form action='" . $_SERVER["REQUEST_URI"] . "' method='post'>";
+        echo "    <form action='" . _html($_SERVER["REQUEST_URI"]) . "' method='post'>";
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
         echo "      <input name='logoID' type='hidden' value='" . (int) $this->logo->id . "'>";
