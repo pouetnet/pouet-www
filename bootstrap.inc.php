@@ -19,6 +19,11 @@ if (!defined("POUET_CARDBOARD_URL")) {
 
 if (@$_SERVER['PATH_INFO']) {
     $path = strrchr($_SERVER['PATH_INFO'], "/");
+    if ($path === "/") {
+        // Nothing after the last slash, as in prod.php/?which=1: point back
+        // to the script itself, not to the front page
+        $path = "/" . basename($_SERVER["SCRIPT_NAME"]);
+    }
     if ($path === false) {
         header("HTTP/1.1 404 Not Found");
         die("Invalid path");
