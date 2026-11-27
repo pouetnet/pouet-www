@@ -25,6 +25,15 @@ class PouetSceneIDStorage implements SceneID3StorageInterface
         }
         return @$this->data[$key];
     }
+
+    // Not in SceneID3StorageInterface, but SceneID3OAuth::Reset() calls it
+    public function Reset()
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION["sceneID"]);
+        }
+        $this->data = [];
+    }
 }
 
 // The login a SceneID answer belongs to is used up or expired: the visitor
@@ -33,6 +42,10 @@ class PouetSceneIDLoginGoneException extends SceneID3Exception {}
 
 class PouetSceneID extends SceneID3
 {
+    // How long a login started on pouet can take at SceneID: the hour a
+    // first visitor's session lasts (login.php)
+    private const STATE_LIFETIME = 60 * 60;
+
     // Time spent waiting on the network doesn't count toward
     // max_execution_time, so a hung id.scene.org would hold PHP-FPM workers
     private const CONNECT_TIMEOUT = 5;
@@ -137,6 +150,16 @@ class PouetSceneID extends SceneID3
         return bin2hex(random_bytes(32));
     }
 
+    // The session can last a year, and so would a state nobody came back
+    // with: note when it was handed out, so ProcessAuthResponse() can let
+    // it expire
+    public function GetAuthURL()
+    {
+        $url = parent::GetAuthURL();
+        $this->storage->Set("stateTime", time());
+        return $url;
+    }
+
     public function ProcessAuthResponse($code = null, $state = null)
     {
         $state = $state ?? ($_GET["state"] ?? null);
@@ -160,18 +183,23 @@ class PouetSceneID extends SceneID3
         }
         global $ephemeralStorage;
         try {
+            $stateTime = $this->storage->Get("stateTime");
+            if (!is_int($stateTime) || time() - $stateTime > self::STATE_LIFETIME) {
+                throw new SceneID3Exception("Your login took too long - please log in again!");
+            }
             // The session is saved when the request ends, and isn't locked
             // until then: a copy of this answer arriving while this request
             // waits on SceneID would still find the state, and send the same
             // code, which SceneID refuses the second time. Only one request
-            // can claim the state in Redis; the claim just has to outlast
-            // this request.
-            if (!$ephemeralStorage->add("sceneid-state:" . $state, true, 60 * 60)) {
+            // can claim the state in Redis, for as long as the state could
+            // still be accepted.
+            if (!$ephemeralStorage->add("sceneid-state:" . $state, true, self::STATE_LIFETIME)) {
                 throw new PouetSceneIDLoginGoneException("This login was already used - please log in again!");
             }
             return parent::ProcessAuthResponse($code, $state);
         } finally {
             $this->storage->Set("state", null);
+            $this->storage->Set("stateTime", null);
         }
     }
 

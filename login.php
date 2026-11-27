@@ -105,7 +105,7 @@ try {
     }
 
     if ($welcome) {
-        redirect("welcome.php" . $returnURL ? "?return=" . rawurlencode(basename($returnURL)) : "");
+        redirect("welcome.php" . ($returnURL ? "?return=" . rawurlencode(basename($returnURL)) : ""));
     } else {
         redirect(basename($returnURL ? $returnURL : "index.php"));
     }
