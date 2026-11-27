@@ -280,7 +280,9 @@ class PouetBoxAccount extends PouetBox
             $sql[$k] = (int) trim($data[$k]);
         }
 
-        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/" . $sql["avatar"])) {
+        // Only a name from the avatar list the form offers: checking that the
+        // file exists also let paths like ../files/... through
+        if (!in_array($sql["avatar"], array_map("basename", $avatars), true)) {
             $sql["avatar"] = basename($avatars[ array_rand($avatars) ]);
         }
 
