@@ -931,6 +931,12 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
             $_in[$k] = @$input[$k];
         }
 
+        // Keep only real types and platforms: the moderators' queue prints
+        // the requested types as they are. Both are required, so none left
+        // means no change
+        $_in["type"] = array_values(array_intersect(is_array($_in["type"]) ? $_in["type"] : [], $fields["type"]["fields"])) ?: $pa["type"];
+        $_in["platform"] = array_values(array_intersect(is_array($_in["platform"]) ? $_in["platform"] : [], array_keys($fields["platform"]["fields"]))) ?: $pa["platform"];
+
         if ($input["releaseDate_year"] && $input["releaseDate_month"] && checkdate((int) $input["releaseDate_month"], 15, (int) $input["releaseDate_year"])) {
             $_in["releaseDate"] = sprintf("%04d-%02d-15", $input["releaseDate_year"], $input["releaseDate_month"]);
         } elseif ($input["releaseDate_year"]) {

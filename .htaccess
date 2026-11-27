@@ -50,6 +50,10 @@ Header always set Content-Security-Policy "upgrade-insecure-requests"
 RedirectMatch 404 (?i)^/(bin|cache|include_generic|include_pouet|include_pouet_index)(/|$)
 RedirectMatch 404 (?i)^/(admin\.functions|bootstrap\.inc)\.php(/|$)
 RedirectMatch 404 (?i)^/(README\.md|LICENSE)$
+# Dotfiles and dot-directories anywhere (.git, .github, .user.ini, ...) are
+# repo and server config, never pages. .well-known stays reachable, for
+# certificate renewals and the like
+RedirectMatch 404 /\.(?!well-known(/|$))
 
 # Uploads live on content.pouet.net only, so they never run on www's origin.
 # Old /content/ links (from when www served them) go there. RedirectMatch,
