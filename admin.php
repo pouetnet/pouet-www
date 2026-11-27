@@ -39,6 +39,7 @@ class PouetBoxAdmin extends PouetBox
             "recacheFrontPage" => "flush entire front page cache",
             "recacheTopDemos" => "recalculate top demo list",
             "recacheBBS" => "recalculate latest 20 BBS caches",
+            "rerollDefaultOneliner" => "pick a new default oneliner for the rest of the hour",
         ];
         foreach ($actions as $k => $v) {
             echo "  <li>";

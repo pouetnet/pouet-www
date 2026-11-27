@@ -129,20 +129,34 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     {
         global $ephemeralStorage;
 
-        $cacheKey = "oneliner-default:" . date("YmdH");
+        $cacheKey = self::DefaultOnelinerCacheKey();
         if ($ephemeralStorage->has($cacheKey)) {
             return $ephemeralStorage->get($cacheKey);
         }
 
-        $line = $this->PickRandomPastOneliner();
-        $ephemeralStorage->set($cacheKey, $line, 60 * 60);
+        return self::RerollDefaultOneliner();
+    }
+
+    // Picks a new default oneliner and keeps it until the end of the current hour.
+    // Also used by the "pick a new default oneliner" action on the admin page.
+    public static function RerollDefaultOneliner()
+    {
+        global $ephemeralStorage;
+
+        $line = self::PickRandomPastOneliner();
+        $ephemeralStorage->set(self::DefaultOnelinerCacheKey(), $line, 60 * 60);
         return $line;
+    }
+
+    private static function DefaultOnelinerCacheKey()
+    {
+        return "oneliner-default:" . date("YmdH");
     }
 
     // Picks a random line from the whole oneliner history.
     // Jumps to a random id and takes the first suitable line from there (wrapping around once)
     // instead of ORDER BY RAND(), which would sort the whole table.
-    private function PickRandomPastOneliner()
+    private static function PickRandomPastOneliner()
     {
         $fallback = "404: oneliner not found. the scene is dead.";
 

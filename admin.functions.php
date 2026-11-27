@@ -25,6 +25,14 @@ function pouetAdmin_recacheFrontPagePartial()
     return $content;
 }
 
+function pouetAdmin_rerollDefaultOneliner()
+{
+    require_once(POUET_ROOT_LOCAL . "/include_pouet_index/box-index-oneliner-latest.php");
+
+    $line = PouetBoxIndexLatestOneliner::RerollDefaultOneliner();
+    return "<p>the oneliner input now starts with: <b>" . _html($line) . "</b></p>\n";
+}
+
 function pouetAdmin_recacheTopDemos()
 {
     global $timer;
