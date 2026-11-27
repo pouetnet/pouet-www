@@ -123,10 +123,26 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     </script>
     <?php
     }
-    // Picks a random line from the whole oneliner history as the input's default nonsense.
-    // Jumps to a random id and takes the first suitable line from there (wrapping around once)
-    // instead of ORDER BY RAND(), which would sort the whole table on every front page view.
+    // The input's default nonsense: a random past oneliner, the same for everyone during
+    // a given hour and picked again when the hour changes.
     private function GetRandomPastOneliner()
+    {
+        global $ephemeralStorage;
+
+        $cacheKey = "oneliner-default:" . date("YmdH");
+        if ($ephemeralStorage->has($cacheKey)) {
+            return $ephemeralStorage->get($cacheKey);
+        }
+
+        $line = $this->PickRandomPastOneliner();
+        $ephemeralStorage->set($cacheKey, $line, 60 * 60);
+        return $line;
+    }
+
+    // Picks a random line from the whole oneliner history.
+    // Jumps to a random id and takes the first suitable line from there (wrapping around once)
+    // instead of ORDER BY RAND(), which would sort the whole table.
+    private function PickRandomPastOneliner()
     {
         $fallback = "404: oneliner not found. the scene is dead.";
 
