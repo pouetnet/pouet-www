@@ -2,13 +2,45 @@ on:
   push:
     branches:
       - master
+    # Keep in sync with the file list in the changes job
+    paths:
+      - pouet.sql
+      - .github/workflows/mysql.yaml
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  # test-mysql is a required check, so a `paths` filter on pull_request would
+  # leave it waiting forever on PRs that don't touch the schema. Skip the job
+  # instead: a skipped job passes the check.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      mysql: ${{ steps.files.outputs.mysql }}
+    steps:
+      - id: files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate \
+            --jq '.[] | .filename, .previous_filename // empty')
+          if grep -qxF -e pouet.sql -e .github/workflows/mysql.yaml <<< "$files"; then
+            echo mysql=true >> "$GITHUB_OUTPUT"
+          else
+            echo mysql=false >> "$GITHUB_OUTPUT"
+          fi
+
   test-mysql:
+    needs: changes
+    # Runs on push (changes is skipped there) and if changes failed, so only a
+    # PR known not to touch the schema skips it
+    if: ${{ !cancelled() && needs.changes.outputs.mysql != 'false' }}
     runs-on: ubuntu-latest
     services:
       mysql:
