@@ -85,6 +85,36 @@ function bbencode_parse_tag($message, $tag, $openCode, $closeCode)
 
 }
 
+// Returns $prefix.$url ready for a quoted attribute, or null if it isn't safe.
+// The message was HTML-escaped before bbencode, so a quote or a bracket in the
+// URL comes from a tag converted before it, as in [img][url]..[/url][/img], and
+// would end the attribute early. Brackets become entities so tags converted
+// after it, as in [url][img]..[/img][/url], can't land in the attribute either;
+// browsers decode them back. Browsers drop tabs and newlines in a URL and trim
+// spaces around it, so "java\tscript:" is still javascript:
+function bbencode_safe_url($url, $prefix = "")
+{
+    if (strpbrk($url, "<>'\"") !== false) {
+        return null;
+    }
+    $url = $prefix . $url;
+    $bare = preg_replace("/[\x00-\x20]+/", "", $url);
+    if (preg_match("/^([a-z][a-z0-9+.\-]*):/i", $bare, $m) && !in_array(strtolower($m[1]), ["http", "https", "ftp", "mailto"])) {
+        return null;
+    }
+    return str_replace(["[", "]"], ["&#91;", "&#93;"], $url);
+}
+
+// Like preg_replace, but $build gets the match and returns the HTML, or null
+// to leave the tag as text
+function bbencode_replace($pattern, $build, $text)
+{
+    return preg_replace_callback($pattern, function ($m) use ($build) {
+        $html = $build($m);
+        return $html === null ? $m[0] : $html;
+    }, $text);
+}
+
 function bbencode($text)
 {
     $text = preg_replace("/\[b\](.*?)\[\/b\]/si", "<b>$1</b>", $text);
@@ -94,22 +124,31 @@ function bbencode($text)
     $text = bbencode_parse_tag($text, "quote", "<div class=\"bbs_quote\"><b>Quote:</b><blockquote>", "</blockquote></div>");
     $text = bbencode_parse_tag($text, "code", "<div class=\"bbs_code\"><b>Code:</b><code>", "</code></div>");
     $text = preg_replace("/\[list\](.*?)\[\/list\]/si", "<ul>$1</ul>", $text);
-    $text = preg_replace("/\[list=(.*?)\](.*?)\[\/list\]/si", "<ol type='$1'>$2</ol>", $text);
+    $text = preg_replace("/\[list=([1aAiI])\](.*?)\[\/list\]/si", "<ol type='$1'>$2</ol>", $text);
     $text = preg_replace("/\[\*\](.*)[\r\n]/", "<li>$1</li>", $text);
 
-    $text = preg_replace("/\[url=&quot;([a-z]+?:\/\/)(.*?)&quot;\](.*?)\[\/url\]/si", "<a href='$1$2'>$3</a>", $text);
-    $text = preg_replace("/\[url=&quot;(.*?)&quot;\](.*?)\[\/url\]/si", "<a href='http://$1'>$2</a>", $text);
-    $text = preg_replace("/\[url\]\s*([a-z]+?:\/\/)(.*?)\s*\[\/url\]/si", "<a href='$1$2'>$1$2</a>", $text);
-    $text = preg_replace("/\[url\](.*?)\[\/url\]/si", "<a href='http://$1'>$1</a>", $text);
-    $text = preg_replace("/\[url=\s*([a-z]+?:\/\/)(.*?)\s*\](.*?)\[\/url\]/si", "<a href='$1$2'>$3</a>", $text);
-    $text = preg_replace("/\[url=(.*?)\](.*?)\[\/url\]/si", "<a href='http://$1'>$2</a>", $text);
+    $link = function ($url, $label, $prefix = "") {
+        $href = bbencode_safe_url($url, $prefix);
+        return $href === null ? null : "<a href='" . $href . "'>" . $label . "</a>";
+    };
+    $text = bbencode_replace("/\[url=&quot;([a-z]+?:\/\/.*?)&quot;\](.*?)\[\/url\]/si", fn($m) => $link($m[1], $m[2]), $text);
+    $text = bbencode_replace("/\[url=&quot;(.*?)&quot;\](.*?)\[\/url\]/si", fn($m) => $link($m[1], $m[2], "http://"), $text);
+    $text = bbencode_replace("/\[url\]\s*([a-z]+?:\/\/.*?)\s*\[\/url\]/si", fn($m) => $link($m[1], $m[1]), $text);
+    $text = bbencode_replace("/\[url\](.*?)\[\/url\]/si", fn($m) => $link($m[1], $m[1], "http://"), $text);
+    $text = bbencode_replace("/\[url=\s*([a-z]+?:\/\/.*?)\s*\](.*?)\[\/url\]/si", fn($m) => $link($m[1], $m[2]), $text);
+    $text = bbencode_replace("/\[url=(.*?)\](.*?)\[\/url\]/si", fn($m) => $link($m[1], $m[2], "http://"), $text);
 
-    $text = preg_replace("/\[email\](.*?)\[\/email\]/si", "<a href='mailto:$1'>$1</a>", $text);
-    if (get_setting("displayimages") || @$_GET["forceimages"]) {
-        $text = preg_replace("/\[img\](.*?)\[\/img\]/i", "<img src='$1' loading='lazy' class='bbimage' alt='BB Image'>", $text);
-    } else {
-        $text = preg_replace("/\[img\](.*?)\[\/img\]/i", "<a href='$1'>[image disabled]</a>", $text);
-    }
+    $text = bbencode_replace("/\[email\](.*?)\[\/email\]/si", fn($m) => $link($m[1], $m[1], "mailto:"), $text);
+    $images = get_setting("displayimages") || @$_GET["forceimages"];
+    $text = bbencode_replace("/\[img\](.*?)\[\/img\]/i", function ($m) use ($images) {
+        $url = bbencode_safe_url($m[1]);
+        if ($url === null) {
+            return null;
+        }
+        return $images
+            ? "<img src='" . $url . "' loading='lazy' class='bbimage' alt='BB Image'>"
+            : "<a href='" . $url . "'>[image disabled]</a>";
+    }, $text);
     //  $text = preg_replace("/\s([a-zA-Z0-9]+:\/\/[a-zA-Z\.\-_0-9\+\/]+)/","<a href='$1' target='_blank'>$1</a>",$text);
     //  $text = preg_replace("/([a-zA-Z\.\-_0-9\+]+@[a-zA-Z\.\-_0-9\+]+)/","<a href='mailto:$1' target='_blank'>$1</a>",$text);
     //  $text = "<p>".preg_replace("/[\r\n]{2,}/","</p>\n\n<p>",$text)."</p>";
