@@ -71,7 +71,13 @@ class PouetBoxIndexFeedWanted extends PouetBoxCachable
             if ((time() - $time) < 60 * 60 * 24 * 30) {
                 echo "New! ";
             }
-            echo "<a href='" . $this->rssData['items'][$i]['link'] . "'>" . $this->rssData['items'][$i]['title'] . "</a> ";
+            // Anyone can post on wanted, so the feed is untrusted
+            $title = _html($this->rssData['items'][$i]['title']);
+            $link = $this->rssData['items'][$i]['link'];
+            if (preg_match("/^https?:\/\//i", $link)) {
+                $title = "<a href='" . _html($link) . "'>" . $title . "</a>";
+            }
+            echo $title . " ";
             echo "</li>\n";
         }
         echo "</ul>\n";
