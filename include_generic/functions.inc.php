@@ -1,5 +1,9 @@
 <?php
 
+// bootstrap.inc.php loads this file before the other includes, and before it
+// sends the 404 header for malformed URLs. Code at the top level of this file
+// must not use the other includes, and must not print anything.
+
 class BenchTimer
 {
     public function __construct($name = "")
