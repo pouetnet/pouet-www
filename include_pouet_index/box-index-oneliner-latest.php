@@ -123,6 +123,37 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     </script>
     <?php
     }
+    // Picks a random line from the whole oneliner history as the input's default nonsense.
+    // Jumps to a random id and takes the first suitable line from there (wrapping around once)
+    // instead of ORDER BY RAND(), which would sort the whole table on every front page view.
+    private function GetRandomPastOneliner()
+    {
+        $fallback = "and this will affect the Demoscene.";
+
+        $bounds = SQLLib::SelectRow("SELECT MIN(id) AS lo, MAX(id) AS hi FROM oneliner");
+        if (!$bounds || $bounds->lo === null) {
+            return $fallback;
+        }
+
+        $pivot = random_int((int) $bounds->lo, (int) $bounds->hi);
+        foreach ([$pivot, 0] as $from) {
+            $r = SQLLib::SelectRow(sprintf_esc(
+                "SELECT oneliner.message FROM oneliner"
+                . " JOIN users ON users.id = oneliner.who"
+                . " WHERE oneliner.id >= %d"
+                . " AND users.level <> 'banned' AND users.permissionPostOneliner <> 0"
+                . " AND CHAR_LENGTH(oneliner.message) <= 80"
+                . " AND oneliner.message NOT LIKE '%%://%%'"
+                . " ORDER BY oneliner.id ASC LIMIT 1",
+                $from,
+            ));
+            if ($r) {
+                return $r->message;
+            }
+        }
+        return $fallback;
+    }
+
     public function RenderFooter()
     {
         global $currentUser;
@@ -151,7 +182,8 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
             //$funnytext = "It is just a video coming from the demoscene. We use it for the track.";
             //$funnytext = "next meme please";
             //$funnytext = "Okay? Yes!";
-            $funnytext = "and this will affect the Demoscene.";
+            //$funnytext = "and this will affect the Demoscene.";
+            $funnytext = $this->GetRandomPastOneliner();
 
             echo "  <div class='foot loggedin'>\n";
             echo "   <span><a href='oneliner.php'>more</a>...</span>\n";
