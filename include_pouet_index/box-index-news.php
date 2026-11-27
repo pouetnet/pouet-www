@@ -18,7 +18,11 @@ class PouetBoxIndexNews extends PouetBox
     public function Render()
     {
         echo "<div class='pouettbl " . $this->uniqueID . "'>\n";
-        echo " <h3><a href='" . $this->link . "'>" . _html($this->title) . "</a></h3>\n";
+        $title = _html($this->title);
+        if (preg_match("/^https?:\/\//i", $this->link)) {
+            $title = "<a href='" . _html($this->link) . "'>" . $title . "</a>";
+        }
+        echo " <h3>" . $title . "</h3>\n";
         echo " <div class='content'>\n" . str_replace("<br/>", "<br>", $this->content) . "\n</div>\n";
         echo " <div class='foot'>lobstregated at <a href='https://news.scene.org/'>Scene.org</a> on " . ($this->timestamp) . "</div>\n";
         echo "</div>\n";
