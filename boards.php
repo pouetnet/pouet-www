@@ -81,7 +81,14 @@ class PouetBoxBoardMain extends PouetBox
             if (strstr($url, "://") === false) {
                 $url = "telnet://" . $url;
             }
-            echo "        <td><a href='" . _html($url) . "'>" . _html($this->board->telnetip) . "</a></td>\n";
+            // Only link schemes a board can be reached with: anything else,
+            // like javascript:, would run script when clicked
+            $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+            if (in_array($scheme, ["telnet", "ssh", "rlogin", "http", "https"], true)) {
+                echo "        <td><a href='" . _html($url) . "'>" . _html($this->board->telnetip) . "</a></td>\n";
+            } else {
+                echo "        <td>" . _html($this->board->telnetip) . "</td>\n";
+            }
             echo "      </tr>\n";
         }
         if ($date = renderHalfDate($this->board->started)) {
