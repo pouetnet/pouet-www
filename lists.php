@@ -195,7 +195,7 @@ class PouetBoxListsMain extends PouetBox
         global $currentUser;
         echo "<div id='" . $this->uniqueID . "' class='pouettbl'>\n";
         echo "<div id='listsname'>\n";
-        echo $this->list->name;
+        echo _html($this->list->name);
         echo "</div>\n";
 
         echo " <div class='content' id='description'>" . nl2br(_html($this->list->desc), false) . "</div>\n";
