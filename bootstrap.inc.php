@@ -18,17 +18,31 @@ if (!defined("POUET_CARDBOARD_URL")) {
 }
 
 if (@$_SERVER['PATH_INFO']) {
-    $path = strrchr($_SERVER['PATH_INFO'], "/");
-    if ($path === false) {
-        header("HTTP/1.1 404 Not Found");
-        die("Invalid path");
-    } else {
-        $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
-        header("HTTP/1.1 404 Not Found");
-        $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
-        printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
-        exit();
+    // Extra path after the script name, as in prod.php/?which=1, or
+    // index.php/prod.php?which=1 when a relative link is followed from such
+    // a URL. Suggest the last segment if it names a top-level page, otherwise
+    // the script itself (which can be in a subdirectory, as export/ ones
+    // are), keeping the query string either way
+    //
+    // PATH_INFO comes decoded, so a shared link whose ? got encoded, as in
+    // prod.php/prod.php%3Fwhich%3D1, has its query in there: keep that query
+    // too when the page before it is a real one
+    $pathParts = explode("?", $_SERVER['PATH_INFO'], 2);
+    $page = basename($pathParts[0]);
+    $pathQuery = $pathParts[1] ?? "";
+    if (!preg_match('/^[a-z0-9_]+\.php$/i', $page) || !is_file(POUET_ROOT_LOCAL . "/" . $page)) {
+        $page = substr($_SERVER["SCRIPT_NAME"], strlen(POUET_ROOT_PATH));
+        $pathQuery = "";
     }
+    $urlGuess = POUET_ROOT_URL . $page;
+    $query = implode("&", array_filter([$pathQuery, $_SERVER["QUERY_STRING"] ?? ""], "strlen"));
+    if ($query !== "") {
+        $urlGuess .= "?" . $query;
+    }
+    header("HTTP/1.1 404 Not Found");
+    $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
+    printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
+    exit();
 }
 
 

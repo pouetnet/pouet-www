@@ -24,8 +24,8 @@ class Formifier
                     echo "</div>\n";
                     break;
                 case "statichidden":
-                    echo "    <div class='static' id='" . $k . "'>" . (@$v["fields"] ? $v["fields"][$v["value"]] : $v["value"]) . "</div>\n";
-                    echo "    <input type='hidden' name='" . $k . "' id='" . $k . "' value='" . @$v["value"] . "'>\n";
+                    echo "    <div class='static' id='" . $k . "'>" . _html(@$v["fields"] ? $v["fields"][$v["value"]] : $v["value"]) . "</div>\n";
+                    echo "    <input type='hidden' name='" . $k . "' id='" . $k . "' value='" . _html(@$v["value"]) . "'>\n";
                     break;
                 case "date":
                     echo "    <input type='date' name='" . $k . "' id='" . $k . "' value='" . _html(@$v["value"]) . "'>\n";
