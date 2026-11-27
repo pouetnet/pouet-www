@@ -27,6 +27,10 @@ class PouetSceneIDStorage implements SceneID3StorageInterface
     }
 }
 
+// The login a SceneID answer belongs to is used up or expired: the visitor
+// may already be logged in with it, e.g. after pressing Back
+class PouetSceneIDLoginGoneException extends SceneID3Exception {}
+
 class PouetSceneID extends SceneID3
 {
     // Time spent waiting on the network doesn't count toward
@@ -137,16 +141,34 @@ class PouetSceneID extends SceneID3
     {
         $state = $state ?? ($_GET["state"] ?? null);
         $expected = $this->storage->Get("state");
-        // No state stored: this login already went through, or the session
-        // it was started in is gone. Clearing cookies wouldn't help, and
-        // would log out whoever already logged in with it.
         if (!is_string($expected)) {
-            throw new SceneID3Exception("This login has expired or was already used - please log in again!");
+            // login.php sets the session cookie before sending the visitor to
+            // SceneID: without one, the browser didn't keep it, and logging
+            // in again would fail the same way
+            if (!isset($_COOKIE[session_name()])) {
+                throw new SceneID3Exception("Your browser didn't keep pouet.net's login cookie - allow cookies for pouet.net, then log in again!");
+            }
+            // This login already went through, or the session it was started
+            // in expired. Clearing cookies wouldn't help, and would log out
+            // whoever already logged in with it.
+            throw new PouetSceneIDLoginGoneException("This login has expired or was already used - please log in again!");
         }
+        // Usually two logins started at once: the newer one replaced the
+        // state, then SceneID sent back the older one
         if (!is_string($state) || !hash_equals($expected, $state)) {
-            throw new SceneID3Exception("State mismatch - try clearing your browser cookies!");
+            throw new SceneID3Exception("This isn't the last login you started - please log in again!");
         }
+        global $ephemeralStorage;
         try {
+            // The session is saved when the request ends, and isn't locked
+            // until then: a copy of this answer arriving while this request
+            // waits on SceneID would still find the state, and send the same
+            // code, which SceneID refuses the second time. Only one request
+            // can claim the state in Redis; the claim just has to outlast
+            // this request.
+            if (!$ephemeralStorage->add("sceneid-state:" . $state, true, 60 * 60)) {
+                throw new PouetSceneIDLoginGoneException("This login was already used - please log in again!");
+            }
             return parent::ProcessAuthResponse($code, $state);
         } finally {
             $this->storage->Set("state", null);
