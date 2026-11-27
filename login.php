@@ -105,11 +105,17 @@ try {
     }
 
     if ($welcome) {
-        redirect("welcome.php" . $returnURL ? "?return=" . rawurlencode(basename($returnURL)) : "");
+        redirect("welcome.php" . ($returnURL ? "?return=" . rawurlencode(basename($returnURL)) : ""));
     } else {
         redirect(basename($returnURL ? $returnURL : "index.php"));
     }
 
+} catch (PouetSceneIDLoginGoneException $e) {
+    // Back or a reload after logging in brings the same answer again
+    if (get_login_id()) {
+        redirect(basename($returnURL ? $returnURL : "index.php"));
+    }
+    redirect("error.php?e=" . rawurlencode($e->GetMessage()));
 } catch (SceneID3Exception $e) {
     redirect("error.php?e=" . rawurlencode($e->GetMessage()));
 }

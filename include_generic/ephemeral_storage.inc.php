@@ -25,6 +25,12 @@ class RedisStorage
             $this->redis->set(EPHEMERALSTORAGE_PREFIX . $key, serialize($value));
         }
     }
+    // Sets $key only if it isn't set yet, and says whether it did: of
+    // several requests trying at once, exactly one gets true
+    public function add($key, $value, $ttl)
+    {
+        return $this->redis->set(EPHEMERALSTORAGE_PREFIX . $key, serialize($value), ["nx", "ex" => $ttl]) === true;
+    }
     public function has($key)
     {
         return $this->redis->exists(EPHEMERALSTORAGE_PREFIX . $key);
