@@ -18,20 +18,28 @@ if (!defined("POUET_CARDBOARD_URL")) {
 }
 
 if (@$_SERVER['PATH_INFO']) {
-    $path = strrchr($_SERVER['PATH_INFO'], "/");
-    if ($path === false) {
-        header("HTTP/1.1 404 Not Found");
-        die("Invalid path");
-    } else {
-        // PATH_INFO comes URL-decoded: encode the name again, or a %3F, %23
-        // or %25 in it would turn into a real ?, # or % in the link
-        $path = "/" . rawurlencode(substr($path, 1));
-        $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
-        header("HTTP/1.1 404 Not Found");
-        $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
-        printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
-        exit();
-    }
+    // A broken relative link (prod.php/prod.php?which=1) or a shared link
+    // whose ? got encoded (prod.php/prod.php%3Fwhich%3D1) lands here: suggest
+    // the page named by the last part of the path, with the query. That part
+    // comes from REQUEST_URI, decoded here, since how much of PATH_INFO is
+    // decoded depends on the server setup
+    $requestPath = explode("?", $_SERVER['REQUEST_URI'] ?? "", 2)[0];
+    $name = rawurldecode(substr(strrchr("/" . rtrim($requestPath, "/"), "/"), 1));
+    // A ? or # in the name was a query or a fragment before the link got
+    // encoded: no page has one in its file name
+    preg_match('/^([^?#]*)(?:\?([^#]*))?(.*)$/s', $name, $parts);
+    $query = implode("&", array_filter([$parts[2], $_SERVER['QUERY_STRING'] ?? ""], "strlen"));
+    $tail = ($query !== "" ? "?" . $query : "") . $parts[3];
+    $root = rtrim(POUET_ROOT_URL, "/") . "/";
+    $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5;
+    header("HTTP/1.1 404 Not Found");
+    // The link encodes the file name again, the text shows it readable
+    printf(
+        "<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>",
+        htmlspecialchars($root . rawurlencode($parts[1]) . $tail, $flags, "UTF-8"),
+        htmlspecialchars($root . $parts[1] . $tail, $flags, "UTF-8"),
+    );
+    exit();
 }
 
 
