@@ -65,19 +65,25 @@ class PouetBoxModificationRequest extends PouetBox
         if (!$requestTypeClass) {
             return ["no such request type!"];
         }
+
+        // The item comes from the parameter matching the request type, and
+        // must exist: approving the request changes the item with this id,
+        // whatever kind of item the request was filed against
+        $itemType = $requestTypeClass::GetItemType();
+        $itemClasses = ["prod" => "PouetProd", "group" => "PouetGroup"];
+        $itemID = (int) @$_REQUEST[$itemType];
+        if (!isset($itemClasses[$itemType]) || !$itemClasses[$itemType]::Spawn($itemID)) {
+            return ["no such " . $itemType . "!"];
+        }
+
         $error = $requestTypeClass::ValidateRequest($data, $post);
         if ($error) {
             return $error;
         }
         $a = [];
         $a["requestType"] = $data["requestType"];
-        if (@$_REQUEST["prod"]) {
-            $a["itemID"] = (int) $_REQUEST["prod"];
-            $a["itemType"] = "prod";
-        } elseif (@$_REQUEST["group"]) {
-            $a["itemID"] = (int) $_REQUEST["group"];
-            $a["itemType"] = "group";
-        }
+        $a["itemID"] = $itemID;
+        $a["itemType"] = $itemType;
         $a["requestDate"] = date("Y-m-d H:i:s");
         $a["userID"] = get_login_id();
 

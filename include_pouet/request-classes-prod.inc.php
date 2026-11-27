@@ -173,8 +173,8 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         }
 
         $output["linkID"] = $input["linkID"];
-        $output["oldLink"] = $input["oldLink"];
-        $output["oldLinkKey"] = $input["oldLinkKey"];
+        $output["oldLink"] = $row->link;
+        $output["oldLinkKey"] = $row->type;
         $output["newLink"] = $newLink;
         $output["newLinkKey"] = $input["newLinkKey"];
         $output["reason"] = $input["reason"];
@@ -696,7 +696,7 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
             return ["you didn't change anything :|"];
         }
 
-        $output["oldDownloadLink"] = $input["oldDownloadLink"];
+        $output["oldDownloadLink"] = $prod->download;
         $output["downloadLink"] = $input["downloadLink"];
         $output["reason"] = $input["reason"];
         return [];
@@ -930,6 +930,12 @@ class PouetRequest_Prod_ChangeInfo extends PouetRequestBase
         foreach ($fields as $k => $v) {
             $_in[$k] = @$input[$k];
         }
+
+        // Keep only real types and platforms: the moderators' queue prints
+        // the requested types as they are. Both are required, so none left
+        // means no change
+        $_in["type"] = array_values(array_intersect(is_array($_in["type"]) ? $_in["type"] : [], $fields["type"]["fields"])) ?: $pa["type"];
+        $_in["platform"] = array_values(array_intersect(is_array($_in["platform"]) ? $_in["platform"] : [], array_keys($fields["platform"]["fields"]))) ?: $pa["platform"];
 
         if ($input["releaseDate_year"] && $input["releaseDate_month"] && checkdate((int) $input["releaseDate_month"], 15, (int) $input["releaseDate_year"])) {
             $_in["releaseDate"] = sprintf("%04d-%02d-15", $input["releaseDate_year"], $input["releaseDate_month"]);

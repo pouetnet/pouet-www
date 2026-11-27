@@ -570,7 +570,7 @@ class PouetBoxUserMain extends PouetBox
                 echo $p->prod->RenderPlatformIcons();
                 echo $p->prod->RenderSingleRow() . " ";
                 echo $p->prod->RenderAccolades();
-                echo " [" . $p->role . "]";
+                echo " [" . _html($p->role) . "]";
                 echo "</li>";
             }
             echo "</ul>";

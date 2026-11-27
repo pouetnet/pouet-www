@@ -22,7 +22,7 @@ class PouetBoxMirrors extends PouetBox
         $a = [&$this->prod];
         PouetCollectPlatforms($a);
 
-        $this->title = "mirrors :: " . $this->prod->name;
+        $this->title = "mirrors :: " . _html($this->prod->name);
     }
 
     public function RenderContent()
@@ -86,7 +86,8 @@ class PouetBoxMirrors extends PouetBox
 $p = new PouetBoxMirrors();
 $p->Load();
 
-$TITLE = $p->title;
+// The box title is HTML, but the header escapes $TITLE itself
+$TITLE = $p->prod ? "mirrors :: " . $p->prod->name : "";
 
 require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");
