@@ -91,7 +91,7 @@ class PouetProd extends BM_Class
     {
         $s = "<span class='typeiconlist'>";
         foreach ($this->types as $t) {
-            $s .= "<span class='typei type_" . str_replace(" ", "_", $t) . "' title='" . _html($t) . "'>" . $t . "</span>\n";
+            $s .= "<span class='typei type_" . _html(str_replace(" ", "_", $t)) . "' title='" . _html($t) . "'>" . _html($t) . "</span>\n";
         }
         $s .= "</span>";
         return $s;
@@ -109,7 +109,7 @@ class PouetProd extends BM_Class
     {
         $s = "<ul>";
         foreach ($this->types as $t) {
-            $s .= "<li><a href='prodlist.php?type%5B%5D=" . rawurlencode($t) . "'><span class='type type_" . str_replace(" ", "_", $t) . "'>" . $t . "</span> " . $t . "</a></li>\n";
+            $s .= "<li><a href='prodlist.php?type%5B%5D=" . rawurlencode($t) . "'><span class='type type_" . _html(str_replace(" ", "_", $t)) . "'>" . _html($t) . "</span> " . _html($t) . "</a></li>\n";
         }
         $s .= "</ul>";
         return $s;

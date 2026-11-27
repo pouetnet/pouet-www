@@ -110,10 +110,10 @@ $IM_TYPES = [
         "capture" => "^(\S*@\S*\.\S*)$",
     ],
     "Mastodon" => [
-        "capture" => "^@?(\S*@\S*\.\S*)$",
+        "capture" => "^@?([\w\.\-]+@[\w\-]+(?:\.[\w\-]+)+)$",
         "display" => function ($in) {
             list($user, $domain) = explode("@", $in);
-            return sprintf("<a href='https://%s/@%s'>@%s@%s</a>", $domain, $user, _html($user), _html($domain));
+            return sprintf("<a href='https://%s/@%s'>@%s@%s</a>", _html($domain), _html($user), _html($user), _html($domain));
         },
     ],
     "Skype" => [
