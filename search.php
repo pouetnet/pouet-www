@@ -211,12 +211,12 @@ class PouetBoxSearchGroup extends PouetBox
             echo "<td class='name'>";
             echo $g->RenderLong();
             if ($g->disambiguation) {
-                echo sprintf(" <small>(%s)</small>", $g->disambiguation);
+                echo sprintf(" <small>(%s)</small>", _html($g->disambiguation));
             }
             echo "</td>\n";
 
             echo "<td>";
-            printf("<a href='%s'>%s</a>", $g->web, $g->web);
+            printf("<a href='%s'>%s</a>", _html($g->web), _html($g->web));
             echo "</td>\n";
 
             echo "<td>";
@@ -312,7 +312,7 @@ class PouetBoxSearchParty extends PouetBox
             echo "</td>\n";
 
             echo "<td>";
-            printf("<a href='%s'>%s</a>", $p->web, $p->web);
+            printf("<a href='%s'>%s</a>", _html($p->web), _html($p->web));
             echo "</td>\n";
 
             echo "<td>";
