@@ -4,7 +4,7 @@ require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-party-edition-submit.php");
 
-if ($currentUser && !$currentUser->CanEditItems()) {
+if (get_login_id() && (!$currentUser || !$currentUser->CanEditItems())) {
     redirect("party.php?which=" . (int) $_GET["which"] . "&when=" . (int) $_GET["when"]);
     exit();
 }

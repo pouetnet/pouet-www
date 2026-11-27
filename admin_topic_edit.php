@@ -4,7 +4,7 @@ require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-group-submit.php");
 
-if ($currentUser && !$currentUser->CanEditBBS()) {
+if (get_login_id() && (!$currentUser || !$currentUser->CanEditBBS())) {
     redirect("topic.php?which=" . (int) $_GET["which"]);
     exit();
 }
