@@ -16,12 +16,14 @@ class PouetBoxLogoVote extends PouetBox
 
     public function RenderContent()
     {
-        echo "<img src=" . POUET_CONTENT_URL . "logos/" . _html($this->logo->file) . " alt='logo'>";
+        echo "<img src='" . POUET_CONTENT_URL . "logos/" . _html($this->logo->file) . "' alt='logo'>";
     }
     public function RenderFooter()
     {
         echo "  <div class='foot'>";
-        echo "    <form action='" . _html($_SERVER["REQUEST_URI"]) . "' method='post'>";
+        // A fixed relative path: echoing the request URL back lets a path such
+        // as "//host/..." turn the action into a protocol-relative URL.
+        echo "    <form action='logo_vote.php' method='post'>";
         $csrf = new CSRFProtect();
         $csrf->PrintToken();
         echo "      <input name='logoID' type='hidden' value='" . (int) $this->logo->id . "'>";
