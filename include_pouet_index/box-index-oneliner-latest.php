@@ -123,6 +123,53 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     </script>
     <?php
     }
+    // The input's default nonsense: a random past oneliner, the same for everyone during
+    // a given hour and picked again when the hour changes.
+    private function GetRandomPastOneliner()
+    {
+        global $ephemeralStorage;
+
+        $cacheKey = "oneliner-default:" . date("YmdH");
+        if ($ephemeralStorage->has($cacheKey)) {
+            return $ephemeralStorage->get($cacheKey);
+        }
+
+        $line = $this->PickRandomPastOneliner();
+        $ephemeralStorage->set($cacheKey, $line, 60 * 60);
+        return $line;
+    }
+
+    // Picks a random line from the whole oneliner history.
+    // Jumps to a random id and takes the first suitable line from there (wrapping around once)
+    // instead of ORDER BY RAND(), which would sort the whole table.
+    private function PickRandomPastOneliner()
+    {
+        $fallback = "404: oneliner not found. the scene is dead.";
+
+        $bounds = SQLLib::SelectRow("SELECT MIN(id) AS lo, MAX(id) AS hi FROM oneliner");
+        if (!$bounds || $bounds->lo === null) {
+            return $fallback;
+        }
+
+        $pivot = random_int((int) $bounds->lo, (int) $bounds->hi);
+        foreach ([$pivot, 0] as $from) {
+            $r = SQLLib::SelectRow(sprintf_esc(
+                "SELECT oneliner.message FROM oneliner"
+                . " JOIN users ON users.id = oneliner.who"
+                . " WHERE oneliner.id >= %d"
+                . " AND users.level <> 'banned' AND users.permissionPostOneliner <> 0"
+                . " AND CHAR_LENGTH(oneliner.message) <= 80"
+                . " AND oneliner.message NOT LIKE '%%://%%'"
+                . " ORDER BY oneliner.id ASC LIMIT 1",
+                $from,
+            ));
+            if ($r) {
+                return $r->message;
+            }
+        }
+        return $fallback;
+    }
+
     public function RenderFooter()
     {
         global $currentUser;
@@ -151,7 +198,8 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
             //$funnytext = "It is just a video coming from the demoscene. We use it for the track.";
             //$funnytext = "next meme please";
             //$funnytext = "Okay? Yes!";
-            $funnytext = "and this will affect the Demoscene.";
+            //$funnytext = "and this will affect the Demoscene.";
+            $funnytext = $this->GetRandomPastOneliner();
 
             echo "  <div class='foot loggedin'>\n";
             echo "   <span><a href='oneliner.php'>more</a>...</span>\n";
