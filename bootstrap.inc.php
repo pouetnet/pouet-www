@@ -23,8 +23,9 @@ if (@$_SERVER['PATH_INFO']) {
         header("HTTP/1.1 404 Not Found");
         die("Invalid path");
     } else {
-        $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
-        if (@$_SERVER["QUERY_STRING"]) {
+        // PATH_INFO arrives decoded: re-encode it so a "#" or "?" in it stays part of the path
+        $urlGuess = rtrim(POUET_ROOT_URL, "/") . "/" . rawurlencode(substr($path, 1));
+        if (($_SERVER["QUERY_STRING"] ?? "") !== "") {
             $urlGuess .= "?" . $_SERVER["QUERY_STRING"];
         }
         header("HTTP/1.1 404 Not Found");
