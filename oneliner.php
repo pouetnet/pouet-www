@@ -60,7 +60,7 @@ class PouetBoxOnelinerView extends PouetBox
             $p = $c->message;
             $p = _html($p);
             //$p = bbencode($p,true);
-            $p = preg_replace("/([a-z]+:\/\/\S+)/", "<a href='$1' rel='external'>$1</a>", $p);
+            $p = preg_replace("/(?<![a-z])((?:https?|ftp):\/\/\S+)/", "<a href='$1' rel='external'>$1</a>", $p);
             $p = nl2br($p, false);
             $p = better_wordwrap($p, 80, " ");
             echo "<li class='cite-" . $c->user->id . "'>";

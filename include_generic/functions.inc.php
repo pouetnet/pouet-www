@@ -374,6 +374,12 @@ function validateLink($url)
 
     $myurl = parse_url($url);
 
+    // Links end up in href attributes: anything else, like javascript:,
+    // would run script when clicked
+    if (!in_array(@$myurl["scheme"], ["http", "https", "ftp"], true)) {
+        $errormessage[] = "only http/https and ftp links are supported";
+    }
+
     if (strlen($myurl["host"]) == 0) {
         $errormessage[] = "missing hostname in the download link";
     }
@@ -445,9 +451,6 @@ function validateDownloadLink($url)
     $errormessage = validateLink($url);
 
     $myurl = parse_url($url);
-    if (($myurl["scheme"] != "http") && ($myurl["scheme"] != "ftp") && ($myurl["scheme"] != "https")) {
-        $errormessage[] = "only http/https and ftp protocols are supported for the download link";
-    }
 
     if (strstr($myurl["host"], "youtube") || strstr($myurl["host"], "youtu.be")) {
         $errormessage[] = "FUCK YOUTUBE - BINARY OR GTFO";
