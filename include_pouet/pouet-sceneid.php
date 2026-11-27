@@ -25,6 +25,15 @@ class PouetSceneIDStorage implements SceneID3StorageInterface
         }
         return @$this->data[$key];
     }
+
+    // Not in SceneID3StorageInterface, but SceneID3OAuth::Reset() calls it
+    public function Reset()
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION["sceneID"]);
+        }
+        $this->data = [];
+    }
 }
 
 class PouetSceneID extends SceneID3
