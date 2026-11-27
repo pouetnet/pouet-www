@@ -24,6 +24,17 @@ class PouetBoxAdminEditGroup extends PouetBoxSubmitGroup
 
         $this->title = "edit this group: " . $this->group->RenderLong();
     }
+    // Without this, the empty Validate() from the PouetForm trait replaces
+    // the submit form's one, and any website went through. An unchanged
+    // website is let through, so groups saved before the check can still be
+    // edited
+    public function Validate($data)
+    {
+        if ($data["website"] && $data["website"] != $this->group->web) {
+            return static::ValidateWebsite($data["website"]);
+        }
+        return [];
+    }
     public function Commit($data)
     {
         global $groupID;

@@ -9,6 +9,17 @@ if (!$currentUser || !$currentUser->IsGloperator()) {
     exit();
 }
 
+// The actions this page offers. Each one runs pouetAdmin_<key>() from
+// admin.functions.php, and only these can be run from here: that file also
+// has cron jobs and helpers that aren't for the admin page
+$adminActions = [
+    "recacheFrontPagePartial" => "flush front page cache",
+    "recacheFrontPage" => "flush entire front page cache",
+    "recacheTopDemos" => "recalculate top demo list",
+    "recacheBBS" => "recalculate latest 20 BBS caches",
+    "rerollDefaultOneliner" => "pick a new default oneliner for the rest of the hour",
+];
+
 function PouetAdmin_recacheFrontPagePartial_Form()
 {
     echo "<ul>";
@@ -30,18 +41,12 @@ class PouetBoxAdmin extends PouetBox
     public function Render()
     {
         global $currentUser;
+        global $adminActions;
         echo "\n\n";
         echo "<div class='pouettbl' id='" . $this->uniqueID . "'>\n";
         echo "<h2>i'm gonna wreck it !</h2>\n";
         echo "<ul class='boxlist'>\n";
-        $actions = [
-            "recacheFrontPagePartial" => "flush front page cache",
-            "recacheFrontPage" => "flush entire front page cache",
-            "recacheTopDemos" => "recalculate top demo list",
-            "recacheBBS" => "recalculate latest 20 BBS caches",
-            "rerollDefaultOneliner" => "pick a new default oneliner for the rest of the hour",
-        ];
-        foreach ($actions as $k => $v) {
+        foreach ($adminActions as $k => $v) {
             echo "  <li>";
             echo "<form method='post'>";
 
@@ -80,9 +85,9 @@ $content = "";
 if ($_POST) {
     $csrf = new CSRFProtect();
     if ($csrf->ValidateToken()) {
-        foreach ($_POST as $k => $v) {
-            $func = "pouetAdmin_" . $k;
-            if (function_exists($func)) {
+        foreach ($adminActions as $k => $v) {
+            if (isset($_POST[$k])) {
+                $func = "pouetAdmin_" . $k;
                 $content .= $func();
             }
         }

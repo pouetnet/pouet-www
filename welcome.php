@@ -1,4 +1,5 @@
 <?php
+
 require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
@@ -12,11 +13,15 @@ require_once("include_pouet/header.php");
 require("include_pouet/menu.inc.php");
 
 if ($currentUser) {
-    if (@$_GET["avatar"]) {
+    // A POST with a CSRF token, so an image or link elsewhere can't change
+    // the avatar of whoever views it
+    $csrf = new CSRFProtect();
+    if (@$_POST["avatar"] && $csrf->ValidateToken()) {
         $sql = [];
-        $sql["avatar"] = basename($_GET["avatar"]);
-        if (!$sql["avatar"] || !file_exists(POUET_CONTENT_LOCAL . "avatars/" . $sql["avatar"])) {
-            $sql["avatar"] = basename($avatars[ array_rand($avatars) ]);
+        $sql["avatar"] = basename($_POST["avatar"]);
+        if (!file_exists(POUET_CONTENT_LOCAL . "avatars/" . $sql["avatar"])) {
+            $avatars = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
+            $sql["avatar"] = $avatars ? basename($avatars[ array_rand($avatars) ]) : $currentUser->avatar;
         }
 
         SQLLib::UpdateRow("users", $sql, "id=" . (int) get_login_id());
@@ -50,33 +55,21 @@ if ($currentUser) {
             $avatars = glob(POUET_CONTENT_LOCAL . "avatars/*.gif");
             shuffle($avatars);
 
+            printf("<form action='%s' method='post'>\n", _html(selfPath()));
+            $csrf = new CSRFProtect();
+            $csrf->PrintToken();
             echo " <ul id='welcome-avatarlist'>";
             for ($x = 0; $x < 30; $x++) {
                 $a = basename($avatars[$x]);
-                printf("<li><a href='welcome.php?avatar=%s'><img src='" . POUET_CONTENT_URL . "avatars/%s' class='avatar'></a></li>", rawurlencode($a), rawurlencode($a));
+                printf("<li><button type='submit' name='avatar' value='%s'><img src='" . POUET_CONTENT_URL . "avatars/%s' class='avatar' alt='%s'></button></li>", _html($a), rawurlencode($a), _html($a));
             }
             echo " </ul>";
+            echo "</form>\n";
 
             echo " <p>...or, again, you can go to your <a href='account.php'>profile</a> to pick from some more.</p>";
             echo " </div>\n";
-            ?>
-<script>
-<!--
-document.observe("dom:loaded",function(){
-  $$("#welcome-avatarlist li a").invoke("observe","click",function(ev){
-    ev.stop();
-    new Ajax.Request(ev.element().up("a").href,{
-      onSuccess:function(){
-        $("currentAvatar").down("img").src = ev.element().src;
-      }
-    });
-  });
-});
-//-->
-</script>
-<?php
 
-                  echo " <h2>:: demos</h2>\n";
+            echo " <h2>:: demos</h2>\n";
             echo " <div class='content'>\n";
             echo " <p>...and of course as for your first activity on the site, you can just go and watch some demos - here's a little selection of the more popular prods:</p>";
 
@@ -96,10 +89,13 @@ document.observe("dom:loaded",function(){
 
             echo " </div>\n";
 
+            // login.php passes the page's file name and query, as it does for
+            // its own redirect: keep it a page on this site, so a link can't
+            // make it a javascript: URL or another site
             if (@$_GET["return"]) {
                 echo " <h2>:: return</h2>\n";
                 echo " <div class='content'>\n";
-                echo " <p>...or you can continue whatever you were doing by <a href='" . _html($_GET["return"]) . "'>clicking here</a></p>";
+                echo " <p>...or you can continue whatever you were doing by <a href='" . _html(POUET_ROOT_URL . basename($_GET["return"])) . "'>clicking here</a></p>";
                 echo " </div>\n";
             }
         }
@@ -111,4 +107,3 @@ document.observe("dom:loaded",function(){
 
 require("include_pouet/menu.inc.php");
 require_once("include_pouet/footer.php");
-?>

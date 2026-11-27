@@ -23,6 +23,17 @@ class PouetBoxAdminEditParty extends PouetBoxSubmitParty
 
         $this->title = "edit this party: " . $this->party->PrintLinked();
     }
+    // Without this, the empty Validate() from the PouetForm trait replaces
+    // the submit form's one, and any website went through. An unchanged
+    // website is let through, so parties saved before the check can still be
+    // edited
+    public function Validate($data)
+    {
+        if ($data["website"] && $data["website"] != $this->party->web) {
+            return static::ValidateWebsite($data["website"]);
+        }
+        return [];
+    }
     public function Commit($data)
     {
         global $partyID;

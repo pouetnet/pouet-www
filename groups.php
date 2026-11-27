@@ -93,10 +93,10 @@ class PouetBoxGroupMain extends PouetBox
         echo "<th colspan='9' id='groupname'>\n";
         echo sprintf("<a href='groups.php?which=%d'>%s", $this->id, _html($this->group->name));
         if ($this->group->disambiguation) {
-            echo sprintf(" <small>(%s)</small>", $this->group->disambiguation);
+            echo sprintf(" <small>(%s)</small>", _html($this->group->disambiguation));
         }
         if ($this->group->acronym) {
-            echo sprintf(" [%s]", $this->group->acronym);
+            echo sprintf(" [%s]", _html($this->group->acronym));
         }
         echo "</a>";
         if ($this->group->web) {
@@ -375,7 +375,7 @@ class PouetBoxGroupList extends PouetBox
             echo "  <td class='groupname'>";
             echo $r->RenderFull();
             if ($r->disambiguation) {
-                echo sprintf(" <small>(%s)</small>", $r->disambiguation);
+                echo sprintf(" <small>(%s)</small>", _html($r->disambiguation));
             }
             echo "</td>\n";
             echo "  <td>\n";
