@@ -29,10 +29,15 @@ class PouetBoxSubmitParty extends PouetBox
             return ["Oh yeah, the party with no name, I remember that one!"];
         }
         if ($data["website"]) {
-            $url = parse_url($data["website"]);
-            if (($url["scheme"] != "http" && $url["scheme"] != "https") || strstr($data["website"], "://") === false) {
-                return ["please only websites with http or https links, kthx"];
-            }
+            return static::ValidateWebsite($data["website"]);
+        }
+        return [];
+    }
+    public static function ValidateWebsite($website)
+    {
+        $url = parse_url($website);
+        if ((@$url["scheme"] != "http" && @$url["scheme"] != "https") || strstr($website, "://") === false) {
+            return ["please only websites with http or https links, kthx"];
         }
         return [];
     }
