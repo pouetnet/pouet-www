@@ -128,7 +128,7 @@ class PouetBoxIndexLatestOneliner extends PouetBoxCachable
     // instead of ORDER BY RAND(), which would sort the whole table on every front page view.
     private function GetRandomPastOneliner()
     {
-        $fallback = "and this will affect the Demoscene.";
+        $fallback = "404: oneliner not found. the scene is dead.";
 
         $bounds = SQLLib::SelectRow("SELECT MIN(id) AS lo, MAX(id) AS hi FROM oneliner");
         if (!$bounds || $bounds->lo === null) {
