@@ -4,8 +4,8 @@ require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-board-submit.php");
 require_once("include_pouet/pouet-box-editbase.php");
 
-if ($currentUser && !$currentUser->CanEditItems()) {
-    redirect("board.php?which=" . (int) $_GET["which"]);
+if (get_login_id() && (!$currentUser || !$currentUser->CanEditItems())) {
+    redirect("boards.php?which=" . (int) $_GET["which"]);
     exit();
 }
 

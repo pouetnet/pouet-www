@@ -3,7 +3,7 @@ require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-party-submit.php");
 
-if ($currentUser && !$currentUser->CanEditItems()) {
+if (get_login_id() && (!$currentUser || !$currentUser->CanEditItems())) {
     redirect("index.php");
     exit();
 }

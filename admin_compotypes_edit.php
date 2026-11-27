@@ -4,7 +4,7 @@ require_once("include_pouet/box-modalmessage.php");
 require_once("include_pouet/box-group-submit.php");
 require_once("include_pouet/pouet-box-editbase.php");
 
-if ($currentUser && !$currentUser->IsModerator()) {
+if (get_login_id() && (!$currentUser || !$currentUser->IsModerator())) {
     redirect("index.php");
     exit();
 }

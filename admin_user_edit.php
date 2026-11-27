@@ -3,7 +3,7 @@
 require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
-if ($currentUser && !$currentUser->IsModerator()) {
+if (get_login_id() && (!$currentUser || !$currentUser->IsModerator())) {
     redirect("user.php?who=" . (int) $_GET["who"]);
     exit();
 }
