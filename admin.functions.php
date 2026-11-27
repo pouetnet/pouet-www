@@ -106,39 +106,122 @@ function pouetAdmin_recacheTopDemos()
     return $content;
 }
 
+// The link checker fetches URLs that any user can submit, so it must only
+// reach public hosts. Otherwise a download link (or a redirect from one)
+// pointing at a private address would make the server probe its own
+// network, and the prod page would show the status code it got back.
+
+// Returns a public IP address for $host, or null when the host does not
+// resolve or when any of its addresses is private, loopback or reserved.
+function pouetAdmin_linkCheckPublicIP($host)
+{
+    $host = trim($host, "[]");
+    $ips = [];
+    if (filter_var($host, FILTER_VALIDATE_IP)) {
+        $ips[] = $host;
+    } else {
+        // One lookup per type: asking for both at once fails entirely when
+        // the resolver errors on AAAA. A records come first, so an IPv4
+        // address is preferred
+        foreach ([DNS_A, DNS_AAAA] as $type) {
+            foreach (@dns_get_record($host, $type) ?: [] as $record) {
+                if (isset($record["ip"])) {
+                    $ips[] = $record["ip"];
+                }
+                if (isset($record["ipv6"])) {
+                    $ips[] = $record["ipv6"];
+                }
+            }
+        }
+    }
+    foreach ($ips as $ip) {
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE)) {
+            return null;
+        }
+    }
+    return $ips[0] ?? null;
+}
+
+// Makes one request without following redirects and returns
+// [status code, content type, redirect target or null]. A URL that is not
+// http/https/ftp or whose host is not public gets status 0, the same as a
+// host that does not exist, without any request being made.
+function pouetAdmin_linkCheckFetch($url)
+{
+    $parts = parse_url($url);
+    $scheme = strtolower($parts["scheme"] ?? "");
+    if (!in_array($scheme, ["http", "https", "ftp"], true) || empty($parts["host"])) {
+        return [0, "", null];
+    }
+    $ip = pouetAdmin_linkCheckPublicIP($parts["host"]);
+    if (!$ip) {
+        return [0, "", null];
+    }
+
+    $curl = curl_init($url);
+    if (!$curl) {
+        return [0, "", null];
+    }
+    $received = 0;
+    curl_setopt_array($curl, [
+        CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP,
+        CURLOPT_FOLLOWLOCATION => false,
+        // Connect to the address checked above whatever host curl reads from
+        // the URL, so neither a DNS change since the check nor a URL that
+        // curl and parse_url() read differently can reach another address
+        CURLOPT_CONNECT_TO => ["::" . (str_contains($ip, ":") ? "[" . $ip . "]" : $ip) . ":"],
+        CURLOPT_PROXY => "",
+        // Open FTP data connections to the checked address too, not to the
+        // one the server's passive mode reply names
+        CURLOPT_FTP_SKIP_PASV_IP => true,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_USERAGENT => "Pouet-BrokenLinkCheck/2.0",
+        CURLOPT_HTTPGET => true,
+        // Stop the download after 1 KB, the headers are all we need
+        CURLOPT_WRITEFUNCTION => function ($curl, $data) use (&$received) {
+            $received += strlen($data);
+            return $received < 1024 ? strlen($data) : 0;
+        },
+    ]);
+    curl_exec($curl);
+
+    return [
+        (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE),
+        (string) curl_getinfo($curl, CURLINFO_CONTENT_TYPE),
+        curl_getinfo($curl, CURLINFO_REDIRECT_URL) ?: null,
+    ];
+}
+
 function pouetAdmin_recheckLinkProd($prod)
 {
     if (php_sapi_name() == "cli") {
         printf("   * %d\n", $prod->id);
     }
-    $sideload = new Sideload();
     $urls = [];
     $url = verysofturlencode($prod->download);
-    for ($x = 0; $x < 10; $x++) {
+    $lastUrl = $url;
+    $returnCode = 0;
+    $returnContentType = "";
+    // Follow redirects one hop at a time so every hop gets checked
+    for ($x = 0; $x < 10 && $url; $x++) {
         if (php_sapi_name() == "cli") {
             printf("     * try %d: %s\n", $x + 1, $url);
         }
-        $sideload->options["max_length"] = 1024; // abort download after 1k
-        $sideload->options["verify_peer"] = false;
-        $sideload->options["user_agent"] = "Pouet-BrokenLinkCheck/2.0";
-        $sideload->options["method"] = "GET";
         $urls[] = $url;
-        $sideload->Request($url);
-
-        $lastUrl = $sideload->httpURL;
-        if ($lastUrl == $url) {
-            break;
-        }
-        $url = $lastUrl;
+        $lastUrl = $url;
+        [$returnCode, $returnContentType, $redirectUrl] = pouetAdmin_linkCheckFetch($url);
+        $url = ($returnCode >= 300 && $returnCode <= 399) ? $redirectUrl : null;
     }
 
     if (php_sapi_name() == "cli") {
-        printf("     * final result: %d, %s\n", $sideload->httpReturnCode, $sideload->httpReturnContentType);
+        printf("     * final result: %d, %s\n", $returnCode, $returnContentType);
     }
 
     // temporary hack for csdb, they tend to occasionally return 503 for
     // links that would normally work just fine
-    if ($sideload->httpReturnCode == 503 && strstr($lastUrl, "csdb") !== false) {
+    if ($returnCode == 503 && strstr($lastUrl, "csdb") !== false) {
         return "";
     }
 
@@ -149,8 +232,8 @@ function pouetAdmin_recheckLinkProd($prod)
         $a["protocol"] = "ftp";
     }
     $a["testDate"] = date("Y-m-d H:i:s");
-    $a["returnCode"] = $sideload->httpReturnCode;
-    $a["returnContentType"] = $sideload->httpReturnContentType;
+    $a["returnCode"] = $returnCode;
+    $a["returnContentType"] = $returnContentType;
 
     SQLLib::UpdateOrInsertRow("prods_linkcheck", $a, sprintf_esc("prodID=%d", $prod->id));
 

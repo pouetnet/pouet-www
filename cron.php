@@ -47,8 +47,8 @@ switch ($argv[1]) {
         }
         break;
     case "linkCheck":
-        // Submitted URLs and redirects can target private services.
-        echo " > linkCheck disabled pending SSRF-safe URL fetching\n";
+        $content = cron_CheckLinks(array_slice($argv, 2));
+        echo " > linkCheck: " . $content . "\n";
         break;
     case "createDataDump":
         $content = pouetAdmin_createDataDump();
