@@ -2412,12 +2412,15 @@ body>.customizerBox.floaty .content {
   margin: 5px;
 }
 
-#welcome-avatarlist a {
+#welcome-avatarlist button {
   padding: 13px;
   display: inline-block;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
-#welcome-avatarlist a:hover {
+#welcome-avatarlist button:hover {
   background: #9FCFFF;
 }
 
