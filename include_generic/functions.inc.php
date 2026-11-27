@@ -654,6 +654,17 @@ function get_login_level()
     return @$_SESSION["user"] ? $_SESSION["user"]->level : false;
 }
 
+// The token logout.php wants, so a link or an image elsewhere can't log
+// people out. One per session rather than a CSRFProtect token: those only
+// work once, and every page showing the logout link would store a new one
+function get_logout_token()
+{
+    if (!@$_SESSION["logoutToken"]) {
+        $_SESSION["logoutToken"] = bin2hex(random_bytes(16));
+    }
+    return $_SESSION["logoutToken"];
+}
+
 function get_setting($s)
 {
     global $currentUserSettings;

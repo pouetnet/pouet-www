@@ -70,7 +70,7 @@ class PouetBoxIndexLogin extends PouetBoxLogin
         echo "<div class='foot'>\n";
         echo "<a href='account.php'>edit profile</a> ::\n";
         echo "<a href='customizer.php'>cust&ouml;omizer</a> ::\n";
-        echo "<a href='logout.php'>logout</a>\n";
+        printf("<a href='logout.php?token=%s'>logout</a>\n", _html(get_logout_token()));
         echo "</div>";
     }
 };
