@@ -3,6 +3,32 @@
 require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
+// The class handling the requested request type, or null when requestType is
+// missing, not a string (e.g. requestType[]=x) or not a known type.
+function requestTypeClass()
+{
+    global $REQUESTTYPES;
+    $requestType = @$_REQUEST["requestType"];
+    if (!is_string($requestType) || !isset($REQUESTTYPES[$requestType])) {
+        return null;
+    }
+    return $REQUESTTYPES[$requestType];
+}
+
+// Link to this page for one request type. It keeps only the prod/group being
+// edited, so it works with or without an incoming query string.
+function requestTypeLink($requestType)
+{
+    $params = [];
+    foreach (["prod", "group"] as $item) {
+        if (@$_REQUEST[$item]) {
+            $params[$item] = (int) $_REQUEST[$item];
+        }
+    }
+    $params["requestType"] = $requestType;
+    return "submit_modification_request.php?" . http_build_query($params);
+}
+
 class PouetBoxModificationRequest extends PouetBox
 {
     use PouetForm;
@@ -35,14 +61,13 @@ class PouetBoxModificationRequest extends PouetBox
     {
         $post = [];
 
-        global $REQUESTTYPES;
-        if ($REQUESTTYPES[ $_REQUEST["requestType"] ]) {
-            $error = $REQUESTTYPES[ $_REQUEST["requestType"] ]::ValidateRequest($data, $post);
-            if ($error) {
-                return $error;
-            }
-        } else {
+        $requestTypeClass = requestTypeClass();
+        if (!$requestTypeClass) {
             return ["no such request type!"];
+        }
+        $error = $requestTypeClass::ValidateRequest($data, $post);
+        if ($error) {
+            return $error;
         }
         $a = [];
         $a["requestType"] = $data["requestType"];
@@ -117,6 +142,7 @@ class PouetBoxModificationRequest extends PouetBox
         echo "</h2>\n";
 
         $error = "";
+        $requestTypeClass = requestTypeClass();
         if (!@$_REQUEST["requestType"]) {
             echo "  <div class='content'>\n";
             global $REQUESTTYPES;
@@ -124,16 +150,21 @@ class PouetBoxModificationRequest extends PouetBox
             echo "<ul>\n";
             foreach ($REQUESTTYPES as $k => $v) {
                 if (@$_REQUEST["prod"] && $v::GetItemType() == "prod") {
-                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html($k), _html($v::Describe()));
+                    printf("  <li><a href='%s'>%s</a></li>", _html(requestTypeLink($k)), _html($v::Describe()));
                 }
                 if (@$_REQUEST["group"] && $v::GetItemType() == "group") {
-                    printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html($k), _html($v::Describe()));
+                    printf("  <li><a href='%s'>%s</a></li>", _html(requestTypeLink($k)), _html($v::Describe()));
                 }
             }
-            printf("  <li><a href='%s&amp;requestType=%s'>%s</a></li>", selfPath(), _html("other"), _html("other request..."));
+            printf("  <li><a href='%s'>%s</a></li>", _html(requestTypeLink("other")), _html("other request..."));
             echo "</ul>\n";
             $error = " ";
             echo "  </div>\n";
+        } elseif (!$requestTypeClass) {
+            // Checked before rendering anything from the request, so an
+            // unknown type is never echoed back into the form.
+            $error = "no such request type !";
+            echo "  <div class='content'>" . $error . "</div>\n";
         } else {
             $this->fields["requestType"]["type"] = "statichidden";
             echo "  <div class='content'>\n";
@@ -143,12 +174,7 @@ class PouetBoxModificationRequest extends PouetBox
             echo "  <div class='content'>\n";
             $fields = [];
 
-            global $REQUESTTYPES;
-            if ($REQUESTTYPES[ $_REQUEST["requestType"] ]) {
-                $error = $REQUESTTYPES[ $_REQUEST["requestType"] ]::GetFields($_REQUEST, $fields, $js);
-            } else {
-                $error = "no such request type !";
-            }
+            $error = $requestTypeClass::GetFields($_REQUEST, $fields, $js);
 
             if ($fields && !$error) {
                 foreach ($_POST as $k => $v) {
@@ -183,12 +209,15 @@ class PouetBoxModificationRequest extends PouetBox
 $TITLE = "submit a modification request";
 
 if (@$_REQUEST["requestType"] == "other") {
+    $from = "";
     if (@$_REQUEST["prod"]) {
-        redirect("topic.php?which=" . (int) FIXMETHREAD_ID . "&fromProd=" . (int) $_REQUEST["prod"] . "#pouetbox_bbspost");
+        $from = "&fromProd=" . (int) $_REQUEST["prod"];
     } elseif (@$_REQUEST["group"]) {
-        redirect("topic.php?which=" . (int) FIXMETHREAD_ID . "&fromGroup=" . (int) $_REQUEST["group"] . "#pouetbox_bbspost");
+        $from = "&fromGroup=" . (int) $_REQUEST["group"];
     }
-    exit();
+    // With no prod or group, still send the user to the thread instead of a
+    // blank page.
+    redirect("topic.php?which=" . (int) FIXMETHREAD_ID . $from . "#pouetbox_bbspost");
 }
 
 require_once("include_pouet/header.php");
