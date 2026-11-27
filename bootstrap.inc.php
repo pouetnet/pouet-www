@@ -26,7 +26,14 @@ if (@$_SERVER['PATH_INFO']) {
         header("HTTP/1.1 404 Not Found");
         die("Invalid path");
     } else {
+        // A trailing slash leaves no page name, so suggest the page that was requested
+        if ($path === "/") {
+            $path = "/" . basename($_SERVER['SCRIPT_NAME']);
+        }
         $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
+        if (($_SERVER['QUERY_STRING'] ?? "") !== "") {
+            $urlGuess .= "?" . $_SERVER['QUERY_STRING'];
+        }
         header("HTTP/1.1 404 Not Found");
         $urlGuess = _html($urlGuess);
         printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
