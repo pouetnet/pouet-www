@@ -9,10 +9,14 @@ var Cookie = {
     Cookie.options = Object.extend(Cookie.options, options || {});
 
     var payload = Cookie.retrieve();
-      if(payload) {
-          Cookie.data = payload.evalJSON();
+      // JSON.parse, not evalJSON(): evalJSON() runs the cookie as script
+      try {
+          Cookie.data = payload ? JSON.parse(payload) : null;
       }
-      else {
+      catch (e) {
+          Cookie.data = null;
+      }
+      if (!Cookie.data || typeof Cookie.data != "object") {
           Cookie.data = data || {};
       }
       Cookie.store();

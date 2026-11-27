@@ -50,7 +50,7 @@ class PouetBoxPartyHeader extends PouetBox
         }
 
         if ($this->partylinks && $this->partylinks->download) {
-            echo "[<a href='" . $this->partylinks->download . "'>download</a>]\n";
+            echo "[<a href='" . _html($this->partylinks->download) . "'>download</a>]\n";
         } elseif ($currentUser && $currentUser->CanSubmitItems()) {
             printf(" [<a class='submitadditional' href='submit_party_edition_info.php?which=%d&amp;when=%d'>+download</a>]\n", $this->party->id, $this->year);
         }
