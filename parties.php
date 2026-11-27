@@ -123,7 +123,7 @@ class PouetBoxPartyList extends PouetBox
                 echo "  <td>";
 
                 if (@$this->partylinks[$party->id][$year]->download) {
-                    echo "[<a href='" . $this->partylinks[$party->id][$year]->download . "'>prods</a>] ";
+                    echo "[<a href='" . _html($this->partylinks[$party->id][$year]->download) . "'>prods</a>] ";
                 }
 
                 if (file_exists($party->GetResultsLocalFileName($year))) {

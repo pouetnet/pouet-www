@@ -79,7 +79,12 @@ class PouetBoxIndexUpcomingParties extends PouetBoxCachable
             $dist = (int) ceil(($st - time()) / 60 / 60 / 24);
 
             echo "<li>\n";
-            echo "<a href='" . $this->rssData['items'][$i]['link'] . "'>" . $this->rssData['items'][$i]['demopartynet:title'] . "</a> ";
+            $title = _html($this->rssData['items'][$i]['demopartynet:title']);
+            $link = $this->rssData['items'][$i]['link'];
+            if (preg_match("/^https?:\/\//i", $link)) {
+                $title = "<a href='" . _html($link) . "'>" . $title . "</a>";
+            }
+            echo $title . " ";
             echo " <span class='timeleft'>";
             echo $form;
             if ($dist <= 0) {

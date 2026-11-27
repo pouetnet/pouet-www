@@ -33,6 +33,18 @@ class PouetBoxAdminEditProd extends PouetBoxSubmitProd
 
         $this->title = "edit this prod: " . $this->prod->RenderLink();
     }
+    // Without this, the empty Validate() from the PouetForm trait replaces
+    // the submit form's one, and any download link went through. A new link
+    // gets the submit form's checks. An unchanged one is let through, so
+    // prods saved before a check existed can still be edited
+    public function Validate($data)
+    {
+        $download = trim($data["download"]);
+        if ($download != $this->prod->download) {
+            return validateDownloadLink($download);
+        }
+        return [];
+    }
     public function Commit($data)
     {
         //die("almost there");
@@ -389,6 +401,10 @@ class PouetBoxAdminEditProdLinks extends PouetBoxEditConnectionsBase
         $a["link"] = $data["link"];
         if (!filter_var($a["link"], FILTER_VALIDATE_URL)) {
             return ["invalid URL"];
+        }
+        // FILTER_VALIDATE_URL takes any scheme, javascript: included
+        if (!in_array(strtolower((string) parse_url($a["link"], PHP_URL_SCHEME)), ["http", "https", "ftp"], true)) {
+            return ["only http/https and ftp links, please"];
         }
         if (@$data["editLinkID"]) {
             SQLLib::UpdateRow("downloadlinks", $a, "id=" . (int) $data["editLinkID"]);

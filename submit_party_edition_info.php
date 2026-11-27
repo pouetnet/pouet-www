@@ -33,6 +33,11 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
     }
     public function Validate($data)
     {
+        // The page only shows the form for a party edition with prods, so
+        // refuse posts for any other edition too
+        if (!$this->prods) {
+            return ["You cannot add stuff to a party that has no prods !"];
+        }
         return parent::Validate($data);
     }
     public function Commit($data)
@@ -73,7 +78,9 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
             }
         }
 
-        if (is_uploaded_file($_FILES["results"]["tmp_name"])) {
+        // Results can only be added, not replaced: LoadFromDB() drops the
+        // field once the edition has a results file
+        if (isset($this->fields["results"]) && is_uploaded_file($_FILES["results"]["tmp_name"])) {
             move_uploaded_file_fake($_FILES["results"]["tmp_name"], get_local_partyresult_path($this->id, $this->year));
         }
         return [];
@@ -104,9 +111,9 @@ class PouetBoxSubmitPartyEditionInfo extends PouetBoxSubmitPartyEdition
             if ($this->links->artcity) {
                 unset($this->fields["artcity"]);
             }
-            if (file_exists(get_local_partyresult_path($this->id, $this->year))) {
-                unset($this->fields["results"]);
-            }
+        }
+        if (file_exists(get_local_partyresult_path($this->id, $this->year))) {
+            unset($this->fields["results"]);
         }
 
         foreach ($_POST as $k => $v) {
