@@ -173,8 +173,8 @@ class PouetRequest_Prod_ChangeLink extends PouetRequestBase
         }
 
         $output["linkID"] = $input["linkID"];
-        $output["oldLink"] = $input["oldLink"];
-        $output["oldLinkKey"] = $input["oldLinkKey"];
+        $output["oldLink"] = $row->link;
+        $output["oldLinkKey"] = $row->type;
         $output["newLink"] = $newLink;
         $output["newLinkKey"] = $input["newLinkKey"];
         $output["reason"] = $input["reason"];
@@ -696,7 +696,7 @@ class PouetRequest_Prod_ChangeDownloadLink extends PouetRequestBase
             return ["you didn't change anything :|"];
         }
 
-        $output["oldDownloadLink"] = $input["oldDownloadLink"];
+        $output["oldDownloadLink"] = $prod->download;
         $output["downloadLink"] = $input["downloadLink"];
         $output["reason"] = $input["reason"];
         return [];
