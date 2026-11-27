@@ -18,16 +18,23 @@ if (!defined("POUET_CARDBOARD_URL")) {
 }
 
 if (@$_SERVER['PATH_INFO']) {
-    $path = strrchr($_SERVER['PATH_INFO'], "/");
-    if ($path === false) {
-        header("HTTP/1.1 404 Not Found");
-        die("Invalid path");
-    } else {
-        $urlGuess = rtrim(POUET_ROOT_URL, "/") . $path;
-        header("HTTP/1.1 404 Not Found");
-        printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
-        exit();
+    // Extra path after the script name, as in prod.php/?which=1, or
+    // index.php/prod.php?which=1 when a relative link is followed from such
+    // a URL. Suggest the last segment if it names a top-level page, otherwise
+    // the script itself (which can be in a subdirectory, as export/ ones
+    // are), keeping the query string either way
+    $page = basename($_SERVER['PATH_INFO']);
+    if (!preg_match('/^[a-z0-9_]+\.php$/i', $page) || !is_file(POUET_ROOT_LOCAL . "/" . $page)) {
+        $page = substr($_SERVER["SCRIPT_NAME"], strlen(POUET_ROOT_PATH));
     }
+    $urlGuess = POUET_ROOT_URL . $page;
+    if (($_SERVER["QUERY_STRING"] ?? "") !== "") {
+        $urlGuess .= "?" . $_SERVER["QUERY_STRING"];
+    }
+    header("HTTP/1.1 404 Not Found");
+    $urlGuess = htmlspecialchars($urlGuess, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
+    printf("<html><body><h1>Malformed URL</h1>Did you mean <a href='%s'>%s</a>?</body></html>", $urlGuess, $urlGuess);
+    exit();
 }
 
 
