@@ -3,6 +3,11 @@
 require_once("bootstrap.inc.php");
 require_once("include_pouet/box-modalmessage.php");
 
+if ($currentUser && !$currentUser->CanSubmitItems()) {
+    redirect("index.php");
+    exit();
+}
+
 // The class handling the requested request type, or null when requestType is
 // missing, not a string (e.g. requestType[]=x) or not a known type.
 function requestTypeClass()
